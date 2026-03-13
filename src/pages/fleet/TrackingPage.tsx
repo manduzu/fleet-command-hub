@@ -28,7 +28,7 @@ export default function TrackingPage() {
       <div className="card-fleet overflow-hidden" style={{ height: "calc(100vh - 220px)", minHeight: 500 }}>
         <div className="flex h-full">
           {/* Map */}
-          <div className="flex-1 relative map-grid bg-slate-50">
+          <div className="flex-1 relative map-grid bg-muted/20">
             {/* SVG routes */}
             <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
               <path d="M55,45 Q65,35 72,30" stroke="hsl(217 91% 60% / 0.4)" strokeWidth="0.6" fill="none" />
