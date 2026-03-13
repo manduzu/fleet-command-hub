@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Crosshair, Navigation, MapPin, Clock, Zap, Search, X } from "lucide-react";
+import { Crosshair, Navigation, MapPin, Clock, Zap, Search, X, Truck } from "lucide-react";
+import truckImg from "@/assets/truck.png";
 
 const trackingVehicles = [
   { id: "T-101", name: "Truck T-101", plate: "MH 12 AD 1234", driver: "John Doe", status: "active", speed: 65, heading: "North", eta: "2h 15m", destination: "Boston Hub", progress: 68, lat: "55%", top: "45%" },
@@ -37,7 +38,7 @@ export default function TrackingPage() {
               <path d="M72,30 Q75,40 73,55 Q71,65 44,70" stroke="hsl(280 65% 60% / 0.3)" strokeWidth="0.5" fill="none" strokeDasharray="2,1" />
             </svg>
 
-            {/* Vehicle markers */}
+            {/* Vehicle markers — truck image */}
             {trackingVehicles.map(v => (
               <button
                 key={v.id}
@@ -45,12 +46,28 @@ export default function TrackingPage() {
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
                 style={{ left: v.lat, top: v.top }}
               >
-              <div className={`relative flex items-center justify-center rounded-full border-2 shadow-lg transition-all ${selected.id === v.id ? "w-11 h-11 border-primary bg-primary" : v.status === "active" ? "w-9 h-9 border-success bg-success" : "w-9 h-9 border-warning bg-warning"}`}>
-                  <Navigation className="w-4 h-4 text-primary-foreground" />
-                  {selected.id === v.id && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary animate-pulse-dot border border-white" />
-                  )}
+                <div className="relative flex flex-col items-center">
+                  {/* Truck image marker */}
+                  <div className={`relative rounded-xl shadow-lg border-2 overflow-hidden transition-all p-1 bg-white ${
+                    selected.id === v.id
+                      ? "border-primary w-16 h-9 shadow-primary/30"
+                      : v.status === "active"
+                        ? "border-success w-12 h-7"
+                        : "border-warning w-12 h-7"
+                  }`}>
+                    <img src={truckImg} alt={v.name} className="w-full h-full object-contain" />
+                    {selected.id === v.id && (
+                      <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary animate-pulse-dot border-2 border-white" />
+                    )}
+                  </div>
+                  {/* Label below */}
+                  <div className={`mt-1 text-xs font-bold px-1.5 py-0.5 rounded shadow whitespace-nowrap ${
+                    selected.id === v.id ? "bg-primary text-primary-foreground" : "bg-white/90 text-foreground border border-border"
+                  }`}>
+                    {v.id}
+                  </div>
                 </div>
+                {/* Tooltip */}
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 bg-foreground text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
                   {v.name} · {v.speed > 0 ? `${v.speed} mph` : "Stopped"}
                 </div>
@@ -72,7 +89,7 @@ export default function TrackingPage() {
               <p className="text-xs text-muted-foreground mt-0.5">1 Idle · 0 Offline</p>
             </div>
 
-            {/* Speed legend */}
+            {/* Legend */}
             <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-sm border border-border rounded-lg px-3 py-2 shadow">
               <p className="text-xs font-semibold text-foreground mb-1">Map Legend</p>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground"><div className="w-3 h-3 rounded-full bg-success" />Active</div>
@@ -83,7 +100,6 @@ export default function TrackingPage() {
 
           {/* Side panel */}
           <div className="w-72 flex flex-col border-l border-border bg-card">
-            {/* Search */}
             <div className="p-4 border-b border-border">
               <h3 className="font-semibold text-foreground mb-3">Active Vehicles</h3>
               <div className="relative">
@@ -103,7 +119,6 @@ export default function TrackingPage() {
               </div>
             </div>
 
-            {/* Vehicle list */}
             <div className="flex-1 overflow-y-auto divide-y divide-border">
               {filtered.map(v => (
                 <button
@@ -111,12 +126,20 @@ export default function TrackingPage() {
                   onClick={() => setSelected(v)}
                   className={`w-full p-4 text-left hover:bg-muted/40 transition-colors ${selected.id === v.id ? "bg-primary/5 border-l-2 border-l-primary" : ""}`}
                 >
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm font-semibold text-foreground">{v.name}</span>
-                    <div className={`w-2 h-2 rounded-full ${v.status === "active" ? "bg-success" : "bg-warning"}`} />
+                  {/* Truck thumbnail */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-14 h-8 bg-muted rounded-lg overflow-hidden flex items-center justify-center flex-shrink-0 border border-border">
+                      <img src={truckImg} alt={v.name} className="w-full h-full object-contain p-0.5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-foreground">{v.name}</span>
+                        <div className={`w-2 h-2 rounded-full ${v.status === "active" ? "bg-success" : "bg-warning"}`} />
+                      </div>
+                      <p className="text-xs text-muted-foreground">{v.driver}</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">{v.driver}</p>
-                  <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center justify-between">
                     <span className="text-xs text-muted-foreground">{v.speed > 0 ? `${v.speed} mph · ${v.heading}` : "Stopped"}</span>
                     <button
                       onClick={e => { e.stopPropagation(); setSelected(v); }}
@@ -142,6 +165,10 @@ export default function TrackingPage() {
 
             {/* Selected vehicle details */}
             <div className="border-t border-border p-4 bg-muted/30">
+              {/* Truck image */}
+              <div className="w-full h-16 bg-white rounded-lg border border-border overflow-hidden flex items-center justify-center mb-3">
+                <img src={truckImg} alt={selected.name} className="h-full object-contain p-1" />
+              </div>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-2 h-2 rounded-full bg-primary animate-pulse-dot" />
                 <p className="text-xs font-semibold text-foreground uppercase tracking-wider">Selected Vehicle</p>
