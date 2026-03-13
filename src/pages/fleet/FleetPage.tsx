@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search, Filter, Plus, Truck, MapPin, User, AlertTriangle, MoreVertical, Eye, Edit, Navigation } from "lucide-react";
+import truckImg from "@/assets/truck.png";
 
 const vehicles = [
   { id: "T-101", name: "Truck T-101", type: "truck", driver: "John Doe", status: "active", utilization: 78, location: "Highway 101, Mile 23", plate: "MH 12 AD 1234", speed: "65 mph", fuel: 72, alerts: 1 },
@@ -100,78 +101,85 @@ export default function FleetPage() {
         {filtered.map(vehicle => {
           const cfg = statusConfig[vehicle.status];
           return (
-            <div key={vehicle.id} className="card-fleet p-5 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Truck className="w-5 h-5 text-primary" />
+            <div key={vehicle.id} className="card-fleet overflow-hidden hover:shadow-md transition-shadow">
+              {/* Truck image banner */}
+              <div className="relative h-32 bg-gradient-to-br from-muted/60 to-muted/20 flex items-center justify-center overflow-hidden border-b border-border">
+                <img
+                  src={truckImg}
+                  alt={vehicle.name}
+                  className="h-24 object-contain drop-shadow-md"
+                  style={{ filter: vehicle.status === "offline" ? "grayscale(100%) opacity(0.5)" : vehicle.status === "maintenance" ? "sepia(60%) opacity(0.8)" : "none" }}
+                />
+                {/* Status pill overlaid */}
+                <div className="absolute top-2 right-2">
+                  <span className={cfg.pill}><span className={`${cfg.dot} mr-1`} />{cfg.label}</span>
+                </div>
+                {vehicle.alerts > 0 && (
+                  <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-destructive/10 border border-destructive/30 flex items-center justify-center">
+                    <AlertTriangle className="w-3 h-3 text-destructive" />
                   </div>
+                )}
+                {/* Vehicle ID badge */}
+                <div className="absolute bottom-2 left-2 bg-black/30 backdrop-blur-sm text-white text-xs font-bold px-2 py-0.5 rounded">
+                  {vehicle.id}
+                </div>
+              </div>
+
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-4">
                   <div>
                     <h3 className="font-semibold text-foreground">{vehicle.name}</h3>
                     <p className="text-xs text-muted-foreground">{vehicle.plate}</p>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {vehicle.alerts > 0 && (
-                    <div className="w-5 h-5 rounded-full bg-destructive/10 flex items-center justify-center">
-                      <AlertTriangle className="w-3 h-3 text-destructive" />
-                    </div>
-                  )}
                   <button className="p-1 rounded hover:bg-muted transition-colors">
                     <MoreVertical className="w-4 h-4 text-muted-foreground" />
                   </button>
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
+                <div className="space-y-3">
                   <div className="flex items-center gap-1.5">
                     <User className="w-3.5 h-3.5 text-muted-foreground" />
                     <span className="text-sm text-foreground">{vehicle.driver}</span>
                   </div>
-                  <span className={cfg.pill}><span className={`${cfg.dot} mr-1`} />{cfg.label}</span>
-                </div>
 
-                <div className="flex items-start gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
-                  <span className="text-xs text-muted-foreground line-clamp-1">{vehicle.location}</span>
-                </div>
+                  <div className="flex items-start gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <span className="text-xs text-muted-foreground line-clamp-1">{vehicle.location}</span>
+                  </div>
 
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-muted-foreground">Today's Utilization</span>
-                    <span className="font-semibold text-foreground">{vehicle.utilization}%</span>
+                  <div>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground">Today's Utilization</span>
+                      <span className="font-semibold text-foreground">{vehicle.utilization}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${vehicle.utilization}%` }} />
+                    </div>
                   </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{ width: `${vehicle.utilization}%` }}
-                    />
-                  </div>
-                </div>
 
-                <div className="flex justify-between text-xs pt-1 border-t border-border">
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Navigation className="w-3 h-3" />
-                    <span>{vehicle.speed}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-2 h-2 rounded-full" style={{ background: `hsl(${vehicle.fuel > 50 ? "160 84% 39%" : vehicle.fuel > 25 ? "38 92% 50%" : "0 84% 60%"})` }} />
-                    <span className="text-muted-foreground">Fuel: {vehicle.fuel}%</span>
+                  <div className="flex justify-between text-xs pt-1 border-t border-border">
+                    <div className="flex items-center gap-1 text-muted-foreground">
+                      <Navigation className="w-3 h-3" />
+                      <span>{vehicle.speed}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 rounded-full" style={{ background: `hsl(${vehicle.fuel > 50 ? "160 84% 39%" : vehicle.fuel > 25 ? "38 92% 50%" : "0 84% 60%"})` }} />
+                      <span className="text-muted-foreground">Fuel: {vehicle.fuel}%</span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex gap-2 mt-4">
-                <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground">
-                  <Eye className="w-3.5 h-3.5" />View
-                </button>
-                <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground">
-                  <Edit className="w-3.5 h-3.5" />Edit
-                </button>
-                <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
-                  <MapPin className="w-3.5 h-3.5" />Track
-                </button>
+                <div className="flex gap-2 mt-4">
+                  <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground">
+                    <Eye className="w-3.5 h-3.5" />View
+                  </button>
+                  <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground">
+                    <Edit className="w-3.5 h-3.5" />Edit
+                  </button>
+                  <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg bg-primary text-primary-foreground hover:opacity-90 transition-opacity">
+                    <MapPin className="w-3.5 h-3.5" />Track
+                  </button>
+                </div>
               </div>
             </div>
           );

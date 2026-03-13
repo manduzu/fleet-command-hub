@@ -3,7 +3,7 @@ import type { FleetPage } from "@/App";
 import {
   LayoutDashboard, Truck, MapPin, BarChart3, Bell, Search,
   ChevronRight, Package, Users, Calendar, Settings, LogOut,
-  Menu, X
+  Menu, X, UserCheck, Wrench, ShoppingCart, CircleDot
 } from "lucide-react";
 import { useState } from "react";
 
@@ -17,7 +17,14 @@ const navItems = [
   { id: "dashboard" as FleetPage, label: "Dashboard", icon: LayoutDashboard },
   { id: "fleet" as FleetPage, label: "Fleet", icon: Truck },
   { id: "tracking" as FleetPage, label: "Tracking", icon: MapPin },
+  { id: "orders" as FleetPage, label: "Orders", icon: ShoppingCart },
+  { id: "drivers" as FleetPage, label: "Drivers", icon: UserCheck },
   { id: "reports" as FleetPage, label: "Reports", icon: BarChart3 },
+];
+
+const managementItems = [
+  { id: "parts" as FleetPage, label: "Store / Parts", icon: Wrench },
+  { id: "tyres" as FleetPage, label: "Tyre Management", icon: CircleDot },
 ];
 
 const bottomItems = [
@@ -95,6 +102,29 @@ export default function FleetLayout({ children, activePage, setActivePage }: Fle
           {sidebarOpen && (
             <p className="text-xs font-semibold uppercase tracking-wider px-3 py-2 mt-4 opacity-40 text-sidebar-foreground">
               Management
+            </p>
+          )}
+          {!sidebarOpen && <div className="border-t border-sidebar-border my-2" />}
+          {managementItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = activePage === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => { setActivePage(item.id); setMobileSidebar(false); }}
+                className={`sidebar-item w-full ${isActive ? "sidebar-item-active" : "sidebar-item-inactive"} ${!sidebarOpen ? "justify-center" : ""}`}
+                title={!sidebarOpen ? item.label : undefined}
+              >
+                <Icon className="w-4 h-4 flex-shrink-0" />
+                {sidebarOpen && <span>{item.label}</span>}
+                {sidebarOpen && isActive && <ChevronRight className="ml-auto w-3 h-3 opacity-70" />}
+              </button>
+            );
+          })}
+
+          {sidebarOpen && (
+            <p className="text-xs font-semibold uppercase tracking-wider px-3 py-2 mt-4 opacity-40 text-sidebar-foreground">
+              Tools
             </p>
           )}
           {!sidebarOpen && <div className="border-t border-sidebar-border my-2" />}
