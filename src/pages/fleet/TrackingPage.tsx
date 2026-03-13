@@ -45,8 +45,8 @@ export default function TrackingPage() {
                 className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
                 style={{ left: v.lat, top: v.top }}
               >
-                <div className={`relative flex items-center justify-center w-9 h-9 rounded-full border-2 shadow-lg transition-all ${selected.id === v.id ? "w-11 h-11 border-primary bg-primary" : v.status === "active" ? "border-success bg-success/90" : "border-warning bg-warning/90"}`}>
-                  <Navigation className={`w-4 h-4 ${selected.id === v.id || v.status === "active" ? "text-white" : "text-white"}`} />
+              <div className={`relative flex items-center justify-center rounded-full border-2 shadow-lg transition-all ${selected.id === v.id ? "w-11 h-11 border-primary bg-primary" : v.status === "active" ? "w-9 h-9 border-success bg-success" : "w-9 h-9 border-warning bg-warning"}`}>
+                  <Navigation className="w-4 h-4 text-primary-foreground" />
                   {selected.id === v.id && (
                     <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary animate-pulse-dot border border-white" />
                   )}
