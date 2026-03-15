@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Search, Filter, Plus, Truck, MapPin, User, AlertTriangle, MoreVertical, Eye, Edit, Navigation } from "lucide-react";
 import truckImg from "@/assets/truck.png";
+import VehicleDetailPage from "./VehicleDetailPage";
 
 const vehicles = [
   { id: "T-101", name: "Truck T-101", type: "truck", driver: "John Doe", status: "active", utilization: 78, location: "Highway 101, Mile 23", plate: "MH 12 AD 1234", speed: "65 mph", fuel: 72, alerts: 1 },
@@ -24,6 +25,11 @@ const statusConfig: Record<string, { label: string; dot: string; pill: string }>
 export default function FleetPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+
+  if (selectedVehicleId) {
+    return <VehicleDetailPage vehicleId={selectedVehicleId} onBack={() => setSelectedVehicleId(null)} />;
+  }
 
   const filtered = vehicles.filter(v => {
     const matchSearch = v.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -170,7 +176,10 @@ export default function FleetPage() {
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground">
+                  <button
+                    onClick={() => setSelectedVehicleId(vehicle.id)}
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground"
+                  >
                     <Eye className="w-3.5 h-3.5" />View
                   </button>
                   <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground">
