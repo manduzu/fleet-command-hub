@@ -25,6 +25,11 @@ const statusConfig: Record<string, { label: string; dot: string; pill: string }>
 export default function FleetPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+
+  if (selectedVehicleId) {
+    return <VehicleDetailPage vehicleId={selectedVehicleId} onBack={() => setSelectedVehicleId(null)} />;
+  }
 
   const filtered = vehicles.filter(v => {
     const matchSearch = v.name.toLowerCase().includes(search.toLowerCase()) ||
