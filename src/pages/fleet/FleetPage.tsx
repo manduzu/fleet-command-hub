@@ -176,7 +176,10 @@ export default function FleetPage() {
                 </div>
 
                 <div className="flex gap-2 mt-4">
-                  <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground">
+                  <button
+                    onClick={() => setSelectedVehicleId(vehicle.id)}
+                    className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground"
+                  >
                     <Eye className="w-3.5 h-3.5" />View
                   </button>
                   <button className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs font-medium rounded-lg border border-border hover:bg-muted transition-colors text-foreground">
