@@ -27,6 +27,11 @@ export default function FleetPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+  const [showAddVehicle, setShowAddVehicle] = useState(false);
+
+  if (showAddVehicle) {
+    return <AddVehiclePage onBack={() => setShowAddVehicle(false)} />;
+  }
 
   if (selectedVehicleId) {
     return <VehicleDetailPage vehicleId={selectedVehicleId} onBack={() => setSelectedVehicleId(null)} />;
