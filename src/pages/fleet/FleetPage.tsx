@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Filter, Plus, Truck, MapPin, User, AlertTriangle, MoreVertical, Eye, Edit, Navigation } from "lucide-react";
 import truckImg from "@/assets/truck.png";
 import VehicleDetailPage from "./VehicleDetailPage";
+import AddVehiclePage from "./AddVehiclePage";
 
 const vehicles = [
   { id: "T-101", name: "Truck T-101", type: "truck", driver: "John Doe", status: "active", utilization: 78, location: "Highway 101, Mile 23", plate: "MH 12 AD 1234", speed: "65 mph", fuel: 72, alerts: 1 },
@@ -26,6 +27,11 @@ export default function FleetPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
+  const [showAddVehicle, setShowAddVehicle] = useState(false);
+
+  if (showAddVehicle) {
+    return <AddVehiclePage onBack={() => setShowAddVehicle(false)} />;
+  }
 
   if (selectedVehicleId) {
     return <VehicleDetailPage vehicleId={selectedVehicleId} onBack={() => setSelectedVehicleId(null)} />;
@@ -54,7 +60,10 @@ export default function FleetPage() {
           <h1 className="text-2xl font-bold text-foreground">Fleet Management</h1>
           <p className="text-muted-foreground text-sm mt-1">{vehicles.length} vehicles in your fleet</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
+        <button
+          onClick={() => setShowAddVehicle(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+        >
           <Plus className="w-4 h-4" />Add Vehicle
         </button>
       </div>
