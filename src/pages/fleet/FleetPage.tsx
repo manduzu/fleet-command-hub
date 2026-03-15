@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Search, Filter, Plus, Truck, MapPin, User, AlertTriangle, MoreVertical, Eye, Edit, Navigation } from "lucide-react";
 import truckImg from "@/assets/truck.png";
 import VehicleDetailPage from "./VehicleDetailPage";
+import AddVehiclePage from "./AddVehiclePage";
 
 const vehicles = [
   { id: "T-101", name: "Truck T-101", type: "truck", driver: "John Doe", status: "active", utilization: 78, location: "Highway 101, Mile 23", plate: "MH 12 AD 1234", speed: "65 mph", fuel: 72, alerts: 1 },
