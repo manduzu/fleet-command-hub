@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Tracking — FleetCtrl</title>
+  <meta name="description" content="Live GPS tracking of fleet vehicles." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family:system-ui,-apple-system,sans-serif; background:#F1F5F9; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; }
+    .nav-link { display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s; }
+    .nav-link:hover { background:#1E293B;color:#fff; }
+    .nav-link.active { background:#1D4ED8;color:#fff; }
+    .nav-section { font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem; }
+    .pill { display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px; }
+    .pill-success { background:#D1FAE5;color:#065F46; }
+    .map-grid { background-color:#EFF6FF; background-image:linear-gradient(rgba(59,130,246,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.08) 1px,transparent 1px); background-size:30px 30px; }
+    .progress-bar { height:6px; background:#E2E8F0; border-radius:999px; overflow:hidden; }
+    .main { margin-left:240px; }
+    @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
+    .vehicle-marker { position:absolute; transform:translate(-50%,-50%); cursor:pointer; }
+    .vehicle-marker .label { background:#0F172A;color:#fff;font-size:.6rem;font-weight:700;padding:.15rem .4rem;border-radius:.3rem;margin-top:.2rem;text-align:center;white-space:nowrap; }
+    .vehicle-marker.selected .label { background:#3B82F6; }
+    .vlist-item { padding:.75rem 1rem; border-bottom:1px solid #F1F5F9; cursor:pointer; }
+    .vlist-item:hover { background:#F8FAFC; }
+    .vlist-item.active { background:#EFF6FF; border-left:3px solid #3B82F6; }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="fleet.html"     class="nav-link"><i class="fa-solid fa-truck fa-fw"></i>Fleet</a>
+    <a href="tracking.html"  class="nav-link active"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html"    class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html"   class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html"   class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Management</div>
+    <a href="parts.html"     class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html"     class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-users fa-fw"></i>Team</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:28rem;position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i><input type="text" placeholder="Search vehicles..." style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;" /></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;"><button style="position:relative;padding:.5rem;border:0;background:transparent;cursor:pointer;"><i class="fa-solid fa-bell" style="color:#64748B;font-size:1rem;"></i><span style="position:absolute;top:.3rem;right:.3rem;width:.5rem;height:.5rem;background:#EF4444;border-radius:999px;"></span></button><div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div></div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="margin-bottom:1rem;"><h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Live Tracking</h1><p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">Real-time vehicle tracking and route monitoring</p></div>
+
+    <div class="card" style="overflow:hidden;height:calc(100vh - 200px);min-height:500px;display:flex;">
+      <!-- Map -->
+      <div class="map-grid" style="flex:1;position:relative;">
+        <!-- SVG routes -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M55,45 Q65,35 72,30" stroke="rgba(59,130,246,.4)" stroke-width="0.6" fill="none"/>
+          <path d="M20,62 Q38,55 55,45" stroke="rgba(16,185,129,.4)" stroke-width="0.6" fill="none" stroke-dasharray="1.5,0.8"/>
+          <path d="M18,38 Q36,42 55,45" stroke="rgba(245,158,11,.4)" stroke-width="0.6" fill="none"/>
+          <path d="M72,30 Q75,50 44,70" stroke="rgba(139,92,246,.3)" stroke-width="0.5" fill="none" stroke-dasharray="2,1"/>
+        </svg>
+
+        <!-- Vehicle markers -->
+        <div class="vehicle-marker selected" style="left:55%;top:45%;" onclick="selectVehicle(0)">
+          <div style="background:#3B82F6;border:2px solid #fff;border-radius:.5rem;padding:.25rem .4rem;box-shadow:0 2px 8px rgba(59,130,246,.4);">
+            <i class="fa-solid fa-truck" style="color:#fff;font-size:.9rem;"></i>
+          </div>
+          <div class="label">T-101</div>
+        </div>
+        <div class="vehicle-marker" style="left:20%;top:62%;" onclick="selectVehicle(1)">
+          <div style="background:#10B981;border:2px solid #fff;border-radius:.5rem;padding:.25rem .4rem;box-shadow:0 2px 8px rgba(16,185,129,.4);">
+            <i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i>
+          </div>
+          <div class="label">V-204</div>
+        </div>
+        <div class="vehicle-marker" style="left:18%;top:38%;" onclick="selectVehicle(2)">
+          <div style="background:#10B981;border:2px solid #fff;border-radius:.5rem;padding:.25rem .4rem;box-shadow:0 2px 8px rgba(16,185,129,.4);">
+            <i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i>
+          </div>
+          <div class="label">T-115</div>
+        </div>
+        <div class="vehicle-marker" style="left:72%;top:30%;" onclick="selectVehicle(3)">
+          <div style="background:#10B981;border:2px solid #fff;border-radius:.5rem;padding:.25rem .4rem;box-shadow:0 2px 8px rgba(16,185,129,.4);">
+            <i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i>
+          </div>
+          <div class="label">T-330</div>
+        </div>
+        <div class="vehicle-marker" style="left:44%;top:70%;" onclick="selectVehicle(4)">
+          <div style="background:#F59E0B;border:2px solid #fff;border-radius:.5rem;padding:.25rem .4rem;">
+            <i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i>
+          </div>
+          <div class="label">V-301</div>
+        </div>
+
+        <!-- Map controls -->
+        <div style="position:absolute;top:.75rem;left:.75rem;display:flex;flex-direction:column;gap:.25rem;">
+          <button style="width:2rem;height:2rem;background:#fff;border:1px solid #E2E8F0;border-radius:.5rem;font-weight:700;color:#0F172A;cursor:pointer;">+</button>
+          <button style="width:2rem;height:2rem;background:#fff;border:1px solid #E2E8F0;border-radius:.5rem;font-weight:700;color:#0F172A;cursor:pointer;">−</button>
+        </div>
+        <!-- Active count badge -->
+        <div style="position:absolute;bottom:.75rem;left:.75rem;background:rgba(255,255,255,.9);border:1px solid #E2E8F0;border-radius:.6rem;padding:.4rem .75rem;">
+          <div style="display:flex;align-items:center;gap:.5rem;"><div style="width:.5rem;height:.5rem;border-radius:50%;background:#10B981;"></div><span style="font-size:.75rem;font-weight:600;color:#0F172A;">4 Vehicles Active</span></div>
+          <p style="font-size:.7rem;color:#64748B;margin-top:.15rem;">1 Idle · 0 Offline</p>
+        </div>
+        <!-- Legend -->
+        <div style="position:absolute;bottom:.75rem;right:.75rem;background:rgba(255,255,255,.9);border:1px solid #E2E8F0;border-radius:.6rem;padding:.5rem .75rem;">
+          <p style="font-size:.7rem;font-weight:600;color:#0F172A;margin-bottom:.3rem;">Legend</p>
+          <div style="display:flex;align-items:center;gap:.375rem;font-size:.7rem;color:#64748B;"><div style="width:.625rem;height:.625rem;border-radius:50%;background:#10B981;"></div>Active</div>
+          <div style="display:flex;align-items:center;gap:.375rem;font-size:.7rem;color:#64748B;margin-top:.2rem;"><div style="width:.625rem;height:.625rem;border-radius:50%;background:#F59E0B;"></div>Idle</div>
+          <div style="display:flex;align-items:center;gap:.375rem;font-size:.7rem;color:#64748B;margin-top:.2rem;"><div style="width:.625rem;height:.625rem;border-radius:50%;background:#3B82F6;"></div>Selected</div>
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div style="width:17rem;display:flex;flex-direction:column;border-left:1px solid #E2E8F0;background:#fff;">
+        <div style="padding:1rem;border-bottom:1px solid #E2E8F0;">
+          <h3 style="font-weight:600;color:#0F172A;margin-bottom:.75rem;">Active Vehicles</h3>
+          <div style="position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.625rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.7rem;"></i><input type="text" placeholder="Search vehicles..." style="width:100%;padding:.375rem .625rem .375rem 1.75rem;font-size:.75rem;background:#F1F5F9;border:0;border-radius:.5rem;outline:none;" /></div>
+        </div>
+        <div id="vlist" style="flex:1;overflow-y:auto;">
+          <script>
+            const vs=[
+              {id:"T-101",name:"Truck T-101",driver:"John Doe",status:"active",speed:65,heading:"North",eta:"2h 15m",dest:"Boston Hub",prog:68},
+              {id:"V-204",name:"Van V-204",driver:"Sarah Lee",status:"active",speed:40,heading:"West",eta:"45m",dest:"San Diego DC",prog:85},
+              {id:"T-115",name:"Truck T-115",driver:"Carlos Rivera",status:"active",speed:72,heading:"East",eta:"3h 50m",dest:"Las Vegas DC",prog:35},
+              {id:"T-330",name:"Truck T-330",driver:"David Kim",status:"active",speed:70,heading:"North",eta:"1h 20m",dest:"New York Hub",prog:72},
+              {id:"V-301",name:"Van V-301",driver:"Priya Patel",status:"idle",speed:0,heading:"—",eta:"—",dest:"Houston Hub",prog:0},
+            ];
+            let sel=0;
+            function selectVehicle(i){
+              sel=i;
+              renderList();
+              renderDetail();
+            }
+            function renderList(){
+              document.getElementById('vlist').innerHTML=vs.map((v,i)=>`
+                <div class="vlist-item${i===sel?' active':''}" onclick="selectVehicle(${i})">
+                  <div style="display:flex;align-items:center;gap:.625rem;margin-bottom:.375rem;">
+                    <div style="width:2.5rem;height:1.5rem;background:#F1F5F9;border-radius:.375rem;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#3B82F6;font-size:.7rem;"></i></div>
+                    <div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:.8rem;font-weight:600;color:#0F172A;">${v.name}</span><div style="width:.5rem;height:.5rem;border-radius:50%;background:${v.status==='active'?'#10B981':'#F59E0B'};"></div></div><p style="font-size:.7rem;color:#64748B;">${v.driver}</p></div>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="font-size:.7rem;color:#64748B;">${v.speed>0?v.speed+' mph · '+v.heading:'Stopped'}</span>
+                    <span style="font-size:.7rem;color:#3B82F6;cursor:pointer;"><i class="fa-solid fa-crosshairs" style="margin-right:.2rem;"></i>Track</span>
+                  </div>
+                  ${v.status==='active'?`<div style="margin-top:.5rem;"><div style="display:flex;justify-content:space-between;font-size:.7rem;margin-bottom:.2rem;"><span style="color:#64748B;">To ${v.dest}</span><span style="font-weight:500;color:#0F172A;">${v.prog}%</span></div><div class="progress-bar"><div style="height:100%;width:${v.prog}%;background:#3B82F6;border-radius:999px;"></div></div></div>`:''}
+                </div>`).join('');
+            }
+            function renderDetail(){
+              const v=vs[sel];
+              document.getElementById('vdetail').innerHTML=`
+                <div style="padding:.75rem 1rem;background:#F8FAFC;border-radius:.6rem;display:flex;align-items:center;justify-content:center;margin-bottom:.75rem;height:3.5rem;">
+                  <i class="fa-solid fa-truck" style="color:#3B82F6;font-size:2rem;"></i>
+                </div>
+                <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.75rem;">
+                  <div style="width:.5rem;height:.5rem;border-radius:50%;background:#3B82F6;"></div>
+                  <p style="font-size:.7rem;font-weight:700;color:#0F172A;text-transform:uppercase;letter-spacing:.05em;">Selected Vehicle</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:.5rem;">
+                  ${[['Vehicle',v.name],['Driver',v.driver],['Speed',v.speed+' mph'],['Heading',v.heading],['ETA',v.eta],['Destination',v.dest]].map(([k,val])=>`<div style="display:flex;justify-content:space-between;"><span style="font-size:.75rem;color:#64748B;">${k}</span><span style="font-size:.75rem;font-weight:600;color:#0F172A;">${val}</span></div>`).join('')}
+                </div>`;
+            }
+            renderList();
+            renderDetail();
+          </script>
+        </div>
+        <div id="vdetail" style="border-top:1px solid #E2E8F0;padding:1rem;background:#FAFAFA;"></div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drivers — FleetCtrl</title>
+  <meta name="description" content="Manage fleet drivers and their assigned vehicles." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family:system-ui,-apple-system,sans-serif; background:#F1F5F9; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; }
+    .nav-link { display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s,color .15s; }
+    .nav-link:hover { background:#1E293B;color:#fff; }
+    .nav-link.active { background:#1D4ED8;color:#fff; }
+    .nav-section { font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem; }
+    .pill { display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px; }
+    .pill-success { background:#D1FAE5;color:#065F46; }
+    .pill-primary { background:#DBEAFE;color:#1D4ED8; }
+    .pill-warning { background:#FEF3C7;color:#92400E; }
+    .pill-danger  { background:#FEE2E2;color:#991B1B; }
+    .main { margin-left:240px; }
+    @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="fleet.html"     class="nav-link"><i class="fa-solid fa-truck fa-fw"></i>Fleet</a>
+    <a href="tracking.html"  class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html"    class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html"   class="nav-link active"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html"   class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Management</div>
+    <a href="parts.html"     class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html"     class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-users fa-fw"></i>Team</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;cursor:pointer;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div style="flex:1;min-width:0;"><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:28rem;position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i><input type="text" placeholder="Search vehicles, routes, drivers..." style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;" /></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;"><button style="position:relative;padding:.5rem;border:0;background:transparent;cursor:pointer;"><i class="fa-solid fa-bell" style="color:#64748B;font-size:1rem;"></i><span style="position:absolute;top:.3rem;right:.3rem;width:.5rem;height:.5rem;background:#EF4444;border-radius:999px;"></span></button><div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div></div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div><h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Driver Management</h1><p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">9 registered drivers · each assigned to a vehicle</p></div>
+      <button style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.85rem;font-weight:500;cursor:pointer;"><i class="fa-solid fa-plus"></i>Add Driver</button>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem;">
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(59,130,246,.06);"><p style="font-size:1.5rem;font-weight:700;color:#3B82F6;">9</p><p style="font-size:.75rem;color:#64748B;">Total Drivers</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(16,185,129,.06);"><p style="font-size:1.5rem;font-weight:700;color:#10B981;">5</p><p style="font-size:.75rem;color:#64748B;">On Duty</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(245,158,11,.06);"><p style="font-size:1.5rem;font-weight:700;color:#F59E0B;">2</p><p style="font-size:.75rem;color:#64748B;">Idle</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(239,68,68,.06);"><p style="font-size:1.5rem;font-weight:700;color:#EF4444;">2</p><p style="font-size:.75rem;color:#64748B;">Off Duty</p></div>
+    </div>
+
+    <!-- Driver cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">
+      <script>
+        const drivers=[
+          {av:"JD",name:"John Doe",lic:"CDL-A | #JD-482910",status:"on-duty",truck:"T-101",plate:"MH 12 AD 1234",trips:3,total:248,rating:4.9,phone:"+1 (555) 012-3456",loc:"Highway 101, Mile 23",since:"Jan 2020",exp:"5 yrs",bg:"#3B82F6"},
+          {av:"SL",name:"Sarah Lee",lic:"CDL-B | #SL-291847",status:"on-duty",truck:"V-204",plate:"DL 04 XY 7788",trips:2,total:192,rating:4.7,phone:"+1 (555) 023-4567",loc:"LA Downtown, Exit 5",since:"Mar 2022",exp:"3 yrs",bg:"#10B981"},
+          {av:"MC",name:"Mike Chen",lic:"CDL-A | #MC-374821",status:"off-duty",truck:"T-108",plate:"KA 05 QW 8899",trips:0,total:310,rating:4.8,phone:"+1 (555) 034-5678",loc:"Chicago Depot",since:"Nov 2018",exp:"7 yrs",bg:"#F59E0B"},
+          {av:"CR",name:"Carlos Rivera",lic:"CDL-A | #CR-485920",status:"on-duty",truck:"T-115",plate:"QL 12 AB 1234",trips:1,total:175,rating:4.6,phone:"+1 (555) 045-6789",loc:"I-10 West, Mile 342",since:"Jun 2021",exp:"4 yrs",bg:"#8B5CF6"},
+          {av:"PP",name:"Priya Patel",lic:"CDL-B | #PP-591038",status:"idle",truck:"V-301",plate:"TX 99 ZZ 5544",trips:1,total:143,rating:4.9,phone:"+1 (555) 056-7890",loc:"Houston Hub Parking",since:"Feb 2023",exp:"2 yrs",bg:"#EF4444"},
+          {av:"EJ",name:"Emma Johnson",lic:"CDL-A | #EJ-682910",status:"on-duty",truck:"T-220",plate:"GA 07 BC 3311",trips:2,total:221,rating:4.8,phone:"+1 (555) 067-8901",loc:"US-75, Dallas",since:"Aug 2019",exp:"6 yrs",bg:"#3B82F6"},
+          {av:"RS",name:"Raj Sharma",lic:"CDL-A | #RS-773021",status:"off-duty",truck:"V-112",plate:"FL 23 MN 8800",trips:0,total:198,rating:4.5,phone:"+1 (555) 078-9012",loc:"Last: Miami Port",since:"Apr 2021",exp:"4 yrs",bg:"#10B981"},
+          {av:"DK",name:"David Kim",lic:"CDL-A | #DK-864182",status:"on-duty",truck:"T-330",plate:"PA 66 TK 4422",trips:3,total:289,rating:4.7,phone:"+1 (555) 089-0123",loc:"I-95 North, Philadelphia",since:"Sep 2020",exp:"5 yrs",bg:"#F59E0B"},
+          {av:"AT",name:"Ana Torres",lic:"CDL-B | #AT-955304",status:"idle",truck:"V-419",plate:"AZ 44 XP 9901",trips:1,total:112,rating:4.6,phone:"+1 (555) 090-1234",loc:"Phoenix Central Hub",since:"Jan 2024",exp:"2 yrs",bg:"#8B5CF6"},
+        ];
+        const spill={
+          "on-duty":'<span class="pill pill-success">● On Duty</span>',
+          "idle":'<span class="pill pill-warning">● Idle</span>',
+          "off-duty":'<span class="pill pill-danger">● Off Duty</span>',
+        };
+        document.write(drivers.map(d=>`
+          <div class="card" style="padding:1.25rem;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;">
+              <div style="display:flex;align-items:center;gap:.75rem;">
+                <div style="width:2.75rem;height:2.75rem;border-radius:999px;background:${d.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-weight:700;font-size:.875rem;">${d.av}</span></div>
+                <div><h3 style="font-weight:600;color:#0F172A;font-size:.95rem;">${d.name}</h3><p style="font-size:.7rem;color:#64748B;">${d.lic}</p></div>
+              </div>
+              ${spill[d.status]}
+            </div>
+            <div style="background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:.75rem;padding:.75rem;margin-bottom:1rem;display:flex;align-items:center;gap:.75rem;">
+              <div style="width:2rem;height:2rem;background:rgba(59,130,246,.1);border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#3B82F6;font-size:.8rem;"></i></div>
+              <div><p style="font-size:.7rem;color:#64748B;">Assigned Vehicle</p><p style="font-size:.85rem;font-weight:700;color:#0F172A;">${d.truck}</p><p style="font-size:.7rem;color:#64748B;">${d.plate}</p></div>
+              <i class="fa-solid fa-user-check" style="color:#10B981;margin-left:auto;"></i>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem;text-align:center;">
+              <div><p style="font-size:1.1rem;font-weight:700;color:#0F172A;">${d.trips}</p><p style="font-size:.7rem;color:#64748B;">Today</p></div>
+              <div style="border-left:1px solid #E2E8F0;border-right:1px solid #E2E8F0;"><p style="font-size:1.1rem;font-weight:700;color:#0F172A;">${d.total}</p><p style="font-size:.7rem;color:#64748B;">Total Trips</p></div>
+              <div><div style="display:flex;align-items:center;justify-content:center;gap:.2rem;"><i class="fa-solid fa-star" style="color:#F59E0B;font-size:.7rem;"></i><span style="font-size:1.1rem;font-weight:700;color:#0F172A;">${d.rating}</span></div><p style="font-size:.7rem;color:#64748B;">Rating</p></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.375rem;font-size:.75rem;">
+              <div style="display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-phone" style="color:#94A3B8;width:.875rem;"></i><span style="color:#64748B;">${d.phone}</span></div>
+              <div style="display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-location-dot" style="color:#94A3B8;width:.875rem;"></i><span style="color:#64748B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${d.loc}</span></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;padding-top:.375rem;border-top:1px solid #F1F5F9;">
+                <div style="display:flex;align-items:center;gap:.375rem;"><i class="fa-solid fa-calendar" style="color:#94A3B8;"></i><span style="color:#64748B;">Since ${d.since}</span></div>
+                <span style="font-weight:600;color:#0F172A;">${d.exp} exp.</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:.5rem;margin-top:1rem;">
+              <button style="flex:1;padding:.375rem;font-size:.75rem;font-weight:500;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#0F172A;"><i class="fa-solid fa-eye" style="margin-right:.25rem;"></i>View</button>
+              <button style="flex:1;padding:.375rem;font-size:.75rem;font-weight:500;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#0F172A;"><i class="fa-solid fa-pen" style="margin-right:.25rem;"></i>Edit</button>
+              <a href="tracking.html" style="flex:1;padding:.375rem;font-size:.75rem;font-weight:500;border:0;border-radius:.5rem;background:#3B82F6;cursor:pointer;color:#fff;text-align:center;text-decoration:none;"><i class="fa-solid fa-location-dot" style="margin-right:.25rem;"></i>Track</a>
+            </div>
+          </div>`).join(''));
+      </script>
+    </div>
+  </main>
+</div>
+</body>
+</html>
