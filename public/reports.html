@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports — FleetCtrl</title>
+  <meta name="description" content="Fleet analytics and report generation." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family:system-ui,-apple-system,sans-serif; background:#F1F5F9; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; }
+    .nav-link { display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s; }
+    .nav-link:hover { background:#1E293B;color:#fff; }
+    .nav-link.active { background:#1D4ED8;color:#fff; }
+    .nav-section { font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem; }
+    .pill { display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px; }
+    .pill-success { background:#D1FAE5;color:#065F46; }
+    .pill-primary { background:#DBEAFE;color:#1D4ED8; }
+    .pill-warning { background:#FEF3C7;color:#92400E; }
+    .pill-danger  { background:#FEE2E2;color:#991B1B; }
+    .progress-bar { height:6px; background:#E2E8F0; border-radius:999px; overflow:hidden; }
+    .main { margin-left:240px; }
+    @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="fleet.html"     class="nav-link"><i class="fa-solid fa-truck fa-fw"></i>Fleet</a>
+    <a href="tracking.html"  class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html"    class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html"   class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html"   class="nav-link active"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Management</div>
+    <a href="parts.html"     class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html"     class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-users fa-fw"></i>Team</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:28rem;position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i><input type="text" placeholder="Search..." style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;" /></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;"><button style="position:relative;padding:.5rem;border:0;background:transparent;cursor:pointer;"><i class="fa-solid fa-bell" style="color:#64748B;font-size:1rem;"></i><span style="position:absolute;top:.3rem;right:.3rem;width:.5rem;height:.5rem;background:#EF4444;border-radius:999px;"></span></button><div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div></div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div><h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Reports &amp; Analytics</h1><p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">Track performance metrics and generate reports</p></div>
+      <button style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.85rem;font-weight:500;cursor:pointer;"><i class="fa-solid fa-file-lines"></i>New Report</button>
+    </div>
+
+    <!-- Date picker -->
+    <div class="card" style="padding:1.25rem;margin-bottom:1.5rem;">
+      <div style="display:flex;align-items:center;flex-wrap:wrap;gap:1rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-calendar" style="color:#64748B;"></i><span style="font-size:.875rem;font-weight:500;color:#0F172A;">Report Period:</span></div>
+        <input type="date" value="2025-04-01" style="padding:.5rem .75rem;font-size:.85rem;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:.5rem;outline:none;color:#0F172A;" />
+        <span style="color:#64748B;">to</span>
+        <input type="date" value="2025-04-30" style="padding:.5rem .75rem;font-size:.85rem;background:#F1F5F9;border:1px solid #E2E8F0;border-radius:.5rem;outline:none;color:#0F172A;" />
+        <div style="display:flex;gap:.5rem;margin-left:auto;">
+          <button style="padding:.375rem .75rem;font-size:.75rem;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#64748B;">This Week</button>
+          <button style="padding:.375rem .75rem;font-size:.75rem;border:1px solid #3B82F6;border-radius:.5rem;background:#3B82F6;cursor:pointer;color:#fff;">This Month</button>
+          <button style="padding:.375rem .75rem;font-size:.75rem;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#64748B;">Last Quarter</button>
+        </div>
+        <button style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.85rem;font-weight:500;cursor:pointer;"><i class="fa-solid fa-chart-bar"></i>Generate Report</button>
+      </div>
+    </div>
+
+    <!-- KPI cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem;">
+      <div class="card" style="padding:1.25rem;"><div style="display:flex;align-items:flex-start;justify-content:space-between;"><div><p style="font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Total Distance</p><div style="display:flex;align-items:baseline;gap:.25rem;margin-top:.5rem;"><span style="font-size:1.875rem;font-weight:700;color:#0F172A;">4,523</span><span style="font-size:.875rem;color:#64748B;">km</span></div><div style="display:flex;align-items:center;gap:.25rem;margin-top:.375rem;"><i class="fa-solid fa-arrow-trend-up" style="color:#10B981;font-size:.7rem;"></i><span style="font-size:.75rem;color:#10B981;font-weight:500;">+12.3% vs last month</span></div></div><div style="width:2.5rem;height:2.5rem;background:rgba(59,130,246,.12);border-radius:.75rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-bullseye" style="color:#3B82F6;"></i></div></div></div>
+      <div class="card" style="padding:1.25rem;"><div style="display:flex;align-items:flex-start;justify-content:space-between;"><div><p style="font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Avg Trip Duration</p><div style="display:flex;align-items:baseline;gap:.25rem;margin-top:.5rem;"><span style="font-size:1.875rem;font-weight:700;color:#0F172A;">3.2</span><span style="font-size:.875rem;color:#64748B;">hrs</span></div><div style="display:flex;align-items:center;gap:.25rem;margin-top:.375rem;"><i class="fa-solid fa-arrow-trend-down" style="color:#EF4444;font-size:.7rem;"></i><span style="font-size:.75rem;color:#EF4444;font-weight:500;">-5.1% vs last month</span></div></div><div style="width:2.5rem;height:2.5rem;background:rgba(245,158,11,.12);border-radius:.75rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-clock" style="color:#F59E0B;"></i></div></div></div>
+      <div class="card" style="padding:1.25rem;"><div style="display:flex;align-items:flex-start;justify-content:space-between;"><div><p style="font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Fleet Uptime</p><div style="display:flex;align-items:baseline;gap:.25rem;margin-top:.5rem;"><span style="font-size:1.875rem;font-weight:700;color:#0F172A;">98.3</span><span style="font-size:.875rem;color:#64748B;">%</span></div><div style="display:flex;align-items:center;gap:.25rem;margin-top:.375rem;"><i class="fa-solid fa-arrow-trend-up" style="color:#10B981;font-size:.7rem;"></i><span style="font-size:.75rem;color:#10B981;font-weight:500;">+0.8% vs last month</span></div></div><div style="width:2.5rem;height:2.5rem;background:rgba(16,185,129,.12);border-radius:.75rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-bolt" style="color:#10B981;"></i></div></div></div>
+      <div class="card" style="padding:1.25rem;"><div style="display:flex;align-items:flex-start;justify-content:space-between;"><div><p style="font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">On-Time Delivery</p><div style="display:flex;align-items:baseline;gap:.25rem;margin-top:.5rem;"><span style="font-size:1.875rem;font-weight:700;color:#0F172A;">91.7</span><span style="font-size:.875rem;color:#64748B;">%</span></div><div style="display:flex;align-items:center;gap:.25rem;margin-top:.375rem;"><i class="fa-solid fa-arrow-trend-up" style="color:#10B981;font-size:.7rem;"></i><span style="font-size:.75rem;color:#10B981;font-weight:500;">+3.2% vs last month</span></div></div><div style="width:2.5rem;height:2.5rem;background:rgba(139,92,246,.12);border-radius:.75rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#8B5CF6;"></i></div></div></div>
+    </div>
+
+    <!-- Charts row -->
+    <div style="display:grid;grid-template-columns:3fr 2fr;gap:1rem;margin-bottom:1.5rem;">
+      <!-- Fuel chart -->
+      <div class="card" style="padding:1.25rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+          <div><h2 style="font-weight:600;color:#0F172A;font-size:.95rem;">Fuel Usage Over Time</h2><p style="font-size:.75rem;color:#64748B;margin-top:.15rem;">Monthly consumption in litres</p></div>
+          <select style="font-size:.75rem;border:1px solid #E2E8F0;border-radius:.5rem;padding:.375rem .625rem;background:#fff;color:#0F172A;outline:none;"><option>Last 6 Months</option><option>Last Year</option></select>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:.75rem;height:11rem;">
+          <script>
+            const fd=[{m:'Jan',v:680},{m:'Feb',v:820},{m:'Mar',v:750},{m:'Apr',v:900},{m:'May',v:760},{m:'Jun',v:840}];
+            const mx=Math.max(...fd.map(d=>d.v));
+            document.write(fd.map(d=>`
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:.25rem;">
+                <span style="font-size:.7rem;color:#64748B;font-weight:500;">${d.v}L</span>
+                <div style="width:100%;border-radius:.3rem .3rem 0 0;background:linear-gradient(180deg,#3B82F6,#60A5FA);min-height:8px;" style="height:${(d.v/mx)*160}px;"></div>
+                <span style="font-size:.7rem;color:#64748B;font-weight:500;">${d.m}</span>
+              </div>`).join(''));
+          </script>
+        </div>
+        <!-- trend line -->
+        <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #F1F5F9;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;"><span style="font-size:.75rem;color:#64748B;">Cost Trend</span><span style="font-size:.75rem;color:#10B981;font-weight:500;"><i class="fa-solid fa-arrow-trend-up"></i> +8.3%</span></div>
+          <svg viewBox="0 0 300 40" style="width:100%;height:2rem;">
+            <polyline points="0,35 50,25 100,30 150,15 200,20 250,10 300,8" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      <!-- Utilization donut -->
+      <div class="card" style="padding:1.25rem;">
+        <div style="margin-bottom:1rem;"><h2 style="font-weight:600;color:#0F172A;font-size:.95rem;">Vehicle Utilization</h2><p style="font-size:.75rem;color:#64748B;">By fleet type this month</p></div>
+        <div style="display:flex;align-items:center;justify-content:center;margin:1rem 0;">
+          <div style="position:relative;width:8rem;height:8rem;">
+            <svg viewBox="0 0 36 36" style="width:100%;height:100%;transform:rotate(-90deg);">
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#F1F5F9" stroke-width="3.8"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#3B82F6" stroke-width="3.8" stroke-dasharray="51.6 100" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10B981" stroke-width="3.8" stroke-dasharray="40.2 100" stroke-dashoffset="-51.6" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="15.9" fill="none" stroke="#F59E0B" stroke-width="3.8" stroke-dasharray="28.3 100" stroke-dashoffset="-91.8" stroke-linecap="round"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;"><span style="font-size:1.5rem;font-weight:700;color:#0F172A;">74%</span><span style="font-size:.7rem;color:#64748B;">Avg</span></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.625rem;">
+          <script>
+            const ud=[{l:'Trucks',v:82,c:'#3B82F6'},{l:'Vans',v:64,c:'#10B981'},{l:'Special',v:45,c:'#F59E0B'}];
+            document.write(ud.map(d=>`
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.25rem;">
+                  <div style="display:flex;align-items:center;gap:.375rem;"><div style="width:.625rem;height:.625rem;border-radius:50%;background:${d.c};"></div><span style="color:#0F172A;font-weight:500;">${d.l}</span></div>
+                  <span style="font-weight:600;color:#0F172A;">${d.v}%</span>
+                </div>
+                <div style="height:6px;background:#E2E8F0;border-radius:999px;overflow:hidden;"><div style="height:100%;width:${d.v}%;background:${d.c};border-radius:999px;"></div></div>
+              </div>`).join(''));
+          </script>
+        </div>
+      </div>
+    </div>
+
+    <!-- Report history -->
+    <div class="card" style="padding:1.25rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <div><h2 style="font-weight:600;color:#0F172A;font-size:.95rem;">Report History</h2><p style="font-size:.75rem;color:#64748B;">Previously generated reports</p></div>
+        <button style="display:flex;align-items:center;gap:.375rem;padding:.375rem .75rem;font-size:.8rem;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#0F172A;"><i class="fa-solid fa-download"></i>Export All</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;font-size:.85rem;border-collapse:collapse;">
+          <thead><tr style="border-bottom:1px solid #E2E8F0;">
+            <th style="text-align:left;padding:.625rem .75rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Report Name</th>
+            <th style="text-align:left;padding:.625rem .75rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Date</th>
+            <th style="text-align:left;padding:.625rem .75rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Type</th>
+            <th style="text-align:left;padding:.625rem .75rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Size</th>
+            <th style="text-align:left;padding:.625rem .75rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Actions</th>
+          </tr></thead>
+          <tbody>
+            <script>
+              const rr=[
+                {n:"Monthly Operations Report",d:"Apr 10, 2025",t:"Operations",s:"2.4 MB",p:"pill-primary"},
+                {n:"Fuel Efficiency Analysis",d:"Apr 09, 2025",t:"Fuel",s:"1.1 MB",p:"pill-warning"},
+                {n:"Driver Performance Review",d:"Apr 08, 2025",t:"HR",s:"3.2 MB",p:"pill-success"},
+                {n:"Route Optimization Summary",d:"Apr 05, 2025",t:"Logistics",s:"0.8 MB",p:"pill-success"},
+                {n:"Fleet Maintenance Log",d:"Apr 02, 2025",t:"Maintenance",s:"1.7 MB",p:"pill-danger"},
+                {n:"Weekly KPI Dashboard",d:"Mar 28, 2025",t:"Overview",s:"0.5 MB",p:"pill-primary"},
+              ];
+              document.write(rr.map(r=>`
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                  <td style="padding:.75rem;"><div style="display:flex;align-items:center;gap:.5rem;"><div style="width:1.75rem;height:1.75rem;background:#DBEAFE;border-radius:.4rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-file-lines" style="color:#3B82F6;font-size:.65rem;"></i></div><span style="font-weight:500;color:#0F172A;">${r.n}</span></div></td>
+                  <td style="padding:.75rem;color:#64748B;">${r.d}</td>
+                  <td style="padding:.75rem;"><span class="pill ${r.p}">${r.t}</span></td>
+                  <td style="padding:.75rem;color:#64748B;">${r.s}</td>
+                  <td style="padding:.75rem;"><button style="display:flex;align-items:center;gap:.25rem;font-size:.75rem;color:#3B82F6;background:transparent;border:0;cursor:pointer;font-weight:500;"><i class="fa-solid fa-download"></i>Download</button></td>
+                </tr>`).join(''));
+            </script>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Store / Parts — FleetCtrl</title>
+  <meta name="description" content="Manage parts issued to fleet vehicles." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family:system-ui,-apple-system,sans-serif; background:#F1F5F9; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; }
+    .nav-link { display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s; }
+    .nav-link:hover { background:#1E293B;color:#fff; }
+    .nav-link.active { background:#1D4ED8;color:#fff; }
+    .nav-section { font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem; }
+    .pill { display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px; }
+    .pill-success { background:#D1FAE5;color:#065F46; }
+    .pill-primary { background:#DBEAFE;color:#1D4ED8; }
+    .pill-warning { background:#FEF3C7;color:#92400E; }
+    .pill-danger  { background:#FEE2E2;color:#991B1B; }
+    .main { margin-left:240px; }
+    @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="fleet.html"     class="nav-link"><i class="fa-solid fa-truck fa-fw"></i>Fleet</a>
+    <a href="tracking.html"  class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html"    class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html"   class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html"   class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Management</div>
+    <a href="parts.html"     class="nav-link active"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html"     class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-users fa-fw"></i>Team</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:28rem;position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i><input type="text" placeholder="Search parts, trucks..." style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;" /></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;"><button style="position:relative;padding:.5rem;border:0;background:transparent;cursor:pointer;"><i class="fa-solid fa-bell" style="color:#64748B;font-size:1rem;"></i><span style="position:absolute;top:.3rem;right:.3rem;width:.5rem;height:.5rem;background:#EF4444;border-radius:999px;"></span></button><div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div></div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div><h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Store Manager — Parts Issuance</h1><p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">Track and manage parts issued to each truck</p></div>
+      <button style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.85rem;font-weight:500;cursor:pointer;"><i class="fa-solid fa-plus"></i>Issue Part</button>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem;">
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(59,130,246,.06);"><p style="font-size:1.5rem;font-weight:700;color:#3B82F6;">10</p><p style="font-size:.75rem;color:#64748B;">Total Records</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(16,185,129,.06);"><p style="font-size:1.5rem;font-weight:700;color:#10B981;">7</p><p style="font-size:.75rem;color:#64748B;">Issued</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(245,158,11,.06);"><p style="font-size:1.5rem;font-weight:700;color:#F59E0B;">2</p><p style="font-size:.75rem;color:#64748B;">Pending</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(59,130,246,.04);"><p style="font-size:1.5rem;font-weight:700;color:#3B82F6;">2</p><p style="font-size:.75rem;color:#64748B;">Returned</p></div>
+    </div>
+
+    <!-- Cost summary -->
+    <div class="card" style="padding:1rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;background:rgba(59,130,246,.04);border-color:rgba(59,130,246,.2);">
+      <div style="width:2.5rem;height:2.5rem;background:rgba(59,130,246,.1);border-radius:.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-dollar-sign" style="color:#3B82F6;"></i></div>
+      <div><p style="font-size:.75rem;color:#64748B;">Total Parts Cost (All Records)</p><p style="font-size:1.5rem;font-weight:700;color:#0F172A;">$5,745.00</p></div>
+    </div>
+
+    <!-- Parts table -->
+    <div class="card" style="overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table style="width:100%;font-size:.83rem;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1px solid #E2E8F0;background:#F8FAFC;">
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Part</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;white-space:nowrap;">Part #</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Truck</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Qty</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;white-space:nowrap;">Issued By</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Date</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Cost</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <script>
+              const parts=[
+                {name:"Air Filter",pn:"AF-4521-HD",truck:"T-101",plate:"MH 12 AD 1234",qty:2,unit:"pcs",status:"issued",date:"12 Mar 2025",by:"James Carter",cost:45,notes:"Replacement for worn filter"},
+                {name:"Brake Pads (Front)",pn:"BP-7832-FR",truck:"T-108",plate:"KA 05 QW 8899",qty:4,unit:"sets",status:"issued",date:"11 Mar 2025",by:"James Carter",cost:220,notes:"Scheduled maintenance"},
+                {name:"Engine Oil 15W-40",pn:"OL-1540-5L",truck:"T-115",plate:"QL 12 AB 1234",qty:10,unit:"litres",status:"pending",date:"13 Mar 2025",by:"Maria Santos",cost:85.5,notes:"Awaiting approval"},
+                {name:"Fan Belt",pn:"FB-2291-VBX",truck:"V-204",plate:"DL 04 XY 7788",qty:1,unit:"pcs",status:"issued",date:"10 Mar 2025",by:"James Carter",cost:32,notes:"Emergency replacement"},
+                {name:"Fuel Injector",pn:"FI-9034-DI",truck:"T-330",plate:"PA 66 TK 4422",qty:6,unit:"pcs",status:"issued",date:"09 Mar 2025",by:"Maria Santos",cost:540,notes:"Full set replacement"},
+                {name:"Coolant Fluid",pn:"CF-3310-GL",truck:"T-220",plate:"GA 07 BC 3311",qty:5,unit:"litres",status:"returned",date:"08 Mar 2025",by:"James Carter",cost:28,notes:"Excess returned"},
+                {name:"Alternator",pn:"AL-6651-AMB",truck:"V-112",plate:"FL 23 MN 8800",qty:1,unit:"pcs",status:"pending",date:"13 Mar 2025",by:"Maria Santos",cost:310,notes:"Ordered — awaiting stock"},
+                {name:"Shock Absorbers (Rear)",pn:"SA-8812-RR",truck:"V-301",plate:"TX 99 ZZ 5544",qty:2,unit:"pcs",status:"issued",date:"07 Mar 2025",by:"James Carter",cost:195,notes:"Rear pair replacement"},
+                {name:"Headlight Bulb H7",pn:"HB-1107-H7",truck:"V-419",plate:"AZ 44 XP 9901",qty:4,unit:"pcs",status:"issued",date:"06 Mar 2025",by:"Maria Santos",cost:18,notes:"Both headlights"},
+                {name:"Transmission Fluid",pn:"TF-5520-QT",truck:"T-101",plate:"MH 12 AD 1234",qty:4,unit:"litres",status:"returned",date:"05 Mar 2025",by:"James Carter",cost:62,notes:"Partial return"},
+              ];
+              const sp2={issued:'<span class="pill pill-success">Issued</span>',pending:'<span class="pill pill-warning">Pending</span>',returned:'<span class="pill pill-primary">Returned</span>'};
+              document.write(parts.map(p=>`
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                  <td style="padding:.75rem 1rem;">
+                    <div style="display:flex;align-items:center;gap:.625rem;">
+                      <div style="width:2rem;height:2rem;background:#DBEAFE;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-box" style="color:#3B82F6;font-size:.75rem;"></i></div>
+                      <div><p style="font-weight:500;color:#0F172A;">${p.name}</p><p style="font-size:.7rem;color:#64748B;">${p.notes}</p></div>
+                    </div>
+                  </td>
+                  <td style="padding:.75rem 1rem;font-family:monospace;font-size:.75rem;color:#64748B;">${p.pn}</td>
+                  <td style="padding:.75rem 1rem;">
+                    <div style="display:flex;align-items:center;gap:.375rem;">
+                      <i class="fa-solid fa-truck" style="color:#3B82F6;font-size:.75rem;"></i>
+                      <div><p style="font-weight:500;color:#0F172A;">${p.truck}</p><p style="font-size:.7rem;color:#64748B;">${p.plate}</p></div>
+                    </div>
+                  </td>
+                  <td style="padding:.75rem 1rem;font-weight:600;color:#0F172A;">${p.qty} ${p.unit}</td>
+                  <td style="padding:.75rem 1rem;color:#64748B;">${p.by}</td>
+                  <td style="padding:.75rem 1rem;color:#64748B;white-space:nowrap;">${p.date}</td>
+                  <td style="padding:.75rem 1rem;font-weight:600;color:#0F172A;">$${(p.cost*p.qty).toFixed(2)}</td>
+                  <td style="padding:.75rem 1rem;">${sp2[p.status]}</td>
+                </tr>`).join(''));
+            </script>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

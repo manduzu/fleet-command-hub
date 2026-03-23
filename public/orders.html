@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orders — FleetCtrl</title>
+  <meta name="description" content="View and manage fleet delivery orders." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family:system-ui,-apple-system,sans-serif; background:#F1F5F9; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; }
+    .nav-link { display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s; }
+    .nav-link:hover { background:#1E293B;color:#fff; }
+    .nav-link.active { background:#1D4ED8;color:#fff; }
+    .nav-section { font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem; }
+    .pill { display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px; }
+    .pill-success { background:#D1FAE5;color:#065F46; }
+    .pill-primary { background:#DBEAFE;color:#1D4ED8; }
+    .pill-warning { background:#FEF3C7;color:#92400E; }
+    .pill-danger  { background:#FEE2E2;color:#991B1B; }
+    .main { margin-left:240px; }
+    @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="fleet.html"     class="nav-link"><i class="fa-solid fa-truck fa-fw"></i>Fleet</a>
+    <a href="tracking.html"  class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html"    class="nav-link active"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html"   class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html"   class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Management</div>
+    <a href="parts.html"     class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html"     class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-users fa-fw"></i>Team</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;cursor:pointer;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div style="flex:1;min-width:0;"><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:28rem;position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i><input type="text" placeholder="Search orders, customers, drivers..." style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;" /></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;"><button style="position:relative;padding:.5rem;border:0;background:transparent;cursor:pointer;"><i class="fa-solid fa-bell" style="color:#64748B;font-size:1rem;"></i><span style="position:absolute;top:.3rem;right:.3rem;width:.5rem;height:.5rem;background:#EF4444;border-radius:999px;"></span></button><div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div></div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+      <div><h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Orders</h1><p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">9 orders with driver &amp; truck assignments</p></div>
+      <button style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.85rem;font-weight:500;cursor:pointer;"><i class="fa-solid fa-plus"></i>New Order</button>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem;">
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(59,130,246,.06);"><p style="font-size:1.5rem;font-weight:700;color:#3B82F6;">9</p><p style="font-size:.75rem;color:#64748B;">Total</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(59,130,246,.06);"><p style="font-size:1.5rem;font-weight:700;color:#3B82F6;">4</p><p style="font-size:.75rem;color:#64748B;">In Transit</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(16,185,129,.06);"><p style="font-size:1.5rem;font-weight:700;color:#10B981;">3</p><p style="font-size:.75rem;color:#64748B;">Completed</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(239,68,68,.06);"><p style="font-size:1.5rem;font-weight:700;color:#EF4444;">1</p><p style="font-size:.75rem;color:#64748B;">Delayed</p></div>
+    </div>
+
+    <!-- Table -->
+    <div class="card" style="overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table style="width:100%;font-size:.83rem;border-collapse:collapse;">
+          <thead>
+            <tr style="border-bottom:1px solid #E2E8F0;background:#F8FAFC;">
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">Order ID</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;">Customer</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;">Route</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;">Driver + Truck</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;">Weight</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;">Date</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;">ETA</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;">Priority</th>
+              <th style="text-align:left;padding:.75rem 1rem;font-size:.7rem;font-weight:600;color:#64748B;text-transform:uppercase;letter-spacing:.05em;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <script>
+              const orders=[
+                {id:"ORD-2025-001",customer:"Amazon Logistics",from:"New York, NY",to:"Boston, MA",status:"completed",driver:"John Doe",truck:"T-101",plate:"MH 12 AD 1234",wt:"12.4t",date:"13 Mar 2025",eta:"Delivered",pri:"high",bg:"#3B82F6"},
+                {id:"ORD-2025-002",customer:"FedEx Supply Chain",from:"Los Angeles, CA",to:"San Diego, CA",status:"in-transit",driver:"Sarah Lee",truck:"V-204",plate:"DL 04 XY 7788",wt:"3.8t",date:"13 Mar 2025",eta:"45 min",pri:"medium",bg:"#10B981"},
+                {id:"ORD-2025-003",customer:"UPS Freight",from:"Chicago, IL",to:"Detroit, MI",status:"delayed",driver:"Mike Chen",truck:"T-108",plate:"KA 05 QW 8899",wt:"18.2t",date:"12 Mar 2025",eta:"3h 20m",pri:"high",bg:"#F59E0B"},
+                {id:"ORD-2025-004",customer:"DHL Express",from:"Phoenix, AZ",to:"Las Vegas, NV",status:"in-transit",driver:"Carlos Rivera",truck:"T-115",plate:"QL 12 AB 1234",wt:"9.1t",date:"13 Mar 2025",eta:"3h 50m",pri:"low",bg:"#8B5CF6"},
+                {id:"ORD-2025-005",customer:"Walmart Distribution",from:"Houston, TX",to:"Dallas, TX",status:"completed",driver:"Priya Patel",truck:"V-301",plate:"TX 99 ZZ 5544",wt:"5.5t",date:"12 Mar 2025",eta:"Delivered",pri:"medium",bg:"#EF4444"},
+                {id:"ORD-2025-006",customer:"Home Depot Supply",from:"Atlanta, GA",to:"Dallas, TX",status:"in-transit",driver:"Emma Johnson",truck:"T-220",plate:"GA 07 BC 3311",wt:"15.7t",date:"13 Mar 2025",eta:"5h 10m",pri:"high",bg:"#3B82F6"},
+                {id:"ORD-2025-007",customer:"Best Buy Logistics",from:"Miami, FL",to:"Orlando, FL",status:"pending",driver:"Raj Sharma",truck:"V-112",plate:"FL 23 MN 8800",wt:"2.3t",date:"14 Mar 2025",eta:"Scheduled",pri:"low",bg:"#10B981"},
+                {id:"ORD-2025-008",customer:"Target Distribution",from:"Philadelphia, PA",to:"New York, NY",status:"in-transit",driver:"David Kim",truck:"T-330",plate:"PA 66 TK 4422",wt:"11.0t",date:"13 Mar 2025",eta:"1h 20m",pri:"medium",bg:"#F59E0B"},
+                {id:"ORD-2025-009",customer:"Nike Supply Chain",from:"Phoenix, AZ",to:"Tucson, AZ",status:"completed",driver:"Ana Torres",truck:"V-419",plate:"AZ 44 XP 9901",wt:"4.2t",date:"12 Mar 2025",eta:"Delivered",pri:"low",bg:"#8B5CF6"},
+              ];
+              const sp={completed:'<span class="pill pill-success">Completed</span>','in-transit':'<span class="pill pill-primary">In Transit</span>',delayed:'<span class="pill pill-danger">Delayed</span>',pending:'<span class="pill pill-warning">Pending</span>'};
+              const pp={high:'<span style="font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;background:#FEE2E2;color:#991B1B;">High</span>',medium:'<span style="font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;background:#FEF3C7;color:#92400E;">Med</span>',low:'<span style="font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;background:#D1FAE5;color:#065F46;">Low</span>'};
+              const initials=n=>n.split(' ').map(x=>x[0]).join('');
+              document.write(orders.map(o=>`
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                  <td style="padding:.75rem 1rem;"><div style="display:flex;align-items:center;gap:.375rem;"><i class="fa-solid fa-box" style="color:#3B82F6;font-size:.75rem;"></i><span style="font-family:monospace;font-size:.75rem;font-weight:600;color:#0F172A;">${o.id}</span></div></td>
+                  <td style="padding:.75rem 1rem;font-weight:500;color:#0F172A;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${o.customer}</td>
+                  <td style="padding:.75rem 1rem;"><div style="display:flex;flex-direction:column;gap:.15rem;font-size:.75rem;"><span style="color:#0F172A;">${o.from}</span><span style="color:#94A3B8;">→ ${o.to}</span></div></td>
+                  <td style="padding:.75rem 1rem;">
+                    <div style="display:flex;align-items:center;gap:.5rem;">
+                      <div style="width:1.75rem;height:1.75rem;border-radius:999px;background:${o.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-size:.65rem;font-weight:700;">${initials(o.driver)}</span></div>
+                      <div><div style="font-size:.8rem;font-weight:500;color:#0F172A;">${o.driver}</div><div style="font-size:.7rem;color:#64748B;"><i class="fa-solid fa-truck" style="color:#3B82F6;margin-right:.2rem;font-size:.65rem;"></i>${o.truck} · ${o.plate}</div></div>
+                    </div>
+                  </td>
+                  <td style="padding:.75rem 1rem;font-size:.75rem;font-weight:600;color:#64748B;">${o.wt}</td>
+                  <td style="padding:.75rem 1rem;font-size:.75rem;color:#64748B;white-space:nowrap;">${o.date}</td>
+                  <td style="padding:.75rem 1rem;font-size:.75rem;font-weight:600;color:#0F172A;white-space:nowrap;">${o.eta}</td>
+                  <td style="padding:.75rem 1rem;">${pp[o.pri]}</td>
+                  <td style="padding:.75rem 1rem;">${sp[o.status]}</td>
+                </tr>`).join(''));
+            </script>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>
