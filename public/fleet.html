@@ -153,5 +153,14 @@
     </div>
   </main>
 </div>
+<script>
+  function toggleDropdown(id){
+    const dd=document.getElementById(id);
+    const icon=document.getElementById(id+'-icon');
+    const isOpen=dd.style.display==='block';
+    dd.style.display=isOpen?'none':'block';
+    icon.style.transform=isOpen?'':'rotate(180deg)';
+  }
+</script>
 </body>
 </html>
