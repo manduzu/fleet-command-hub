@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trailers — FleetCtrl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family: system-ui,-apple-system,sans-serif; background:#F1F5F9; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; overflow-y:auto; }
+    .nav-link { display:flex; align-items:center; gap:.75rem; padding:.6rem 1rem; border-radius:.6rem; color:#94A3B8; font-size:.875rem; font-weight:500; text-decoration:none; transition:background .15s,color .15s; }
+    .nav-link:hover { background:#1E293B; color:#fff; }
+    .nav-link.active { background:#1D4ED8; color:#fff; }
+    .nav-section { font-size:.65rem; font-weight:700; letter-spacing:.1em; color:#475569; text-transform:uppercase; padding:1rem 1rem .25rem; }
+    .dropdown-content { display:none; padding-left:1rem; }
+    .dropdown-content.open { display:block; }
+    .progress-bar { height:5px; background:#E2E8F0; border-radius:999px; overflow:hidden; }
+    .main { margin-left:240px; }
+    @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <div class="nav-link active" style="cursor:pointer;" onclick="toggleDropdown('fleet-dd')">
+      <i class="fa-solid fa-truck fa-fw"></i><span style="flex:1;">Fleet</span>
+      <i class="fa-solid fa-chevron-down fa-fw" id="fleet-dd-icon" style="font-size:.65rem;transform:rotate(180deg);"></i>
+    </div>
+    <div id="fleet-dd" class="dropdown-content open">
+      <a href="trucks.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-truck-front fa-fw"></i>Trucks</a>
+      <a href="trailers.html" class="nav-link active" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    </div>
+    <div class="nav-link" style="cursor:pointer;" onclick="toggleDropdown('logistics-dd')">
+      <i class="fa-solid fa-boxes-stacked fa-fw"></i><span style="flex:1;">Logistics</span>
+      <i class="fa-solid fa-chevron-down fa-fw" id="logistics-dd-icon" style="font-size:.65rem;"></i>
+    </div>
+    <div id="logistics-dd" class="dropdown-content">
+      <a href="create-fleet.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-plus-circle fa-fw"></i>Create Fleet</a>
+      <a href="draft-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Management</div>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-warehouse fa-fw"></i>Parking Yard</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:24rem;position:relative;">
+      <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i>
+      <input type="text" id="search" placeholder="Search trailers..." oninput="filterTrailers()" style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;color:#1E293B;" />
+    </div>
+    <div style="margin-left:auto;display:flex;gap:.75rem;align-items:center;">
+      <a href="create-fleet.html" style="display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;background:#3B82F6;color:#fff;border-radius:.6rem;font-size:.8rem;font-weight:600;text-decoration:none;"><i class="fa-solid fa-plus"></i>Add Trailer</a>
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+    </div>
+  </header>
+
+  <main style="padding:1.5rem;">
+    <div style="margin-bottom:1.5rem;">
+      <h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Trailers</h1>
+      <p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">7 trailers in your fleet</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem;">
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(16,185,129,.06);">
+        <p style="font-size:1.5rem;font-weight:700;color:#10B981;">3</p><p style="font-size:.75rem;color:#64748B;">Coupled</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(245,158,11,.06);">
+        <p style="font-size:1.5rem;font-weight:700;color:#F59E0B;">2</p><p style="font-size:.75rem;color:#64748B;">Available</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(59,130,246,.06);">
+        <p style="font-size:1.5rem;font-weight:700;color:#3B82F6;">1</p><p style="font-size:.75rem;color:#64748B;">Maintenance</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(139,92,246,.06);">
+        <p style="font-size:1.5rem;font-weight:700;color:#8B5CF6;">1</p><p style="font-size:.75rem;color:#64748B;">Loading</p></div>
+    </div>
+
+    <div id="trailers-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;"></div>
+  </main>
+</div>
+
+<script>
+const trailers = [
+  {id:'TR-001',name:'Trailer TR-001',type:'Dry Van',plate:'MH 55 TR 0011',assignedTo:'T-101',driver:'John Doe',status:'coupled',capacity:'22 tons',load:'18.5 tons',loadPct:84,length:'13.6m',year:2020,inspection:'2025-06-15',yard:'Alpha Yard',loc:'Highway 101, Mile 23'},
+  {id:'TR-002',name:'Trailer TR-002',type:'Refrigerated',plate:'KA 33 TR 0022',assignedTo:'T-115',driver:'Carlos Rivera',status:'coupled',capacity:'18 tons',load:'16 tons',loadPct:89,length:'13.6m',year:2021,inspection:'2025-09-01',yard:'Alpha Yard',loc:'I-10 West, Mile 342'},
+  {id:'TR-003',name:'Trailer TR-003',type:'Flatbed',plate:'GA 21 TR 0033',assignedTo:'T-220',driver:'Emma Johnson',status:'coupled',capacity:'30 tons',load:'24 tons',loadPct:80,length:'14.6m',year:2019,inspection:'2024-12-10',yard:'Charlie Yard',loc:'US-75, Dallas'},
+  {id:'TR-004',name:'Trailer TR-004',type:'Dry Van',plate:'PA 44 TR 0044',assignedTo:'—',driver:'Unassigned',status:'available',capacity:'22 tons',load:'0 tons',loadPct:0,length:'13.6m',year:2022,inspection:'2026-03-20',yard:'Delta Yard',loc:'Delta Yard – Bay 7'},
+  {id:'TR-005',name:'Trailer TR-005',type:'Tanker',plate:'TX 77 TR 0055',assignedTo:'—',driver:'Unassigned',status:'available',capacity:'25 000 L',load:'0 L',loadPct:0,length:'12.0m',year:2020,inspection:'2025-08-11',yard:'Bravo Yard',loc:'Bravo Yard – Bay 3'},
+  {id:'TR-006',name:'Trailer TR-006',type:'Lowboy',plate:'FL 99 TR 0066',assignedTo:'—',driver:'—',status:'maintenance',capacity:'40 tons',load:'0 tons',loadPct:0,length:'16.7m',year:2018,inspection:'2024-10-05',yard:'Bravo Yard',loc:'Bravo Yard – Workshop'},
+  {id:'TR-007',name:'Trailer TR-007',type:'Curtainsider',plate:'AZ 11 TR 0077',assignedTo:'—',driver:'Loading crew',status:'loading',capacity:'24 tons',load:'12 tons',loadPct:50,length:'13.6m',year:2023,inspection:'2026-07-30',yard:'Charlie Yard',loc:'Charlie Yard – Loading Bay 2'},
+];
+const statusCfg = {
+  coupled:{label:'Coupled',bg:'#D1FAE5',c:'#065F46'},
+  available:{label:'Available',bg:'#FEF3C7',c:'#92400E'},
+  maintenance:{label:'Maintenance',bg:'#DBEAFE',c:'#1D4ED8'},
+  loading:{label:'Loading',bg:'#EDE9FE',c:'#5B21B6'},
+};
+
+function renderTrailers(list) {
+  const grid = document.getElementById('trailers-grid');
+  grid.innerHTML = '';
+  list.forEach(t => {
+    const cfg = statusCfg[t.status];
+    const imgFilter = t.status==='maintenance'?'sepia(60%) opacity(.8)':'none';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.overflow = 'hidden';
+    card.innerHTML = `
+      <div style="position:relative;height:130px;background:linear-gradient(135deg,#F0F9FF,#E0F2FE);display:flex;align-items:center;justify-content:center;border-bottom:1px solid #E2E8F0;">
+        <!-- Trailer SVG -->
+        <svg viewBox="0 0 260 100" style="width:100%;max-width:200px;filter:${imgFilter};drop-shadow:0 4px 8px rgba(0,0,0,.1);" xmlns="http://www.w3.org/2000/svg">
+          <!-- Main trailer body -->
+          <rect x="10" y="20" width="210" height="65" rx="4" fill="#0EA5E9"/>
+          <rect x="15" y="26" width="200" height="52" rx="3" fill="#38BDF8" opacity=".35"/>
+          <!-- Side stripe -->
+          <rect x="10" y="70" width="210" height="8" fill="#0369A1"/>
+          <!-- Front connector -->
+          <rect x="215" y="38" width="22" height="20" rx="3" fill="#475569"/>
+          <rect x="230" y="44" width="12" height="8" rx="2" fill="#64748B"/>
+          <!-- Axles -->
+          <rect x="90" y="83" width="120" height="5" rx="2" fill="#334155"/>
+          <!-- Wheels -->
+          <circle cx="100" cy="92" r="10" fill="#1E293B"/><circle cx="100" cy="92" r="5" fill="#475569"/>
+          <circle cx="130" cy="92" r="10" fill="#1E293B"/><circle cx="130" cy="92" r="5" fill="#475569"/>
+          <circle cx="170" cy="92" r="10" fill="#1E293B"/><circle cx="170" cy="92" r="5" fill="#475569"/>
+          <circle cx="200" cy="92" r="10" fill="#1E293B"/><circle cx="200" cy="92" r="5" fill="#475569"/>
+          <!-- Tail lights -->
+          <rect x="10" y="28" width="6" height="10" rx="2" fill="#FCA5A5"/>
+          <rect x="10" y="56" width="6" height="10" rx="2" fill="#FCA5A5"/>
+          <!-- Type label -->
+          <text x="115" y="57" text-anchor="middle" font-size="11" font-weight="700" fill="white" opacity=".8">${t.type}</text>
+        </svg>
+        <div style="position:absolute;top:.5rem;right:.5rem;background:${cfg.bg};color:${cfg.c};font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;">● ${cfg.label}</div>
+        <div style="position:absolute;bottom:.5rem;left:.5rem;background:rgba(0,0,0,.35);color:#fff;font-size:.65rem;font-weight:700;padding:.15rem .4rem;border-radius:.3rem;">${t.id}</div>
+        <div style="position:absolute;bottom:.5rem;right:.5rem;background:rgba(0,0,0,.25);color:#fff;font-size:.65rem;padding:.15rem .4rem;border-radius:.3rem;"><i class="fa-solid fa-warehouse" style="margin-right:.2rem;"></i>${t.yard}</div>
+      </div>
+      <div style="padding:1.25rem;">
+        <div style="margin-bottom:.75rem;">
+          <h3 style="font-weight:700;color:#0F172A;">${t.name}</h3>
+          <p style="font-size:.75rem;color:#64748B;">${t.type} · ${t.length} · ${t.plate}</p>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.8rem;margin-bottom:.75rem;">
+          <div style="display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-truck fa-fw" style="color:#94A3B8;font-size:.7rem;"></i><span style="color:#374151;">${t.assignedTo!=='—'?'Truck '+t.assignedTo:'Unassigned'}</span></div>
+          <div style="display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-user fa-fw" style="color:#94A3B8;font-size:.7rem;"></i><span style="color:#374151;">${t.driver}</span></div>
+          <div style="display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-weight-hanging fa-fw" style="color:#94A3B8;font-size:.7rem;"></i><span style="color:#374151;">Cap: ${t.capacity}</span></div>
+          <div style="display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-location-dot fa-fw" style="color:#94A3B8;font-size:.7rem;"></i><span style="color:#64748B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.loc}</span></div>
+        </div>
+        <div style="margin-bottom:.75rem;">
+          <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.3rem;">
+            <span style="color:#64748B;">Load</span>
+            <span style="font-weight:600;color:#0F172A;">${t.load} / ${t.capacity} (${t.loadPct}%)</span>
+          </div>
+          <div class="progress-bar"><div style="height:100%;width:${t.loadPct}%;background:${t.loadPct>80?'#EF4444':t.loadPct>50?'#F59E0B':'#10B981'};border-radius:999px;"></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;color:#64748B;padding:.4rem 0;border-top:1px solid #F1F5F9;margin-bottom:.75rem;">
+          <span><i class="fa-solid fa-calendar-check" style="margin-right:.25rem;"></i>Inspection: ${t.inspection}</span>
+          <span>${t.year}</span>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+          <button style="flex:1;padding:.4rem;font-size:.75rem;font-weight:500;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#0F172A;"><i class="fa-solid fa-eye" style="margin-right:.25rem;"></i>View</button>
+          <button style="flex:1;padding:.4rem;font-size:.75rem;font-weight:500;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#0F172A;"><i class="fa-solid fa-pen" style="margin-right:.25rem;"></i>Edit</button>
+          <button style="flex:1;padding:.4rem;font-size:.75rem;font-weight:500;border:0;border-radius:.5rem;background:${t.status==='available'?'#10B981':'#64748B'};cursor:pointer;color:#fff;" onclick="assign(this,'${t.id}')">
+            <i class="fa-solid fa-link" style="margin-right:.25rem;"></i>${t.status==='available'?'Assign':'Detach'}
+          </button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function filterTrailers() {
+  const q = document.getElementById('search').value.toLowerCase();
+  renderTrailers(trailers.filter(t =>
+    t.name.toLowerCase().includes(q)||t.type.toLowerCase().includes(q)||t.plate.toLowerCase().includes(q)
+  ));
+}
+
+function assign(btn, id) {
+  const label = btn.textContent.trim();
+  if(label.includes('Assign')) { btn.textContent='✓ Assigned'; btn.style.background='#3B82F6'; }
+  else { btn.textContent='Assign'; btn.style.background='#10B981'; }
+}
+
+function toggleDropdown(id){
+  const dd=document.getElementById(id);const icon=document.getElementById(id+'-icon');
+  dd.classList.toggle('open');icon.style.transform=dd.classList.contains('open')?'rotate(180deg)':'';
+}
+
+renderTrailers(trailers);
+</script>
+</body>
+</html>

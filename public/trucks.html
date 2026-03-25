@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trucks — FleetCtrl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family: system-ui,-apple-system,sans-serif; background:#F1F5F9; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; overflow-y:auto; }
+    .nav-link { display:flex; align-items:center; gap:.75rem; padding:.6rem 1rem; border-radius:.6rem; color:#94A3B8; font-size:.875rem; font-weight:500; text-decoration:none; transition:background .15s,color .15s; }
+    .nav-link:hover { background:#1E293B; color:#fff; }
+    .nav-link.active { background:#1D4ED8; color:#fff; }
+    .nav-section { font-size:.65rem; font-weight:700; letter-spacing:.1em; color:#475569; text-transform:uppercase; padding:1rem 1rem .25rem; }
+    .dropdown-content { display:none; padding-left:1rem; }
+    .dropdown-content.open { display:block; }
+    .pill { display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px; }
+    .pill-success { background:#D1FAE5;color:#065F46; }
+    .pill-warning { background:#FEF3C7;color:#92400E; }
+    .pill-primary { background:#DBEAFE;color:#1D4ED8; }
+    .pill-danger { background:#FEE2E2;color:#991B1B; }
+    .progress-bar { height:5px; background:#E2E8F0; border-radius:999px; overflow:hidden; }
+    /* Truck SVG illustration */
+    .truck-svg { width:100%;max-width:180px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.12)); }
+    .main { margin-left:240px; }
+    @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <!-- Fleet Dropdown -->
+    <div class="nav-link active" style="cursor:pointer;" onclick="toggleDropdown('fleet-dd')">
+      <i class="fa-solid fa-truck fa-fw"></i><span style="flex:1;">Fleet</span>
+      <i class="fa-solid fa-chevron-down fa-fw" id="fleet-dd-icon" style="font-size:.65rem;transform:rotate(180deg);"></i>
+    </div>
+    <div id="fleet-dd" class="dropdown-content open">
+      <a href="trucks.html" class="nav-link active" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-truck-front fa-fw"></i>Trucks</a>
+      <a href="trailers.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    </div>
+    <!-- Logistics Dropdown -->
+    <div class="nav-link" style="cursor:pointer;" onclick="toggleDropdown('logistics-dd')">
+      <i class="fa-solid fa-boxes-stacked fa-fw"></i><span style="flex:1;">Logistics</span>
+      <i class="fa-solid fa-chevron-down fa-fw" id="logistics-dd-icon" style="font-size:.65rem;"></i>
+    </div>
+    <div id="logistics-dd" class="dropdown-content">
+      <a href="create-fleet.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-plus-circle fa-fw"></i>Create Fleet</a>
+      <a href="draft-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Management</div>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-warehouse fa-fw"></i>Parking Yard</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:24rem;position:relative;">
+      <i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i>
+      <input type="text" id="search" placeholder="Search trucks..." oninput="filterTrucks()" style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;color:#1E293B;" />
+    </div>
+    <div style="margin-left:auto;display:flex;gap:.75rem;align-items:center;">
+      <a href="create-fleet.html" style="display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;background:#3B82F6;color:#fff;border-radius:.6rem;font-size:.8rem;font-weight:600;text-decoration:none;"><i class="fa-solid fa-plus"></i>Add Truck</a>
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+    </div>
+  </header>
+
+  <main style="padding:1.5rem;">
+    <div style="margin-bottom:1.5rem;">
+      <h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Trucks</h1>
+      <p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">6 trucks in your fleet</p>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem;">
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(16,185,129,.06);cursor:pointer;" onclick="setFilter('active')">
+        <p style="font-size:1.5rem;font-weight:700;color:#10B981;">4</p><p style="font-size:.75rem;color:#64748B;">Active</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(245,158,11,.06);cursor:pointer;" onclick="setFilter('idle')">
+        <p style="font-size:1.5rem;font-weight:700;color:#F59E0B;">1</p><p style="font-size:.75rem;color:#64748B;">Idle</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(59,130,246,.06);cursor:pointer;" onclick="setFilter('maintenance')">
+        <p style="font-size:1.5rem;font-weight:700;color:#3B82F6;">1</p><p style="font-size:.75rem;color:#64748B;">Maintenance</p></div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(239,68,68,.06);cursor:pointer;" onclick="setFilter('offline')">
+        <p style="font-size:1.5rem;font-weight:700;color:#EF4444;">0</p><p style="font-size:.75rem;color:#64748B;">Offline</p></div>
+    </div>
+
+    <div id="trucks-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;"></div>
+  </main>
+</div>
+
+<script>
+const trucks = [
+  {id:'T-101',name:'Truck T-101',make:'Volvo FH16',year:2021,plate:'MH 12 AD 1234',driver:'John Doe',driverImg:'JD',status:'active',util:78,loc:'Highway 101, Mile 23',speed:'65 mph',fuel:72,mileage:'142,300 km',vin:'YV2RT8XA9MA123456',cargo:'General Freight',yard:'Alpha Yard'},
+  {id:'T-108',name:'Truck T-108',make:'Mercedes Actros',year:2020,plate:'KA 05 QW 8899',driver:'Mike Chen',driverImg:'MC',status:'maintenance',util:0,loc:'Chicago Depot',speed:'0 mph',fuel:85,mileage:'98,750 km',vin:'WDB9340321L456789',cargo:'—',yard:'Bravo Yard'},
+  {id:'T-115',name:'Truck T-115',make:'Scania R500',year:2022,plate:'QL 12 AB 1234',driver:'Carlos Rivera',driverImg:'CR',status:'active',util:90,loc:'I-10 West, Mile 342',speed:'72 mph',fuel:35,mileage:'67,100 km',vin:'YS2R4X20001789012',cargo:'Containers',yard:'Alpha Yard'},
+  {id:'T-220',name:'Truck T-220',make:'DAF XF 530',year:2021,plate:'GA 07 BC 3311',driver:'Emma Johnson',driverImg:'EJ',status:'active',util:65,loc:'US-75, Dallas',speed:'58 mph',fuel:62,mileage:'88,400 km',vin:'XLRTG00X1E1234567',cargo:'Heavy Machinery',yard:'Charlie Yard'},
+  {id:'T-330',name:'Truck T-330',make:'Kenworth T680',year:2023,plate:'PA 66 TK 4422',driver:'David Kim',driverImg:'DK',status:'active',util:82,loc:'I-95 North, Philadelphia',speed:'70 mph',fuel:55,mileage:'31,200 km',vin:'1XKYD49X7LJ111222',cargo:'Auto Parts',yard:'Delta Yard'},
+  {id:'T-445',name:'Truck T-445',make:'Peterbilt 579',year:2019,plate:'TX 55 PB 7710',driver:'Ana Torres',driverImg:'AT',status:'idle',util:15,loc:'Houston Hub Parking',speed:'0 mph',fuel:90,mileage:'210,500 km',vin:'1XPBD49X5GD333444',cargo:'—',yard:'Bravo Yard'},
+];
+const statusCfg = {
+  active:{label:'Active',pillBg:'#D1FAE5',pillC:'#065F46',dot:'#10B981'},
+  idle:{label:'Idle',pillBg:'#FEF3C7',pillC:'#92400E',dot:'#F59E0B'},
+  maintenance:{label:'Maintenance',pillBg:'#DBEAFE',pillC:'#1D4ED8',dot:'#3B82F6'},
+  offline:{label:'Offline',pillBg:'#FEE2E2',pillC:'#991B1B',dot:'#EF4444'},
+};
+let activeFilter = 'all';
+
+function renderTrucks(list) {
+  const grid = document.getElementById('trucks-grid');
+  grid.innerHTML = '';
+  if (!list.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:#64748B;"><i class="fa-solid fa-truck" style="font-size:2.5rem;opacity:.2;margin-bottom:.75rem;display:block;"></i><p style="font-weight:500;">No trucks found</p></div>';
+    return;
+  }
+  list.forEach(t => {
+    const cfg = statusCfg[t.status];
+    const imgFilter = t.status==='offline'?'grayscale(100%) opacity(.5)':t.status==='maintenance'?'sepia(60%) opacity(.8)':'none';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.overflow = 'hidden';
+    card.innerHTML = `
+      <div style="position:relative;height:140px;background:linear-gradient(135deg,#EFF6FF,#E0F2FE);display:flex;align-items:center;justify-content:center;border-bottom:1px solid #E2E8F0;overflow:hidden;">
+        <!-- Truck SVG illustration -->
+        <svg viewBox="0 0 260 110" class="truck-svg" style="filter:${imgFilter};" xmlns="http://www.w3.org/2000/svg">
+          <!-- Cab -->
+          <rect x="130" y="25" width="90" height="65" rx="6" fill="#1D4ED8"/>
+          <!-- Windshield -->
+          <rect x="175" y="32" width="38" height="28" rx="3" fill="#BAE6FD" opacity=".9"/>
+          <!-- Cab door -->
+          <rect x="135" y="45" width="35" height="40" rx="2" fill="#2563EB"/>
+          <rect x="145" y="55" width="18" height="20" rx="2" fill="#BAE6FD" opacity=".6"/>
+          <!-- Trailer body -->
+          <rect x="10" y="30" width="125" height="60" rx="4" fill="#3B82F6"/>
+          <rect x="15" y="35" width="115" height="50" rx="3" fill="#60A5FA" opacity=".4"/>
+          <!-- Stripe -->
+          <rect x="10" y="72" width="125" height="6" fill="#1E40AF"/>
+          <!-- Wheels -->
+          <circle cx="50" cy="95" r="12" fill="#1E293B"/>
+          <circle cx="50" cy="95" r="6" fill="#475569"/>
+          <circle cx="90" cy="95" r="12" fill="#1E293B"/>
+          <circle cx="90" cy="95" r="6" fill="#475569"/>
+          <circle cx="175" cy="95" r="12" fill="#1E293B"/>
+          <circle cx="175" cy="95" r="6" fill="#475569"/>
+          <circle cx="210" cy="95" r="12" fill="#1E293B"/>
+          <circle cx="210" cy="95" r="6" fill="#475569"/>
+          <!-- Headlight -->
+          <rect x="217" y="48" width="8" height="10" rx="2" fill="#FDE68A"/>
+          <!-- Exhaust -->
+          <rect x="125" y="15" width="5" height="20" rx="2" fill="#475569"/>
+        </svg>
+        <div style="position:absolute;top:.5rem;right:.5rem;background:${cfg.pillBg};color:${cfg.pillC};font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;">● ${cfg.label}</div>
+        <div style="position:absolute;bottom:.5rem;left:.5rem;background:rgba(0,0,0,.35);color:#fff;font-size:.65rem;font-weight:700;padding:.15rem .4rem;border-radius:.3rem;">${t.id}</div>
+        <div style="position:absolute;bottom:.5rem;right:.5rem;background:rgba(0,0,0,.25);color:#fff;font-size:.65rem;padding:.15rem .4rem;border-radius:.3rem;"><i class="fa-solid fa-warehouse" style="margin-right:.2rem;"></i>${t.yard}</div>
+      </div>
+      <div style="padding:1.25rem;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem;">
+          <div>
+            <h3 style="font-weight:700;color:#0F172A;">${t.name}</h3>
+            <p style="font-size:.75rem;color:#64748B;">${t.make} · ${t.year} · ${t.plate}</p>
+          </div>
+          <div style="width:2rem;height:2rem;background:#3B82F6;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.65rem;font-weight:700;color:#fff;">${t.driverImg}</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.8rem;margin-bottom:.75rem;">
+          <div style="display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-user" style="color:#94A3B8;font-size:.7rem;"></i><span style="color:#374151;">${t.driver}</span></div>
+          <div style="display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-location-dot" style="color:#94A3B8;font-size:.7rem;"></i><span style="color:#64748B;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${t.loc}</span></div>
+          <div style="display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-road" style="color:#94A3B8;font-size:.7rem;"></i><span style="color:#374151;">${t.mileage}</span></div>
+          <div style="display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-box" style="color:#94A3B8;font-size:.7rem;"></i><span style="color:#374151;">${t.cargo}</span></div>
+        </div>
+        <div style="margin-bottom:.75rem;">
+          <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.3rem;">
+            <span style="color:#64748B;">Utilization</span><span style="font-weight:600;color:#0F172A;">${t.util}%</span>
+          </div>
+          <div class="progress-bar"><div style="height:100%;width:${t.util}%;background:#3B82F6;border-radius:999px;"></div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;padding:.5rem 0;border-top:1px solid #F1F5F9;border-bottom:1px solid #F1F5F9;margin-bottom:.75rem;">
+          <span style="color:#64748B;"><i class="fa-solid fa-gauge-high" style="margin-right:.25rem;color:#94A3B8;"></i>${t.speed}</span>
+          <span style="display:flex;align-items:center;gap:.3rem;">
+            <span style="width:.5rem;height:.5rem;border-radius:50%;background:${t.fuel>50?'#10B981':t.fuel>25?'#F59E0B':'#EF4444'};display:inline-block;"></span>
+            <span style="color:#64748B;">Fuel: ${t.fuel}%</span>
+          </span>
+        </div>
+        <div style="display:flex;gap:.5rem;">
+          <button style="flex:1;padding:.4rem;font-size:.75rem;font-weight:500;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#0F172A;"><i class="fa-solid fa-eye" style="margin-right:.25rem;"></i>View</button>
+          <button style="flex:1;padding:.4rem;font-size:.75rem;font-weight:500;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#0F172A;"><i class="fa-solid fa-pen" style="margin-right:.25rem;"></i>Edit</button>
+          <a href="tracking.html" style="flex:1;padding:.4rem;font-size:.75rem;font-weight:500;border:0;border-radius:.5rem;background:#3B82F6;cursor:pointer;color:#fff;text-align:center;text-decoration:none;"><i class="fa-solid fa-location-dot" style="margin-right:.25rem;"></i>Track</a>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function filterTrucks() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = trucks.filter(t =>
+    (activeFilter==='all'||t.status===activeFilter) &&
+    (t.name.toLowerCase().includes(q)||t.driver.toLowerCase().includes(q)||t.plate.toLowerCase().includes(q))
+  );
+  renderTrucks(filtered);
+}
+
+function setFilter(f) {
+  activeFilter = activeFilter===f ? 'all' : f;
+  filterTrucks();
+}
+
+function toggleDropdown(id) {
+  const dd=document.getElementById(id);const icon=document.getElementById(id+'-icon');
+  dd.classList.toggle('open');icon.style.transform=dd.classList.contains('open')?'rotate(180deg)':'';
+}
+
+renderTrucks(trucks);
+</script>
+</body>
+</html>
