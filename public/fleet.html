@@ -34,17 +34,34 @@
   <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
     <div class="nav-section">Main Menu</div>
     <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
-    <a href="fleet.html"     class="nav-link active"><i class="fa-solid fa-truck fa-fw"></i>Fleet</a>
-    <a href="tracking.html"  class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
-    <a href="orders.html"    class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
-    <a href="drivers.html"   class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
-    <a href="reports.html"   class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-link active" style="cursor:pointer;" onclick="toggleDropdown('fleet-dd')">
+      <i class="fa-solid fa-truck fa-fw"></i><span style="flex:1;">Fleet</span>
+      <i class="fa-solid fa-chevron-down fa-fw" id="fleet-dd-icon" style="font-size:.65rem;transform:rotate(180deg);"></i>
+    </div>
+    <div id="fleet-dd" style="display:block;padding-left:1rem;">
+      <a href="trucks.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-truck-front fa-fw"></i>Trucks</a>
+      <a href="trailers.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    </div>
+    <div class="nav-link" style="cursor:pointer;" onclick="toggleDropdown('logistics-dd')">
+      <i class="fa-solid fa-boxes-stacked fa-fw"></i><span style="flex:1;">Logistics</span>
+      <i class="fa-solid fa-chevron-down fa-fw" id="logistics-dd-icon" style="font-size:.65rem;"></i>
+    </div>
+    <div id="logistics-dd" style="display:none;padding-left:1rem;">
+      <a href="create-fleet.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-plus-circle fa-fw"></i>Create Fleet</a>
+      <a href="draft-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
     <div class="nav-section">Management</div>
-    <a href="parts.html"     class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
-    <a href="tyres.html"     class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-warehouse fa-fw"></i>Parking Yard</a>
     <div class="nav-section">Tools</div>
     <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
-    <a href="#" class="nav-link"><i class="fa-solid fa-users fa-fw"></i>Team</a>
     <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
   </nav>
   <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
