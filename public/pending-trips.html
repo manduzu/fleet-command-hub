@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pending Trips — FleetCtrl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { font-family: system-ui,-apple-system,sans-serif; background:#F1F5F9; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; overflow-y:auto; }
+    .nav-link { display:flex; align-items:center; gap:.75rem; padding:.6rem 1rem; border-radius:.6rem; color:#94A3B8; font-size:.875rem; font-weight:500; text-decoration:none; transition:background .15s,color .15s; }
+    .nav-link:hover { background:#1E293B; color:#fff; }
+    .nav-link.active { background:#1D4ED8; color:#fff; }
+    .nav-section { font-size:.65rem; font-weight:700; letter-spacing:.1em; color:#475569; text-transform:uppercase; padding:1rem 1rem .25rem; }
+    .dropdown-content { display:none; padding-left:1rem; }
+    .dropdown-content.open { display:block; }
+    .pill { display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px; }
+    .pill-warning { background:#FEF3C7;color:#92400E; }
+    .pill-success { background:#D1FAE5;color:#065F46; }
+    .pill-primary { background:#DBEAFE;color:#1D4ED8; }
+    .progress-bar { height:6px; background:#E2E8F0; border-radius:999px; overflow:hidden; }
+    .main { margin-left:240px; }
+    @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <div class="nav-link" style="cursor:pointer;" onclick="toggleDropdown('fleet-dd')">
+      <i class="fa-solid fa-truck fa-fw"></i><span style="flex:1;">Fleet</span>
+      <i class="fa-solid fa-chevron-down fa-fw" id="fleet-dd-icon" style="font-size:.65rem;"></i>
+    </div>
+    <div id="fleet-dd" class="dropdown-content">
+      <a href="trucks.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-truck-front fa-fw"></i>Trucks</a>
+      <a href="trailers.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    </div>
+    <div class="nav-link active" style="cursor:pointer;" onclick="toggleDropdown('logistics-dd')">
+      <i class="fa-solid fa-boxes-stacked fa-fw"></i><span style="flex:1;">Logistics</span>
+      <i class="fa-solid fa-chevron-down fa-fw" id="logistics-dd-icon" style="font-size:.65rem;transform:rotate(180deg);"></i>
+    </div>
+    <div id="logistics-dd" class="dropdown-content open">
+      <a href="create-fleet.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-plus-circle fa-fw"></i>Create Fleet</a>
+      <a href="draft-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="nav-link active" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="nav-link" style="font-size:.8rem;padding:.5rem .75rem;"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Management</div>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-warehouse fa-fw"></i>Parking Yard</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <h2 style="font-size:1rem;font-weight:600;color:#0F172A;">Pending Trips</h2>
+    <div style="margin-left:auto;display:flex;gap:.75rem;align-items:center;">
+      <button style="position:relative;padding:.5rem;border:0;background:transparent;cursor:pointer;"><i class="fa-solid fa-bell" style="color:#64748B;font-size:1rem;"></i><span style="position:absolute;top:.3rem;right:.3rem;width:.5rem;height:.5rem;background:#EF4444;border-radius:999px;"></span></button>
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+    </div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="margin-bottom:1.5rem;">
+      <h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Pending Trips</h1>
+      <p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">Trips approved and awaiting dispatch or currently en-route</p>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.5rem;">
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(245,158,11,.06);">
+        <p style="font-size:1.5rem;font-weight:700;color:#F59E0B;">8</p>
+        <p style="font-size:.75rem;color:#64748B;font-weight:500;">Awaiting Dispatch</p>
+      </div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(59,130,246,.06);">
+        <p style="font-size:1.5rem;font-weight:700;color:#3B82F6;">5</p>
+        <p style="font-size:.75rem;color:#64748B;font-weight:500;">En-Route</p>
+      </div>
+      <div class="card" style="padding:1rem;text-align:center;background:rgba(239,68,68,.06);">
+        <p style="font-size:1.5rem;font-weight:700;color:#EF4444;">2</p>
+        <p style="font-size:.75rem;color:#64748B;font-weight:500;">Delayed</p>
+      </div>
+    </div>
+
+    <div id="trips-list" style="display:flex;flex-direction:column;gap:.75rem;"></div>
+  </main>
+</div>
+<script>
+  const trips = [
+    {id:'TRP-201',vehicle:'T-101',driver:'John Doe',origin:'Chicago Depot',dest:'New York Hub',cargo:'General Freight',dept:'Today, 08:00',eta:'Today, 18:00',progress:65,status:'en-route'},
+    {id:'TRP-202',vehicle:'V-204',driver:'Sarah Lee',origin:'LA Warehouse',dest:'Phoenix Central',cargo:'Perishable Goods',dept:'Today, 09:30',eta:'Today, 14:00',progress:40,status:'en-route'},
+    {id:'TRP-203',vehicle:'T-115',driver:'Carlos Rivera',origin:'Dallas Hub',dest:'Houston Port',cargo:'Containers',dept:'Today, 11:00',eta:'Today, 16:30',progress:0,status:'awaiting'},
+    {id:'TRP-204',vehicle:'T-330',driver:'David Kim',origin:'Boston Hub',dest:'Philadelphia Gate',cargo:'General Freight',dept:'Today, 12:00',eta:'Today, 15:00',progress:0,status:'awaiting'},
+    {id:'TRP-205',vehicle:'V-301',driver:'Priya Patel',origin:'Seattle Yard',dest:'Portland Depot',cargo:'Liquid Bulk',dept:'Today, 07:00',eta:'Today, 10:00',progress:90,status:'en-route'},
+    {id:'TRP-206',vehicle:'T-220',driver:'Emma Johnson',origin:'Atlanta DC',dest:'Nashville Hub',cargo:'Heavy Machinery',dept:'Yesterday',eta:'Today, 09:00',progress:80,status:'delayed'},
+    {id:'TRP-207',vehicle:'V-112',driver:'Raj Sharma',origin:'Miami Port',dest:'Orlando DC',cargo:'Perishable Goods',dept:'Yesterday',eta:'Today, 08:30',progress:70,status:'delayed'},
+  ];
+  const statusCfg={
+    'en-route':{label:'En-Route',bg:'#EFF6FF',c:'#3B82F6'},
+    'awaiting':{label:'Awaiting Dispatch',bg:'#FFFBEB',c:'#F59E0B'},
+    'delayed':{label:'Delayed',bg:'#FEF2F2',c:'#EF4444'}
+  };
+  const list = document.getElementById('trips-list');
+  trips.forEach(t => {
+    const cfg = statusCfg[t.status];
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.padding = '1.25rem';
+    div.innerHTML = `
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:.75rem;margin-bottom:.75rem;">
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <div style="width:2.5rem;height:2.5rem;background:rgba(59,130,246,.1);border-radius:.75rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#3B82F6;"></i></div>
+          <div>
+            <div style="font-weight:700;color:#0F172A;">${t.id} — ${t.vehicle}</div>
+            <div style="font-size:.8rem;color:#64748B;display:flex;align-items:center;gap:.35rem;"><i class="fa-solid fa-user" style="font-size:.65rem;"></i>${t.driver}</div>
+          </div>
+        </div>
+        <span style="background:${cfg.bg};color:${cfg.c};font-size:.7rem;font-weight:600;padding:.25rem .65rem;border-radius:999px;">● ${cfg.label}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;font-size:.8rem;margin-bottom:.75rem;">
+        <div><span style="color:#94A3B8;display:block;font-size:.7rem;margin-bottom:.15rem;">ROUTE</span><span style="color:#0F172A;">${t.origin} → ${t.dest}</span></div>
+        <div><span style="color:#94A3B8;display:block;font-size:.7rem;margin-bottom:.15rem;">DEPARTURE</span><span style="color:#0F172A;">${t.dept}</span></div>
+        <div><span style="color:#94A3B8;display:block;font-size:.7rem;margin-bottom:.15rem;">ETA</span><span style="color:#0F172A;">${t.eta}</span></div>
+      </div>
+      <div style="margin-bottom:.75rem;">
+        <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.3rem;">
+          <span style="color:#64748B;">Trip Progress</span><span style="font-weight:600;color:#0F172A;">${t.progress}%</span>
+        </div>
+        <div class="progress-bar"><div style="height:100%;width:${t.progress}%;background:${cfg.c};border-radius:999px;"></div></div>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <a href="tracking.html" style="padding:.4rem .9rem;background:#EFF6FF;color:#3B82F6;border-radius:.5rem;font-size:.75rem;font-weight:600;text-decoration:none;"><i class="fa-solid fa-location-dot" style="margin-right:.25rem;"></i>Track</a>
+        ${t.status==='awaiting'?`<button onclick="dispatch(this)" style="padding:.4rem .9rem;background:#D1FAE5;color:#065F46;border:0;border-radius:.5rem;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="fa-solid fa-paper-plane" style="margin-right:.25rem;"></i>Dispatch</button>`:''}
+        <button onclick="markComplete(this)" style="padding:.4rem .9rem;background:#F1F5F9;color:#374151;border:0;border-radius:.5rem;font-size:.75rem;font-weight:600;cursor:pointer;"><i class="fa-solid fa-circle-check" style="margin-right:.25rem;"></i>Mark Complete</button>
+      </div>`;
+    list.appendChild(div);
+  });
+  function dispatch(btn){const c=btn.closest('.card');c.style.background='#F0FFF4';btn.innerHTML='<i class="fa-solid fa-bolt" style="margin-right:.25rem;"></i>Dispatched!';}
+  function markComplete(btn){const c=btn.closest('.card');c.style.opacity='.5';setTimeout(()=>c.remove(),600);}
+  function toggleDropdown(id){
+    const dd=document.getElementById(id);const icon=document.getElementById(id+'-icon');
+    dd.classList.toggle('open');icon.style.transform=dd.classList.contains('open')?'rotate(180deg)':'';
+  }
+</script>
+</body>
+</html>
