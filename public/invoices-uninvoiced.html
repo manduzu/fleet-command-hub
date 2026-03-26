@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Uninvoiced Trips — FleetCtrl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body{font-family:system-ui,-apple-system,sans-serif;background:#F1F5F9;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s,color .15s;}
+    .nav-link:hover{background:#1E293B;color:#fff;}.nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;width:100%;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;background:transparent;border:none;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:1.5rem;}.dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:.5rem;color:#94A3B8;font-size:.8rem;text-decoration:none;transition:background .15s,color .15s;}
+    .sub-link:hover{background:#1E293B;color:#fff;}.sub-link.active{color:#60A5FA;}
+    .main{margin-left:240px;}.card{background:#fff;border-radius:1rem;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid #E2E8F0;}
+    .pill{display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+    .pill-warning{background:#FEF3C7;color:#92400E;}.pill-success{background:#D1FAE5;color:#065F46;}
+    @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Logistics</div>
+    <button class="dropdown-btn" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="logistics">
+      <a href="create-fleet.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create Fleet</a>
+      <a href="draft-trips.html" class="sub-link"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="sub-link"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+    <div class="nav-section">Fleet</div>
+    <button class="dropdown-btn" onclick="toggleDD('fleet')"><i class="fa-solid fa-truck fa-fw"></i><span style="flex:1">Fleet</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="fleet">
+      <a href="trucks.html" class="sub-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a>
+      <a href="trailers.html" class="sub-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    </div>
+    <div class="nav-section">Finance</div>
+    <button class="dropdown-btn open" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items open" id="invoices">
+      <a href="invoices-all.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
+      <a href="invoices-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
+      <a href="invoices-uninvoiced.html" class="sub-link active"><i class="fa-solid fa-file-circle-question fa-fw"></i>Uninvoiced Trips</a>
+      <a href="invoices-credit-note.html" class="sub-link"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
+    </div>
+    <div class="nav-section">People</div>
+    <button class="dropdown-btn" onclick="toggleDD('employees')"><i class="fa-solid fa-users fa-fw"></i><span style="flex:1">Employees</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="employees">
+      <a href="emp-drivers.html" class="sub-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+      <a href="emp-storekeepers.html" class="sub-link"><i class="fa-solid fa-boxes-stacked fa-fw"></i>Store Keepers</a>
+      <a href="emp-accountants.html" class="sub-link"><i class="fa-solid fa-calculator fa-fw"></i>Accountants</a>
+      <a href="emp-mechanics.html" class="sub-link"><i class="fa-solid fa-wrench fa-fw"></i>Mechanics</a>
+      <a href="emp-turnboys.html" class="sub-link"><i class="fa-solid fa-person fa-fw"></i>Turnboys</a>
+      <a href="emp-managers.html" class="sub-link"><i class="fa-solid fa-user-tie fa-fw"></i>Managers</a>
+    </div>
+    <button class="dropdown-btn" onclick="toggleDD('clients')"><i class="fa-solid fa-building fa-fw"></i><span style="flex:1">Clients</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="clients">
+      <a href="clients-list.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>Client List</a>
+      <a href="clients-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Client</a>
+    </div>
+    <div class="nav-section">Store</div>
+    <button class="dropdown-btn" onclick="toggleDD('store')"><i class="fa-solid fa-store fa-fw"></i><span style="flex:1">Store</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="store">
+      <a href="store-inventory.html" class="sub-link"><i class="fa-solid fa-warehouse fa-fw"></i>Inventory</a>
+      <a href="store-suppliers.html" class="sub-link"><i class="fa-solid fa-truck-ramp-box fa-fw"></i>Suppliers</a>
+      <a href="store-warehouse.html" class="sub-link"><i class="fa-solid fa-building fa-fw"></i>Warehouse</a>
+      <a href="store-branch.html" class="sub-link"><i class="fa-solid fa-code-branch fa-fw"></i>Branch</a>
+      <a href="store-categories.html" class="sub-link"><i class="fa-solid fa-tags fa-fw"></i>Categories</a>
+      <a href="store-brands.html" class="sub-link"><i class="fa-solid fa-copyright fa-fw"></i>Brands</a>
+    </div>
+    <div class="nav-section">Management</div>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-square-parking fa-fw"></i>Parking Yard</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <h1 style="font-size:1rem;font-weight:700;color:#0F172A;flex:1;">Uninvoiced Trips</h1>
+    <div style="display:flex;gap:.5rem;">
+      <button style="padding:.4rem .9rem;background:#F59E0B;color:#fff;border:none;border-radius:.5rem;font-size:.8rem;font-weight:600;cursor:pointer;"><i class="fa-solid fa-file-invoice" style="margin-right:.3rem;"></i>Batch Invoice Selected</button>
+    </div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+      <div><p style="color:#64748B;font-size:.875rem;">8 completed trips without invoices · $72,300 uninvoiced value</p></div>
+      <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:.6rem;padding:.5rem 1rem;font-size:.8rem;color:#92400E;"><i class="fa-solid fa-triangle-exclamation" style="margin-right:.4rem;"></i>Revenue pending invoicing</div>
+    </div>
+    <div class="card" style="overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead style="background:#F8FAFC;">
+          <tr>
+            <th style="padding:.75rem 1rem;"><input type="checkbox" onclick="toggleAll(this)" /></th>
+            <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:#64748B;border-bottom:1px solid #E2E8F0;">Trip ID</th>
+            <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:#64748B;border-bottom:1px solid #E2E8F0;">Route</th>
+            <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:#64748B;border-bottom:1px solid #E2E8F0;">Client</th>
+            <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:#64748B;border-bottom:1px solid #E2E8F0;">Driver</th>
+            <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:#64748B;border-bottom:1px solid #E2E8F0;">Truck</th>
+            <th style="padding:.75rem 1rem;text-align:left;font-size:.75rem;font-weight:600;color:#64748B;border-bottom:1px solid #E2E8F0;">Completed</th>
+            <th style="padding:.75rem 1rem;text-align:right;font-size:.75rem;font-weight:600;color:#64748B;border-bottom:1px solid #E2E8F0;">Value</th>
+            <th style="padding:.75rem 1rem;text-align:center;font-size:.75rem;font-weight:600;color:#64748B;border-bottom:1px solid #E2E8F0;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="uninvTable"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+<script>
+const trips=[
+  {id:"TRP-0881",route:"JHB → DBN",client:"Acme Logistics",driver:"John Doe",truck:"T-101",completed:"2024-01-30",value:18500},
+  {id:"TRP-0882",route:"CPT → PE",client:"Blue Sky Transport",driver:"Sarah Lee",truck:"V-204",completed:"2024-01-31",value:9200},
+  {id:"TRP-0883",route:"DBN → JHB",client:"Cargo Masters",driver:"Carlos Rivera",truck:"T-115",completed:"2024-02-01",value:11400},
+  {id:"TRP-0884",route:"JHB → EL",client:"Speedway Freight",driver:"Emma Johnson",truck:"T-220",completed:"2024-02-02",value:7800},
+  {id:"TRP-0885",route:"PE → JHB",client:"Apex Couriers",driver:"David Kim",truck:"T-330",completed:"2024-02-03",value:8600},
+  {id:"TRP-0886",route:"BFN → CPT",client:"Horizon Haul",driver:"John Doe",truck:"T-101",completed:"2024-02-04",value:6900},
+  {id:"TRP-0887",route:"JHB → KZN",client:"Prime Freight Co.",driver:"Sarah Lee",truck:"V-204",completed:"2024-02-05",value:5400},
+  {id:"TRP-0888",route:"KZN → JHB",client:"Redline Logistics",driver:"Ana Torres",truck:"V-419",completed:"2024-02-06",value:4500},
+];
+function render(){
+  document.getElementById('uninvTable').innerHTML=trips.map(t=>`
+    <tr style="border-bottom:1px solid #F1F5F9;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background=''">
+      <td style="padding:.75rem 1rem;"><input type="checkbox" class="row-chk" /></td>
+      <td style="padding:.75rem 1rem;font-size:.8rem;font-weight:700;color:#F59E0B;">${t.id}</td>
+      <td style="padding:.75rem 1rem;font-size:.85rem;color:#0F172A;font-weight:500;">${t.route}</td>
+      <td style="padding:.75rem 1rem;font-size:.8rem;color:#64748B;">${t.client}</td>
+      <td style="padding:.75rem 1rem;font-size:.8rem;color:#64748B;">${t.driver}</td>
+      <td style="padding:.75rem 1rem;font-size:.8rem;color:#64748B;">${t.truck}</td>
+      <td style="padding:.75rem 1rem;font-size:.8rem;color:#64748B;">${t.completed}</td>
+      <td style="padding:.75rem 1rem;font-size:.85rem;font-weight:700;color:#0F172A;text-align:right;">$${t.value.toLocaleString()}</td>
+      <td style="padding:.75rem 1rem;text-align:center;"><a href="invoices-add.html" style="padding:.3rem .7rem;background:#3B82F6;color:#fff;border-radius:.4rem;font-size:.75rem;font-weight:600;text-decoration:none;"><i class="fa-solid fa-file-invoice" style="margin-right:.3rem;"></i>Invoice</a></td>
+    </tr>`).join('');
+}
+function toggleAll(cb){document.querySelectorAll('.row-chk').forEach(c=>c.checked=cb.checked);}
+function toggleDD(id){const el=document.getElementById(id);el.classList.toggle('open');el.previousElementSibling.classList.toggle('open');}
+render();
+</script>
+</body>
+</html>

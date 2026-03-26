@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Client List — FleetCtrl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body{font-family:system-ui,-apple-system,sans-serif;background:#F1F5F9;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s,color .15s;}
+    .nav-link:hover{background:#1E293B;color:#fff;}.nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;width:100%;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;background:transparent;border:none;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:1.5rem;}.dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:.5rem;color:#94A3B8;font-size:.8rem;text-decoration:none;transition:background .15s,color .15s;}
+    .sub-link:hover{background:#1E293B;color:#fff;}.sub-link.active{color:#60A5FA;}
+    .main{margin-left:240px;}.card{background:#fff;border-radius:1rem;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid #E2E8F0;}
+    .pill{display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;}.pill-warning{background:#FEF3C7;color:#92400E;}.pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;}.modal.open{display:flex;}
+    .modal-box{background:#fff;border-radius:1rem;padding:2rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+    label{font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:.35rem;}
+    input,select,textarea{width:100%;padding:.6rem .75rem;border:1px solid #E2E8F0;border-radius:.5rem;font-size:.85rem;outline:none;}
+    @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+  </style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <div class="nav-section">Logistics</div>
+    <button class="dropdown-btn" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="logistics">
+      <a href="create-fleet.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create Fleet</a>
+      <a href="draft-trips.html" class="sub-link"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="sub-link"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+    <div class="nav-section">Fleet</div>
+    <button class="dropdown-btn" onclick="toggleDD('fleet')"><i class="fa-solid fa-truck fa-fw"></i><span style="flex:1">Fleet</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="fleet"><a href="trucks.html" class="sub-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a><a href="trailers.html" class="sub-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a></div>
+    <div class="nav-section">Finance</div>
+    <button class="dropdown-btn" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="invoices">
+      <a href="invoices-all.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
+      <a href="invoices-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
+      <a href="invoices-uninvoiced.html" class="sub-link"><i class="fa-solid fa-file-circle-question fa-fw"></i>Uninvoiced Trips</a>
+      <a href="invoices-credit-note.html" class="sub-link"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
+    </div>
+    <div class="nav-section">People</div>
+    <button class="dropdown-btn" onclick="toggleDD('employees')"><i class="fa-solid fa-users fa-fw"></i><span style="flex:1">Employees</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="employees">
+      <a href="emp-drivers.html" class="sub-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+      <a href="emp-storekeepers.html" class="sub-link"><i class="fa-solid fa-boxes-stacked fa-fw"></i>Store Keepers</a>
+      <a href="emp-accountants.html" class="sub-link"><i class="fa-solid fa-calculator fa-fw"></i>Accountants</a>
+      <a href="emp-mechanics.html" class="sub-link"><i class="fa-solid fa-wrench fa-fw"></i>Mechanics</a>
+      <a href="emp-turnboys.html" class="sub-link"><i class="fa-solid fa-person fa-fw"></i>Turnboys</a>
+      <a href="emp-managers.html" class="sub-link"><i class="fa-solid fa-user-tie fa-fw"></i>Managers</a>
+    </div>
+    <button class="dropdown-btn open" onclick="toggleDD('clients')"><i class="fa-solid fa-building fa-fw"></i><span style="flex:1">Clients</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items open" id="clients">
+      <a href="clients-list.html" class="sub-link active"><i class="fa-solid fa-list fa-fw"></i>Client List</a>
+      <a href="clients-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Client</a>
+    </div>
+    <div class="nav-section">Store</div>
+    <button class="dropdown-btn" onclick="toggleDD('store')"><i class="fa-solid fa-store fa-fw"></i><span style="flex:1">Store</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="store">
+      <a href="store-inventory.html" class="sub-link"><i class="fa-solid fa-warehouse fa-fw"></i>Inventory</a>
+      <a href="store-suppliers.html" class="sub-link"><i class="fa-solid fa-truck-ramp-box fa-fw"></i>Suppliers</a>
+      <a href="store-warehouse.html" class="sub-link"><i class="fa-solid fa-building fa-fw"></i>Warehouse</a>
+      <a href="store-branch.html" class="sub-link"><i class="fa-solid fa-code-branch fa-fw"></i>Branch</a>
+      <a href="store-categories.html" class="sub-link"><i class="fa-solid fa-tags fa-fw"></i>Categories</a>
+      <a href="store-brands.html" class="sub-link"><i class="fa-solid fa-copyright fa-fw"></i>Brands</a>
+    </div>
+    <div class="nav-section">Management</div>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-square-parking fa-fw"></i>Parking Yard</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:28rem;position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i><input oninput="search(this.value)" placeholder="Search clients..." style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;" /></div>
+    <div style="margin-left:auto;display:flex;gap:.5rem;">
+      <a href="clients-add.html" style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;background:#3B82F6;color:#fff;border:none;border-radius:.6rem;font-size:.85rem;font-weight:500;cursor:pointer;text-decoration:none;"><i class="fa-solid fa-plus"></i>Add Client</a>
+    </div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="margin-bottom:1.5rem;"><h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Clients</h1><p style="color:#64748B;font-size:.875rem;margin-top:.25rem;" id="countLabel">10 registered clients</p></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem;" id="clientGrid"></div>
+  </main>
+</div>
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h2 style="font-size:1.1rem;font-weight:700;color:#0F172A;">Edit Client</h2>
+      <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:#64748B;font-size:1.2rem;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div style="display:grid;gap:1rem;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div><label>Company Name</label><input id="eName" /></div>
+        <div><label>Industry</label><input id="eIndustry" /></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div><label>Contact Person</label><input id="eContact" /></div>
+        <div><label>Phone</label><input id="ePhone" /></div>
+      </div>
+      <div><label>Email</label><input id="eEmail" type="email" /></div>
+      <div><label>Address</label><input id="eAddress" /></div>
+      <div><label>Status</label><select id="eStatus"><option value="active">Active</option><option value="inactive">Inactive</option></select></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:.75rem;margin-top:1.5rem;">
+      <button onclick="closeModal()" style="padding:.5rem 1.25rem;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;font-size:.85rem;cursor:pointer;">Cancel</button>
+      <button onclick="saveEdit()" style="padding:.5rem 1.25rem;border:none;border-radius:.5rem;background:#3B82F6;color:#fff;font-size:.85rem;font-weight:600;cursor:pointer;">Save Changes</button>
+    </div>
+  </div>
+</div>
+<script>
+let clients=[
+  {id:1,name:"Acme Logistics",industry:"Logistics",contact:"Tom Walker",phone:"+27 11 001 2345",email:"tom@acmelogistics.co.za",address:"Sandton, Johannesburg",status:"active",trips:48,revenue:185000,since:"Jan 2022",color:"#3B82F6"},
+  {id:2,name:"Blue Sky Transport",industry:"Transport",contact:"Linda Nkosi",phone:"+27 21 002 3456",email:"linda@bluesky.co.za",address:"Cape Town",status:"active",trips:34,revenue:142000,since:"Mar 2022",color:"#10B981"},
+  {id:3,name:"Cargo Masters",industry:"Freight",contact:"David Mokoena",phone:"+27 31 003 4567",email:"david@cargomasters.co.za",address:"Durban",status:"active",trips:29,revenue:98500,since:"Jun 2021",color:"#8B5CF6"},
+  {id:4,name:"Speedway Freight",industry:"Freight",contact:"Sarah Dlamini",phone:"+27 12 004 5678",email:"sarah@speedway.co.za",address:"Pretoria",status:"active",trips:22,revenue:76000,since:"Sep 2022",color:"#F59E0B"},
+  {id:5,name:"Apex Couriers",industry:"Courier",contact:"James Potgieter",phone:"+27 41 005 6789",email:"james@apexcouriers.co.za",address:"Port Elizabeth",status:"inactive",trips:15,revenue:54200,since:"Jan 2023",color:"#EF4444"},
+  {id:6,name:"Horizon Haul",industry:"Logistics",contact:"Thabo Sithole",phone:"+27 51 006 7890",email:"thabo@horizonhaul.co.za",address:"Bloemfontein",status:"active",trips:18,revenue:63800,since:"Feb 2022",color:"#06B6D4"},
+  {id:7,name:"Prime Freight Co.",industry:"Freight",contact:"Anna Botha",phone:"+27 11 007 8901",email:"anna@primefreight.co.za",address:"Johannesburg",status:"active",trips:41,revenue:168000,since:"Nov 2020",color:"#F97316"},
+  {id:8,name:"Redline Logistics",industry:"Logistics",contact:"Mike van der Berg",phone:"+27 31 008 9012",email:"mike@redline.co.za",address:"Durban",status:"inactive",trips:9,revenue:31500,since:"Jul 2023",color:"#EF4444"},
+  {id:9,name:"SwiftMove Ltd",industry:"Transport",contact:"Priya Naidoo",phone:"+27 11 009 0123",email:"priya@swiftmove.co.za",address:"Johannesburg",status:"active",trips:37,revenue:134000,since:"Apr 2021",color:"#3B82F6"},
+  {id:10,name:"Nexus Transport",industry:"Transport",contact:"Carlos Ferreira",phone:"+27 43 010 1234",email:"carlos@nexustransport.co.za",address:"East London",status:"active",trips:26,revenue:94000,since:"Aug 2022",color:"#10B981"},
+];
+let editIdx=-1,filtered=clients;
+function render(list){
+  const g=document.getElementById('clientGrid');
+  g.innerHTML=list.map((c,i)=>{
+    const init=c.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+    return `<div class="card" style="padding:1.25rem;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <div style="width:2.75rem;height:2.75rem;border-radius:.6rem;background:${c.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;"><span style="color:#fff;font-weight:700;font-size:.85rem;">${init}</span></div>
+          <div><h3 style="font-weight:700;color:#0F172A;font-size:.95rem;">${c.name}</h3><p style="font-size:.7rem;color:#64748B;">${c.industry}</p></div>
+        </div>
+        <span class="pill ${c.status==='active'?'pill-success':'pill-warning'}">${c.status==='active'?'● Active':'● Inactive'}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem;font-size:.8rem;">
+        <div style="display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-user" style="color:#94A3B8;width:.875rem;"></i><span style="color:#0F172A;font-weight:500;">${c.contact}</span></div>
+        <div style="display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-phone" style="color:#94A3B8;width:.875rem;"></i><span style="color:#64748B;">${c.phone}</span></div>
+        <div style="display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-envelope" style="color:#94A3B8;width:.875rem;"></i><span style="color:#64748B;">${c.email}</span></div>
+        <div style="display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-location-dot" style="color:#94A3B8;width:.875rem;"></i><span style="color:#64748B;">${c.address}</span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;padding:.75rem;background:#F8FAFC;border-radius:.6rem;margin-bottom:1rem;">
+        <div style="text-align:center;"><p style="font-size:1.1rem;font-weight:700;color:#0F172A;">${c.trips}</p><p style="font-size:.7rem;color:#64748B;">Total Trips</p></div>
+        <div style="text-align:center;border-left:1px solid #E2E8F0;"><p style="font-size:1.1rem;font-weight:700;color:#10B981;">$${(c.revenue/1000).toFixed(0)}K</p><p style="font-size:.7rem;color:#64748B;">Revenue</p></div>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button onclick="openEdit(${clients.indexOf(c)})" style="flex:1;padding:.375rem;font-size:.75rem;font-weight:500;border:1px solid #E2E8F0;border-radius:.5rem;background:#fff;cursor:pointer;color:#0F172A;"><i class="fa-solid fa-pen" style="margin-right:.25rem;"></i>Edit</button>
+        <button onclick="deleteClient(${clients.indexOf(c)})" style="padding:.375rem .6rem;font-size:.75rem;border:1px solid #FEE2E2;border-radius:.5rem;background:#fff;cursor:pointer;"><i class="fa-solid fa-trash" style="color:#EF4444;"></i></button>
+        <button style="flex:1;padding:.375rem;font-size:.75rem;font-weight:500;border:0;border-radius:.5rem;background:#3B82F6;cursor:pointer;color:#fff;"><i class="fa-solid fa-file-invoice" style="margin-right:.25rem;"></i>Invoice</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function search(q){filtered=clients.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.contact.toLowerCase().includes(q.toLowerCase()));document.getElementById('countLabel').textContent=filtered.length+' clients found';render(filtered);}
+function openEdit(i){editIdx=i;const c=clients[i];document.getElementById('eName').value=c.name;document.getElementById('eIndustry').value=c.industry;document.getElementById('eContact').value=c.contact;document.getElementById('ePhone').value=c.phone;document.getElementById('eEmail').value=c.email;document.getElementById('eAddress').value=c.address;document.getElementById('eStatus').value=c.status;document.getElementById('editModal').classList.add('open');}
+function saveEdit(){const c=clients[editIdx];c.name=document.getElementById('eName').value;c.industry=document.getElementById('eIndustry').value;c.contact=document.getElementById('eContact').value;c.phone=document.getElementById('ePhone').value;c.email=document.getElementById('eEmail').value;c.address=document.getElementById('eAddress').value;c.status=document.getElementById('eStatus').value;closeModal();render(clients);}
+function deleteClient(i){if(confirm('Delete this client?')){clients.splice(i,1);render(clients);}}
+function closeModal(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open'));}
+function toggleDD(id){const el=document.getElementById(id);el.classList.toggle('open');el.previousElementSibling.classList.toggle('open');}
+render(clients);
+</script>
+</body>
+</html>
