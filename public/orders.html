@@ -22,12 +22,6 @@
     .pill-danger  { background:#FEE2E2;color:#991B1B; }
     .main { margin-left:240px; }
     @media(max-width:768px){ .sidebar{display:none;} .main{margin-left:0;} }
-      .dropdown-btn{display:flex;align-items:center;gap:.75rem;width:100%;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;background:transparent;border:none;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
-    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
-    .dropdown-items{display:none;padding-left:1.5rem;}.dropdown-items.open{display:block;}
-    .sub-link{display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:.5rem;color:#94A3B8;font-size:.8rem;text-decoration:none;transition:background .15s,color .15s;}
-    .sub-link:hover{background:#1E293B;color:#fff;}.sub-link.active{color:#60A5FA;}
-    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
   </style>
 </head>
 <body>
@@ -39,66 +33,23 @@
   <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
     <div class="nav-section">Main Menu</div>
     <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
-    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
-    <a href="orders.html" class="nav-link active"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
-    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
-    <div class="nav-section">Logistics</div>
-    <button class="dropdown-btn" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items" id="logistics">
-      <a href="create-fleet.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create Fleet</a>
-      <a href="draft-trips.html" class="sub-link"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
-      <a href="pending-trips.html" class="sub-link"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
-      <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
-    </div>
-    <div class="nav-section">Fleet</div>
-    <button class="dropdown-btn" onclick="toggleDD('fleet')"><i class="fa-solid fa-truck fa-fw"></i><span style="flex:1">Fleet</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items" id="fleet">
-      <a href="trucks.html" class="sub-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a>
-      <a href="trailers.html" class="sub-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
-    </div>
-    <div class="nav-section">Finance</div>
-    <button class="dropdown-btn" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items" id="invoices">
-      <a href="invoices-all.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
-      <a href="invoices-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
-      <a href="invoices-uninvoiced.html" class="sub-link"><i class="fa-solid fa-file-circle-question fa-fw"></i>Uninvoiced Trips</a>
-      <a href="invoices-credit-note.html" class="sub-link"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
-    </div>
-    <div class="nav-section">People</div>
-    <button class="dropdown-btn" onclick="toggleDD('employees')"><i class="fa-solid fa-users fa-fw"></i><span style="flex:1">Employees</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items" id="employees">
-      <a href="emp-drivers.html" class="sub-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
-      <a href="emp-storekeepers.html" class="sub-link"><i class="fa-solid fa-boxes-stacked fa-fw"></i>Store Keepers</a>
-      <a href="emp-accountants.html" class="sub-link"><i class="fa-solid fa-calculator fa-fw"></i>Accountants</a>
-      <a href="emp-mechanics.html" class="sub-link"><i class="fa-solid fa-wrench fa-fw"></i>Mechanics</a>
-      <a href="emp-turnboys.html" class="sub-link"><i class="fa-solid fa-person fa-fw"></i>Turnboys</a>
-      <a href="emp-managers.html" class="sub-link"><i class="fa-solid fa-user-tie fa-fw"></i>Managers</a>
-    </div>
-    <button class="dropdown-btn" onclick="toggleDD('clients')"><i class="fa-solid fa-building fa-fw"></i><span style="flex:1">Clients</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items" id="clients">
-      <a href="clients-list.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>Client List</a>
-      <a href="clients-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Client</a>
-    </div>
-    <div class="nav-section">Store</div>
-    <button class="dropdown-btn" onclick="toggleDD('store')"><i class="fa-solid fa-store fa-fw"></i><span style="flex:1">Store</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items" id="store">
-      <a href="store-inventory.html" class="sub-link"><i class="fa-solid fa-warehouse fa-fw"></i>Inventory</a>
-      <a href="store-suppliers.html" class="sub-link"><i class="fa-solid fa-truck-ramp-box fa-fw"></i>Suppliers</a>
-      <a href="store-warehouse.html" class="sub-link"><i class="fa-solid fa-building fa-fw"></i>Warehouse</a>
-      <a href="store-branch.html" class="sub-link"><i class="fa-solid fa-code-branch fa-fw"></i>Branch</a>
-      <a href="store-categories.html" class="sub-link"><i class="fa-solid fa-tags fa-fw"></i>Categories</a>
-      <a href="store-brands.html" class="sub-link"><i class="fa-solid fa-copyright fa-fw"></i>Brands</a>
-    </div>
+    <a href="fleet.html"     class="nav-link"><i class="fa-solid fa-truck fa-fw"></i>Fleet</a>
+    <a href="tracking.html"  class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html"    class="nav-link active"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="drivers.html"   class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="reports.html"   class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
     <div class="nav-section">Management</div>
-    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
-    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
-    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
-    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-square-parking fa-fw"></i>Parking Yard</a>
+    <a href="parts.html"     class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html"     class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <div class="nav-section">Tools</div>
+    <a href="#" class="nav-link"><i class="fa-solid fa-calendar fa-fw"></i>Schedule</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-users fa-fw"></i>Team</a>
+    <a href="#" class="nav-link"><i class="fa-solid fa-gear fa-fw"></i>Settings</a>
   </nav>
   <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
-    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;cursor:pointer;">
       <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
-      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+      <div style="flex:1;min-width:0;"><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
     </div>
   </div>
 </aside>
