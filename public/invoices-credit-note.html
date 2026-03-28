@@ -38,6 +38,7 @@
     <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
     <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
     <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+
     <div class="nav-section">Logistics</div>
     <button class="dropdown-btn" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
     <div class="dropdown-items" id="logistics">
@@ -46,17 +47,23 @@
       <a href="pending-trips.html" class="sub-link"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
       <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
     </div>
+
     <div class="nav-section">Fleet</div>
     <button class="dropdown-btn" onclick="toggleDD('fleet')"><i class="fa-solid fa-truck fa-fw"></i><span style="flex:1">Fleet</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items" id="fleet"><a href="trucks.html" class="sub-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a><a href="trailers.html" class="sub-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a></div>
+    <div class="dropdown-items" id="fleet">
+      <a href="trucks.html" class="sub-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a>
+      <a href="trailers.html" class="sub-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    </div>
+
     <div class="nav-section">Finance</div>
-    <button class="dropdown-btn open" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items open" id="invoices">
+    <button class="dropdown-btn" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="invoices">
       <a href="invoices-all.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
       <a href="invoices-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
       <a href="invoices-uninvoiced.html" class="sub-link"><i class="fa-solid fa-file-circle-question fa-fw"></i>Uninvoiced Trips</a>
-      <a href="invoices-credit-note.html" class="sub-link active"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
+      <a href="invoices-credit-note.html" class="sub-link"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
     </div>
+
     <div class="nav-section">People</div>
     <button class="dropdown-btn" onclick="toggleDD('employees')"><i class="fa-solid fa-users fa-fw"></i><span style="flex:1">Employees</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
     <div class="dropdown-items" id="employees">
@@ -67,8 +74,13 @@
       <a href="emp-turnboys.html" class="sub-link"><i class="fa-solid fa-person fa-fw"></i>Turnboys</a>
       <a href="emp-managers.html" class="sub-link"><i class="fa-solid fa-user-tie fa-fw"></i>Managers</a>
     </div>
+
     <button class="dropdown-btn" onclick="toggleDD('clients')"><i class="fa-solid fa-building fa-fw"></i><span style="flex:1">Clients</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items" id="clients"><a href="clients-list.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>Client List</a><a href="clients-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Client</a></div>
+    <div class="dropdown-items" id="clients">
+      <a href="clients-list.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>Client List</a>
+      <a href="clients-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Client</a>
+    </div>
+
     <div class="nav-section">Store</div>
     <button class="dropdown-btn" onclick="toggleDD('store')"><i class="fa-solid fa-store fa-fw"></i><span style="flex:1">Store</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
     <div class="dropdown-items" id="store">
@@ -79,6 +91,7 @@
       <a href="store-categories.html" class="sub-link"><i class="fa-solid fa-tags fa-fw"></i>Categories</a>
       <a href="store-brands.html" class="sub-link"><i class="fa-solid fa-copyright fa-fw"></i>Brands</a>
     </div>
+
     <div class="nav-section">Management</div>
     <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
     <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
@@ -179,6 +192,10 @@ function closeModal(){document.querySelectorAll('.modal').forEach(m=>m.classList
 function addCN(){notes.unshift({id:'CN-00'+(notes.length+1),client:'New Client',ref:'INV-XXXX',reason:'Overcharge',date:'2024-02-10',amount:0,status:'outstanding'});closeModal();render();}
 function toggleDD(id){const el=document.getElementById(id);el.classList.toggle('open');el.previousElementSibling.classList.toggle('open');}
 render();
+</script>
+<script>
+function toggleDD(id){var el=document.getElementById(id);if(!el)return;var open=el.classList.contains('open');document.querySelectorAll('.dropdown-items').forEach(function(d){d.classList.remove('open');});document.querySelectorAll('.dropdown-btn').forEach(function(b){b.classList.remove('open');});if(!open){el.classList.add('open');el.previousElementSibling.classList.add('open');}}
+(function(){var p=location.pathname.split('/').pop()||'dashboard.html';document.querySelectorAll('.nav-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');}else{a.classList.remove('active');}});document.querySelectorAll('.sub-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');var dd=a.closest('.dropdown-items');if(dd){dd.classList.add('open');dd.previousElementSibling.classList.add('open');}}});})();
 </script>
 </body>
 </html>

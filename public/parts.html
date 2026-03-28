@@ -100,7 +100,7 @@
 
     <div class="nav-section">Management</div>
     <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
-    <a href="parts.html" class="nav-link active"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
     <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
     <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-square-parking fa-fw"></i>Parking Yard</a>
   </nav>
@@ -196,5 +196,9 @@
     </div>
   </main>
 </div>
+<script>
+function toggleDD(id){var el=document.getElementById(id);if(!el)return;var open=el.classList.contains('open');document.querySelectorAll('.dropdown-items').forEach(function(d){d.classList.remove('open');});document.querySelectorAll('.dropdown-btn').forEach(function(b){b.classList.remove('open');});if(!open){el.classList.add('open');el.previousElementSibling.classList.add('open');}}
+(function(){var p=location.pathname.split('/').pop()||'dashboard.html';document.querySelectorAll('.nav-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');}else{a.classList.remove('active');}});document.querySelectorAll('.sub-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');var dd=a.closest('.dropdown-items');if(dd){dd.classList.add('open');dd.previousElementSibling.classList.add('open');}}});})();
+</script>
 </body>
 </html>

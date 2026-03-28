@@ -44,7 +44,7 @@
     <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
     <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
     <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
-    <a href="reports.html" class="nav-link active"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
 
     <div class="nav-section">Logistics</div>
     <button class="dropdown-btn" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
@@ -246,5 +246,9 @@
     </div>
   </main>
 </div>
+<script>
+function toggleDD(id){var el=document.getElementById(id);if(!el)return;var open=el.classList.contains('open');document.querySelectorAll('.dropdown-items').forEach(function(d){d.classList.remove('open');});document.querySelectorAll('.dropdown-btn').forEach(function(b){b.classList.remove('open');});if(!open){el.classList.add('open');el.previousElementSibling.classList.add('open');}}
+(function(){var p=location.pathname.split('/').pop()||'dashboard.html';document.querySelectorAll('.nav-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');}else{a.classList.remove('active');}});document.querySelectorAll('.sub-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');var dd=a.closest('.dropdown-items');if(dd){dd.classList.add('open');dd.previousElementSibling.classList.add('open');}}});})();
+</script>
 </body>
 </html>
