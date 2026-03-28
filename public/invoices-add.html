@@ -40,6 +40,7 @@
     <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
     <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
     <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+
     <div class="nav-section">Logistics</div>
     <button class="dropdown-btn" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
     <div class="dropdown-items" id="logistics">
@@ -48,20 +49,23 @@
       <a href="pending-trips.html" class="sub-link"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
       <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
     </div>
+
     <div class="nav-section">Fleet</div>
     <button class="dropdown-btn" onclick="toggleDD('fleet')"><i class="fa-solid fa-truck fa-fw"></i><span style="flex:1">Fleet</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
     <div class="dropdown-items" id="fleet">
       <a href="trucks.html" class="sub-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a>
       <a href="trailers.html" class="sub-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
     </div>
+
     <div class="nav-section">Finance</div>
-    <button class="dropdown-btn open" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items open" id="invoices">
+    <button class="dropdown-btn" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="invoices">
       <a href="invoices-all.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
-      <a href="invoices-add.html" class="sub-link active"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
+      <a href="invoices-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
       <a href="invoices-uninvoiced.html" class="sub-link"><i class="fa-solid fa-file-circle-question fa-fw"></i>Uninvoiced Trips</a>
       <a href="invoices-credit-note.html" class="sub-link"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
     </div>
+
     <div class="nav-section">People</div>
     <button class="dropdown-btn" onclick="toggleDD('employees')"><i class="fa-solid fa-users fa-fw"></i><span style="flex:1">Employees</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
     <div class="dropdown-items" id="employees">
@@ -72,11 +76,13 @@
       <a href="emp-turnboys.html" class="sub-link"><i class="fa-solid fa-person fa-fw"></i>Turnboys</a>
       <a href="emp-managers.html" class="sub-link"><i class="fa-solid fa-user-tie fa-fw"></i>Managers</a>
     </div>
+
     <button class="dropdown-btn" onclick="toggleDD('clients')"><i class="fa-solid fa-building fa-fw"></i><span style="flex:1">Clients</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
     <div class="dropdown-items" id="clients">
       <a href="clients-list.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>Client List</a>
       <a href="clients-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Client</a>
     </div>
+
     <div class="nav-section">Store</div>
     <button class="dropdown-btn" onclick="toggleDD('store')"><i class="fa-solid fa-store fa-fw"></i><span style="flex:1">Store</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
     <div class="dropdown-items" id="store">
@@ -87,6 +93,7 @@
       <a href="store-categories.html" class="sub-link"><i class="fa-solid fa-tags fa-fw"></i>Categories</a>
       <a href="store-brands.html" class="sub-link"><i class="fa-solid fa-copyright fa-fw"></i>Brands</a>
     </div>
+
     <div class="nav-section">Management</div>
     <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
     <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
@@ -183,30 +190,10 @@
   </main>
 </div>
 <div id="toast" style="display:none;position:fixed;bottom:2rem;right:2rem;background:#10B981;color:#fff;padding:.75rem 1.25rem;border-radius:.75rem;font-size:.85rem;font-weight:600;z-index:200;box-shadow:0 4px 16px rgba(0,0,0,.2);"><i class="fa-solid fa-check-circle" style="margin-right:.5rem;"></i>Invoice saved successfully!</div>
+
 <script>
-function toggleDD(id){const el=document.getElementById(id);const btn=el.previousElementSibling;el.classList.toggle('open');btn.classList.toggle('open');}
-function calcTotals(){
-  let sub=0;
-  document.querySelectorAll('#lineItems tr').forEach(tr=>{
-    const inputs=tr.querySelectorAll('input[type=number]');
-    if(inputs.length===2){const tot=Number(inputs[0].value)*Number(inputs[1].value);sub+=tot;tr.querySelector('td:nth-child(4)').textContent='$'+tot.toLocaleString();}
-  });
-  document.getElementById('subtotal').textContent='$'+sub.toLocaleString();
-  const tax=sub*.15;document.getElementById('taxAmt').textContent='$'+tax.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-  document.getElementById('totalAmt').textContent='$'+(sub+tax).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-}
-function addRow(){
-  const tbody=document.getElementById('lineItems');
-  const tr=document.createElement('tr');
-  tr.innerHTML=`<td style="padding:.5rem;"><input placeholder="Description" style="width:100%;padding:.4rem .6rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;" /></td>
-    <td style="padding:.5rem;"><input type="number" value="1" style="width:100%;padding:.4rem .6rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;text-align:right;" onchange="calcTotals()" /></td>
-    <td style="padding:.5rem;"><input type="number" value="0" style="width:100%;padding:.4rem .6rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;text-align:right;" onchange="calcTotals()" /></td>
-    <td style="padding:.5rem;text-align:right;font-size:.85rem;font-weight:600;color:#0F172A;">$0</td>
-    <td style="padding:.5rem;text-align:center;"><button onclick="removeRow(this)" style="background:none;border:none;cursor:pointer;color:#EF4444;"><i class="fa-solid fa-minus-circle"></i></button></td>`;
-  tbody.appendChild(tr);
-}
-function removeRow(btn){btn.closest('tr').remove();calcTotals();}
-function saveInvoice(){const t=document.getElementById('toast');t.style.display='block';setTimeout(()=>{t.style.display='none';window.location='invoices-all.html';},1800);}
+function toggleDD(id){var el=document.getElementById(id);if(!el)return;var open=el.classList.contains('open');document.querySelectorAll('.dropdown-items').forEach(function(d){d.classList.remove('open');});document.querySelectorAll('.dropdown-btn').forEach(function(b){b.classList.remove('open');});if(!open){el.classList.add('open');el.previousElementSibling.classList.add('open');}}
+(function(){var p=location.pathname.split('/').pop()||'dashboard.html';document.querySelectorAll('.nav-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');}else{a.classList.remove('active');}});document.querySelectorAll('.sub-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');var dd=a.closest('.dropdown-items');if(dd){dd.classList.add('open');dd.previousElementSibling.classList.add('open');}}});})();
 </script>
 </body>
 </html>

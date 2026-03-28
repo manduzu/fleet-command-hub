@@ -65,9 +65,9 @@
     </div>
 
     <div class="nav-section">Finance</div>
-    <button class="dropdown-btn open" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items open" id="invoices">
-      <a href="invoices-all.html" class="sub-link active"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
+    <button class="dropdown-btn" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="invoices">
+      <a href="invoices-all.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
       <a href="invoices-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
       <a href="invoices-uninvoiced.html" class="sub-link"><i class="fa-solid fa-file-circle-question fa-fw"></i>Uninvoiced Trips</a>
       <a href="invoices-credit-note.html" class="sub-link"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
@@ -262,6 +262,10 @@ function confirmDelete(){invoices.splice(delIdx,1);closeModal();render();}
 function closeModal(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open'));}
 function toggleDD(id){const el=document.getElementById(id);const btn=el.previousElementSibling;el.classList.toggle('open');btn.classList.toggle('open');}
 render();
+</script>
+<script>
+function toggleDD(id){var el=document.getElementById(id);if(!el)return;var open=el.classList.contains('open');document.querySelectorAll('.dropdown-items').forEach(function(d){d.classList.remove('open');});document.querySelectorAll('.dropdown-btn').forEach(function(b){b.classList.remove('open');});if(!open){el.classList.add('open');el.previousElementSibling.classList.add('open');}}
+(function(){var p=location.pathname.split('/').pop()||'dashboard.html';document.querySelectorAll('.nav-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');}else{a.classList.remove('active');}});document.querySelectorAll('.sub-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');var dd=a.closest('.dropdown-items');if(dd){dd.classList.add('open');dd.previousElementSibling.classList.add('open');}}});})();
 </script>
 </body>
 </html>
