@@ -1,0 +1,695 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Trip — FleetCtrl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body{font-family:system-ui,-apple-system,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s,color .15s;}
+    .nav-link:hover{background:#1E293B;color:#fff;}
+    .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:.75rem;}
+    .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.75rem;padding:.45rem 1rem;border-radius:.5rem;color:#64748B;font-size:.8rem;text-decoration:none;transition:background .15s,color .15s;}
+    .sub-link:hover{background:#1E293B;color:#CBD5E1;}
+    .sub-link.active{color:#60A5FA;background:#1E293B;}
+    .main{margin-left:240px;}
+    @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+
+    .card{background:#fff;border-radius:1rem;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid #E2E8F0;}
+    .input-field{width:100%;padding:.6rem .9rem;border:1px solid #E2E8F0;border-radius:.6rem;font-size:.875rem;outline:none;transition:border .15s,box-shadow .15s;color:#0F172A;background:#fff;}
+    .input-field:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+    .label{font-size:.8rem;font-weight:600;color:#374151;margin-bottom:.35rem;display:block;}
+
+    /* Stepper */
+    .stepper{display:flex;align-items:center;gap:0;margin-bottom:2rem;}
+    .step{display:flex;align-items:center;gap:.5rem;cursor:pointer;flex:1;position:relative;}
+    .step-circle{width:2.25rem;height:2.25rem;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;border:2px solid #CBD5E1;color:#94A3B8;background:#fff;transition:all .2s;flex-shrink:0;}
+    .step.active .step-circle{border-color:#3B82F6;background:#3B82F6;color:#fff;}
+    .step.done .step-circle{border-color:#10B981;background:#10B981;color:#fff;}
+    .step-label{font-size:.8rem;font-weight:600;color:#94A3B8;transition:color .2s;}
+    .step.active .step-label,.step.done .step-label{color:#0F172A;}
+    .step-line{flex:1;height:2px;background:#CBD5E1;margin:0 .5rem;min-width:1rem;}
+    .step.done+.step-line,.step.active+.step-line{background:#3B82F6;}
+
+    .panel{display:none;}
+    .panel.active{display:block;}
+
+    /* Waypoint */
+    .waypoint-row{display:flex;gap:.75rem;align-items:center;margin-bottom:.75rem;}
+    .waypoint-row .input-field{flex:1;}
+    .remove-wp{background:#FEE2E2;border:0;width:2rem;height:2rem;border-radius:.5rem;color:#EF4444;cursor:pointer;font-size:.8rem;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+    .remove-wp:hover{background:#FECACA;}
+
+    /* Summary card */
+    .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem 1.5rem;}
+    .summary-item .s-label{font-size:.7rem;font-weight:600;color:#94A3B8;text-transform:uppercase;letter-spacing:.05em;}
+    .summary-item .s-value{font-size:.95rem;font-weight:600;color:#0F172A;margin-top:.15rem;}
+
+    /* Map placeholder */
+    .map-placeholder{width:100%;height:220px;background:linear-gradient(135deg,#1E293B 0%,#334155 100%);border-radius:.75rem;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+    .map-placeholder::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23475569' stroke-width='.4' fill='none'/%3E%3C/svg%3E");opacity:.3;}
+    .map-dot{position:absolute;width:12px;height:12px;background:#3B82F6;border-radius:999px;box-shadow:0 0 0 4px rgba(59,130,246,.3);}
+    .map-dot.dest{background:#EF4444;box-shadow:0 0 0 4px rgba(239,68,68,.3);}
+    .map-line{position:absolute;height:2px;background:repeating-linear-gradient(90deg,#3B82F6 0 8px,transparent 8px 14px);transform-origin:left center;}
+  </style>
+</head>
+<body>
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+
+    <div class="nav-section">Logistics</div>
+    <button class="dropdown-btn" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="logistics">
+      <a href="create-trip.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create Trip</a>
+      <a href="create-fleet.html" class="sub-link"><i class="fa-solid fa-truck-moving fa-fw"></i>Create Fleet</a>
+      <a href="draft-trips.html" class="sub-link"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="sub-link"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+
+    <div class="nav-section">Fleet</div>
+    <button class="dropdown-btn" onclick="toggleDD('fleet')"><i class="fa-solid fa-truck fa-fw"></i><span style="flex:1">Fleet</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="fleet">
+      <a href="trucks.html" class="sub-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a>
+      <a href="trailers.html" class="sub-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    </div>
+
+    <div class="nav-section">Finance</div>
+    <button class="dropdown-btn" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="invoices">
+      <a href="invoices-all.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
+      <a href="invoices-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
+      <a href="invoices-uninvoiced.html" class="sub-link"><i class="fa-solid fa-file-circle-question fa-fw"></i>Uninvoiced Trips</a>
+      <a href="invoices-credit-note.html" class="sub-link"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
+    </div>
+
+    <div class="nav-section">People</div>
+    <button class="dropdown-btn" onclick="toggleDD('employees')"><i class="fa-solid fa-users fa-fw"></i><span style="flex:1">Employees</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="employees">
+      <a href="emp-drivers.html" class="sub-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+      <a href="emp-storekeepers.html" class="sub-link"><i class="fa-solid fa-boxes-stacked fa-fw"></i>Store Keepers</a>
+      <a href="emp-accountants.html" class="sub-link"><i class="fa-solid fa-calculator fa-fw"></i>Accountants</a>
+      <a href="emp-mechanics.html" class="sub-link"><i class="fa-solid fa-wrench fa-fw"></i>Mechanics</a>
+      <a href="emp-turnboys.html" class="sub-link"><i class="fa-solid fa-person fa-fw"></i>Turnboys</a>
+      <a href="emp-managers.html" class="sub-link"><i class="fa-solid fa-user-tie fa-fw"></i>Managers</a>
+    </div>
+
+    <button class="dropdown-btn" onclick="toggleDD('clients')"><i class="fa-solid fa-building fa-fw"></i><span style="flex:1">Clients</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="clients">
+      <a href="clients-list.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>Client List</a>
+      <a href="clients-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Client</a>
+    </div>
+
+    <div class="nav-section">Store</div>
+    <button class="dropdown-btn" onclick="toggleDD('store')"><i class="fa-solid fa-store fa-fw"></i><span style="flex:1">Store</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="store">
+      <a href="store-inventory.html" class="sub-link"><i class="fa-solid fa-warehouse fa-fw"></i>Inventory</a>
+      <a href="store-suppliers.html" class="sub-link"><i class="fa-solid fa-truck-ramp-box fa-fw"></i>Suppliers</a>
+      <a href="store-warehouse.html" class="sub-link"><i class="fa-solid fa-building fa-fw"></i>Warehouse</a>
+      <a href="store-branch.html" class="sub-link"><i class="fa-solid fa-code-branch fa-fw"></i>Branch</a>
+      <a href="store-categories.html" class="sub-link"><i class="fa-solid fa-tags fa-fw"></i>Categories</a>
+      <a href="store-brands.html" class="sub-link"><i class="fa-solid fa-copyright fa-fw"></i>Brands</a>
+    </div>
+
+    <div class="nav-section">Management</div>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-square-parking fa-fw"></i>Parking Yard</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ========== MAIN ========== -->
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <h2 style="font-size:1rem;font-weight:600;color:#0F172A;"><i class="fa-solid fa-route" style="color:#3B82F6;margin-right:.5rem;"></i>Create New Trip</h2>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;">
+      <span style="font-size:.75rem;color:#64748B;background:#F1F5F9;padding:.35rem .75rem;border-radius:999px;font-weight:600;">Trip #TRP-<span id="trip-id">10458</span></span>
+      <button style="position:relative;padding:.5rem;border:0;background:transparent;cursor:pointer;"><i class="fa-solid fa-bell" style="color:#64748B;font-size:1rem;"></i><span style="position:absolute;top:.3rem;right:.3rem;width:.5rem;height:.5rem;background:#EF4444;border-radius:999px;"></span></button>
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+    </div>
+  </header>
+
+  <main style="padding:1.5rem;max-width:1000px;">
+    <!-- Page Title -->
+    <div style="margin-bottom:.5rem;">
+      <h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;">Create Trip / Journey</h1>
+      <p style="color:#64748B;font-size:.875rem;margin-top:.25rem;">Plan a new trip by assigning a vehicle, driver, route, cargo details, and client information.</p>
+    </div>
+
+    <!-- ===== STEPPER ===== -->
+    <div class="stepper" id="stepper">
+      <div class="step active" data-step="1" onclick="goStep(1)">
+        <div class="step-circle">1</div>
+        <div class="step-label">Route</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2" onclick="goStep(2)">
+        <div class="step-circle">2</div>
+        <div class="step-label">Vehicle</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="3" onclick="goStep(3)">
+        <div class="step-circle">3</div>
+        <div class="step-label">Cargo</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="4" onclick="goStep(4)">
+        <div class="step-circle">4</div>
+        <div class="step-label">Client</div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="5" onclick="goStep(5)">
+        <div class="step-circle">5</div>
+        <div class="step-label">Review</div>
+      </div>
+    </div>
+
+    <!-- ===== STEP 1: Route ===== -->
+    <div class="panel active" id="panel-1">
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-map-location-dot" style="color:#3B82F6;"></i> Route & Schedule</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label class="label">Trip Type *</label>
+            <select class="input-field" id="f-trip-type" required>
+              <option value="">Select type...</option>
+              <option>One-Way</option>
+              <option>Round Trip</option>
+              <option>Multi-Stop</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Priority</label>
+            <select class="input-field" id="f-priority">
+              <option>Normal</option>
+              <option>High</option>
+              <option>Urgent</option>
+              <option>Critical</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Origin / Pickup Location *</label>
+            <input type="text" class="input-field" id="f-origin" placeholder="e.g. Nairobi Depot" required />
+          </div>
+          <div>
+            <label class="label">Destination / Drop-off *</label>
+            <input type="text" class="input-field" id="f-destination" placeholder="e.g. Mombasa Port" required />
+          </div>
+          <div>
+            <label class="label">Departure Date & Time *</label>
+            <input type="datetime-local" class="input-field" id="f-depart" required />
+          </div>
+          <div>
+            <label class="label">Expected Arrival</label>
+            <input type="datetime-local" class="input-field" id="f-arrive" />
+          </div>
+          <div style="grid-column:1/-1;">
+            <label class="label">Estimated Distance (km)</label>
+            <input type="number" class="input-field" id="f-distance" placeholder="e.g. 485" style="max-width:220px;" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Waypoints -->
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-location-crosshairs" style="color:#F59E0B;"></i> Waypoints / Stops <span style="font-size:.7rem;color:#94A3B8;font-weight:500;">(optional)</span></h3>
+        <div id="waypoints-container">
+          <div class="waypoint-row">
+            <span style="font-size:.75rem;color:#94A3B8;width:1.5rem;text-align:center;">1</span>
+            <input type="text" class="input-field" placeholder="Stop location" />
+            <input type="text" class="input-field" placeholder="Purpose (e.g. Fuel, Rest)" style="max-width:200px;" />
+            <button type="button" class="remove-wp" onclick="removeWaypoint(this)"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+        <button type="button" onclick="addWaypoint()" style="margin-top:.5rem;background:transparent;border:1px dashed #CBD5E1;border-radius:.5rem;padding:.5rem 1rem;color:#3B82F6;font-size:.8rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.4rem;">
+          <i class="fa-solid fa-plus"></i> Add Waypoint
+        </button>
+      </div>
+
+      <!-- Map Preview -->
+      <div class="card" style="padding:1.5rem;margin-bottom:1.5rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-map" style="color:#10B981;"></i> Route Preview</h3>
+        <div class="map-placeholder">
+          <div class="map-dot" style="left:20%;top:55%;"></div>
+          <div class="map-dot dest" style="left:75%;top:40%;"></div>
+          <div class="map-line" style="left:calc(20% + 6px);top:calc(55% - 1px);width:calc(55% - 6px);transform:rotate(-8deg);"></div>
+          <div style="position:relative;z-index:2;text-align:center;">
+            <i class="fa-solid fa-route" style="font-size:2rem;color:#475569;margin-bottom:.5rem;display:block;"></i>
+            <span style="color:#94A3B8;font-size:.8rem;font-weight:600;">Route map will be displayed here</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;">
+        <button type="button" onclick="goStep(2)" style="padding:.65rem 1.75rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;">Next: Vehicle <i class="fa-solid fa-arrow-right" style="margin-left:.4rem;"></i></button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 2: Vehicle & Driver ===== -->
+    <div class="panel" id="panel-2">
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-truck" style="color:#3B82F6;"></i> Assign Vehicle</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label class="label">Truck *</label>
+            <select class="input-field" id="f-truck" required>
+              <option value="">Select truck...</option>
+              <option>T-101 — Volvo FH16 (KBZ 123A)</option>
+              <option>T-102 — Scania R450 (KCA 456B)</option>
+              <option>T-103 — MAN TGX (KDA 789C)</option>
+              <option>T-104 — Mercedes Actros (KBB 321D)</option>
+              <option>T-105 — DAF XF (KCF 654E)</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Trailer (Optional)</label>
+            <select class="input-field" id="f-trailer">
+              <option value="">No trailer</option>
+              <option>TR-201 — Flatbed 40ft</option>
+              <option>TR-202 — Tanker 30,000L</option>
+              <option>TR-203 — Refrigerated 20ft</option>
+              <option>TR-204 — Container Chassis 40ft</option>
+              <option>TR-205 — Side Curtain 45ft</option>
+            </select>
+          </div>
+        </div>
+        <!-- Truck preview card -->
+        <div id="truck-preview" style="display:none;margin-top:1rem;padding:1rem;background:#F8FAFC;border-radius:.75rem;border:1px solid #E2E8F0;">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:80px;height:56px;background:#1E293B;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck-moving" style="color:#3B82F6;font-size:1.5rem;"></i></div>
+            <div>
+              <div style="font-weight:700;color:#0F172A;font-size:.95rem;" id="tp-name">—</div>
+              <div style="font-size:.8rem;color:#64748B;" id="tp-details">—</div>
+            </div>
+            <div style="margin-left:auto;text-align:right;">
+              <span style="display:inline-block;padding:.2rem .6rem;border-radius:999px;font-size:.7rem;font-weight:600;background:#DCFCE7;color:#16A34A;">Available</span>
+              <div style="font-size:.75rem;color:#94A3B8;margin-top:.25rem;">Last service: 12 days ago</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-user-tie" style="color:#10B981;"></i> Assign Driver</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label class="label">Primary Driver *</label>
+            <select class="input-field" id="f-driver" required>
+              <option value="">Select driver...</option>
+              <option>John Doe — DL-4521</option>
+              <option>Sarah Lee — DL-7890</option>
+              <option>Mike Chen — DL-3312</option>
+              <option>Carlos Rivera — DL-9901</option>
+              <option>Emma Johnson — DL-1123</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Turnboy / Co-Driver</label>
+            <select class="input-field" id="f-turnboy">
+              <option value="">None</option>
+              <option>Priya Patel</option>
+              <option>Raj Sharma</option>
+              <option>David Kim</option>
+              <option>James Ochieng</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Driver Contact</label>
+            <input type="tel" class="input-field" id="f-driver-phone" placeholder="+254 7XX XXX XXX" />
+          </div>
+          <div>
+            <label class="label">License Expiry</label>
+            <input type="date" class="input-field" id="f-license-exp" />
+          </div>
+        </div>
+        <!-- Driver preview -->
+        <div id="driver-preview" style="display:none;margin-top:1rem;padding:1rem;background:#F0FDF4;border-radius:.75rem;border:1px solid #BBF7D0;">
+          <div style="display:flex;align-items:center;gap:1rem;">
+            <div style="width:48px;height:48px;background:#16A34A;border-radius:999px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-user" style="color:#fff;font-size:1rem;"></i></div>
+            <div>
+              <div style="font-weight:700;color:#0F172A;font-size:.9rem;" id="dp-name">—</div>
+              <div style="font-size:.8rem;color:#64748B;">12 trips completed · 4.8★ rating</div>
+            </div>
+            <div style="margin-left:auto;">
+              <span style="display:inline-block;padding:.2rem .6rem;border-radius:999px;font-size:.7rem;font-weight:600;background:#DBEAFE;color:#2563EB;">On Duty</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;">
+        <button type="button" onclick="goStep(1)" style="padding:.65rem 1.75rem;background:#fff;color:#374151;border:1px solid #E2E8F0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;"><i class="fa-solid fa-arrow-left" style="margin-right:.4rem;"></i> Back</button>
+        <button type="button" onclick="goStep(3)" style="padding:.65rem 1.75rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;">Next: Cargo <i class="fa-solid fa-arrow-right" style="margin-left:.4rem;"></i></button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 3: Cargo ===== -->
+    <div class="panel" id="panel-3">
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-boxes-stacked" style="color:#F59E0B;"></i> Cargo Details</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label class="label">Cargo Type *</label>
+            <select class="input-field" id="f-cargo-type" required>
+              <option value="">Select type...</option>
+              <option>General Freight</option>
+              <option>Perishable Goods</option>
+              <option>Hazardous Materials</option>
+              <option>Heavy Machinery</option>
+              <option>Liquid Bulk</option>
+              <option>Containers (TEU)</option>
+              <option>Dry Bulk</option>
+              <option>Livestock</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Cargo Description</label>
+            <input type="text" class="input-field" id="f-cargo-desc" placeholder="e.g. 2x 20ft containers — electronics" />
+          </div>
+          <div>
+            <label class="label">Weight (kg) *</label>
+            <input type="number" class="input-field" id="f-weight" placeholder="e.g. 18000" required />
+          </div>
+          <div>
+            <label class="label">Volume (m³)</label>
+            <input type="number" class="input-field" id="f-volume" placeholder="e.g. 65" />
+          </div>
+          <div>
+            <label class="label">Number of Packages</label>
+            <input type="number" class="input-field" id="f-packages" placeholder="e.g. 24" />
+          </div>
+          <div>
+            <label class="label">Declared Value (KES)</label>
+            <input type="number" class="input-field" id="f-value" placeholder="e.g. 5000000" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-shield-halved" style="color:#8B5CF6;"></i> Special Handling</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label class="label">Temperature Control</label>
+            <select class="input-field" id="f-temp">
+              <option>Not Required</option>
+              <option>Chilled (2-8°C)</option>
+              <option>Frozen (-18°C)</option>
+              <option>Ambient Controlled</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Insurance Required</label>
+            <select class="input-field" id="f-insurance">
+              <option>No</option>
+              <option>Basic Cover</option>
+              <option>Full Cover</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1;">
+            <label class="label">Special Instructions</label>
+            <textarea class="input-field" id="f-instructions" rows="3" placeholder="Fragile items, stacking restrictions, handling notes..."></textarea>
+          </div>
+        </div>
+        <!-- Hazard toggles -->
+        <div style="margin-top:1rem;display:flex;flex-wrap:wrap;gap:.5rem;">
+          <label style="display:flex;align-items:center;gap:.4rem;padding:.4rem .75rem;background:#FEF2F2;border:1px solid #FECACA;border-radius:.5rem;font-size:.8rem;color:#DC2626;cursor:pointer;">
+            <input type="checkbox" id="f-hazard" /> <i class="fa-solid fa-radiation"></i> Hazardous
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;padding:.4rem .75rem;background:#FFF7ED;border:1px solid #FED7AA;border-radius:.5rem;font-size:.8rem;color:#EA580C;cursor:pointer;">
+            <input type="checkbox" id="f-fragile" /> <i class="fa-solid fa-wine-glass"></i> Fragile
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;padding:.4rem .75rem;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:.5rem;font-size:.8rem;color:#2563EB;cursor:pointer;">
+            <input type="checkbox" id="f-oversized" /> <i class="fa-solid fa-up-right-and-down-left-from-center"></i> Oversized
+          </label>
+          <label style="display:flex;align-items:center;gap:.4rem;padding:.4rem .75rem;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:.5rem;font-size:.8rem;color:#16A34A;cursor:pointer;">
+            <input type="checkbox" id="f-perishable" /> <i class="fa-solid fa-snowflake"></i> Perishable
+          </label>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;">
+        <button type="button" onclick="goStep(2)" style="padding:.65rem 1.75rem;background:#fff;color:#374151;border:1px solid #E2E8F0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;"><i class="fa-solid fa-arrow-left" style="margin-right:.4rem;"></i> Back</button>
+        <button type="button" onclick="goStep(4)" style="padding:.65rem 1.75rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;">Next: Client <i class="fa-solid fa-arrow-right" style="margin-left:.4rem;"></i></button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 4: Client & Billing ===== -->
+    <div class="panel" id="panel-4">
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-building" style="color:#6366F1;"></i> Client Information</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label class="label">Client / Company *</label>
+            <select class="input-field" id="f-client" required>
+              <option value="">Select client...</option>
+              <option>Acme Logistics Ltd</option>
+              <option>SafariCom PLC</option>
+              <option>Kenya Breweries</option>
+              <option>Bamburi Cement</option>
+              <option>East African Portland</option>
+              <option>Bidco Africa</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Contact Person</label>
+            <input type="text" class="input-field" id="f-contact-person" placeholder="Full name" />
+          </div>
+          <div>
+            <label class="label">Contact Phone</label>
+            <input type="tel" class="input-field" id="f-contact-phone" placeholder="+254 7XX XXX XXX" />
+          </div>
+          <div>
+            <label class="label">Contact Email</label>
+            <input type="email" class="input-field" id="f-contact-email" placeholder="email@company.com" />
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-money-bill-wave" style="color:#10B981;"></i> Billing & Rates</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <label class="label">Rate Type</label>
+            <select class="input-field" id="f-rate-type">
+              <option>Per Trip (Flat)</option>
+              <option>Per Kilometre</option>
+              <option>Per Tonne</option>
+              <option>Hourly</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Rate Amount (KES)</label>
+            <input type="number" class="input-field" id="f-rate" placeholder="e.g. 150000" />
+          </div>
+          <div>
+            <label class="label">Payment Terms</label>
+            <select class="input-field" id="f-payment-terms">
+              <option>Net 30</option>
+              <option>Net 14</option>
+              <option>COD</option>
+              <option>Prepaid</option>
+            </select>
+          </div>
+          <div>
+            <label class="label">Purchase Order #</label>
+            <input type="text" class="input-field" id="f-po" placeholder="PO-XXXX" />
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;">
+        <button type="button" onclick="goStep(3)" style="padding:.65rem 1.75rem;background:#fff;color:#374151;border:1px solid #E2E8F0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;"><i class="fa-solid fa-arrow-left" style="margin-right:.4rem;"></i> Back</button>
+        <button type="button" onclick="goStep(5)" style="padding:.65rem 1.75rem;background:#3B82F6;color:#fff;border:0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;">Review Trip <i class="fa-solid fa-arrow-right" style="margin-left:.4rem;"></i></button>
+      </div>
+    </div>
+
+    <!-- ===== STEP 5: Review & Submit ===== -->
+    <div class="panel" id="panel-5">
+      <div class="card" style="padding:1.5rem;margin-bottom:1rem;">
+        <h3 style="font-weight:700;color:#0F172A;margin-bottom:1.25rem;display:flex;align-items:center;gap:.5rem;"><i class="fa-solid fa-clipboard-check" style="color:#3B82F6;"></i> Trip Summary</h3>
+
+        <!-- Route summary -->
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.75rem;font-weight:700;color:#3B82F6;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;"><i class="fa-solid fa-route" style="margin-right:.3rem;"></i> Route</div>
+          <div class="summary-grid" id="sum-route"></div>
+        </div>
+        <hr style="border:0;border-top:1px solid #E2E8F0;margin:.75rem 0;">
+
+        <!-- Vehicle summary -->
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.75rem;font-weight:700;color:#10B981;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;"><i class="fa-solid fa-truck" style="margin-right:.3rem;"></i> Vehicle & Driver</div>
+          <div class="summary-grid" id="sum-vehicle"></div>
+        </div>
+        <hr style="border:0;border-top:1px solid #E2E8F0;margin:.75rem 0;">
+
+        <!-- Cargo summary -->
+        <div style="margin-bottom:1.25rem;">
+          <div style="font-size:.75rem;font-weight:700;color:#F59E0B;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;"><i class="fa-solid fa-boxes-stacked" style="margin-right:.3rem;"></i> Cargo</div>
+          <div class="summary-grid" id="sum-cargo"></div>
+        </div>
+        <hr style="border:0;border-top:1px solid #E2E8F0;margin:.75rem 0;">
+
+        <!-- Client summary -->
+        <div>
+          <div style="font-size:.75rem;font-weight:700;color:#6366F1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem;"><i class="fa-solid fa-building" style="margin-right:.3rem;"></i> Client & Billing</div>
+          <div class="summary-grid" id="sum-client"></div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex;gap:.75rem;justify-content:space-between;flex-wrap:wrap;">
+        <button type="button" onclick="goStep(4)" style="padding:.65rem 1.75rem;background:#fff;color:#374151;border:1px solid #E2E8F0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;"><i class="fa-solid fa-arrow-left" style="margin-right:.4rem;"></i> Back</button>
+        <div style="display:flex;gap:.75rem;">
+          <button type="button" onclick="saveDraft()" style="padding:.65rem 1.5rem;border:1px solid #E2E8F0;border-radius:.6rem;font-size:.875rem;font-weight:600;background:#fff;color:#374151;cursor:pointer;">
+            <i class="fa-solid fa-file-pen" style="margin-right:.4rem;color:#64748B;"></i>Save Draft
+          </button>
+          <button type="button" onclick="submitTrip()" style="padding:.65rem 1.5rem;background:#10B981;color:#fff;border:0;border-radius:.6rem;font-size:.875rem;font-weight:600;cursor:pointer;">
+            <i class="fa-solid fa-paper-plane" style="margin-right:.4rem;"></i>Create Trip
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" style="display:none;position:fixed;bottom:1.5rem;right:1.5rem;background:#10B981;color:#fff;padding:.75rem 1.25rem;border-radius:.75rem;font-size:.875rem;font-weight:600;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.15);">
+  <i class="fa-solid fa-circle-check" style="margin-right:.4rem;"></i><span id="toast-msg"></span>
+</div>
+
+<script>
+/* === Sidebar === */
+function toggleDD(id){var el=document.getElementById(id);if(!el)return;var open=el.classList.contains('open');document.querySelectorAll('.dropdown-items').forEach(function(d){d.classList.remove('open');});document.querySelectorAll('.dropdown-btn').forEach(function(b){b.classList.remove('open');});if(!open){el.classList.add('open');el.previousElementSibling.classList.add('open');}}
+(function(){var p=location.pathname.split('/').pop()||'dashboard.html';document.querySelectorAll('.nav-link').forEach(function(a){if(a.getAttribute('href')===p)a.classList.add('active');else a.classList.remove('active');});document.querySelectorAll('.sub-link').forEach(function(a){if(a.getAttribute('href')===p){a.classList.add('active');var dd=a.closest('.dropdown-items');if(dd){dd.classList.add('open');dd.previousElementSibling.classList.add('open');}}});})();
+
+/* === Stepper === */
+var currentStep = 1;
+function goStep(n) {
+  if (n < 1 || n > 5) return;
+  currentStep = n;
+  // Update panels
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  var panel = document.getElementById('panel-' + n);
+  if (panel) panel.classList.add('active');
+  // Update stepper
+  document.querySelectorAll('.step').forEach(function(s) {
+    var sn = parseInt(s.dataset.step);
+    s.classList.remove('active', 'done');
+    if (sn === n) s.classList.add('active');
+    else if (sn < n) s.classList.add('done');
+  });
+  // Build summary on step 5
+  if (n === 5) buildSummary();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* === Waypoints === */
+var wpCount = 1;
+function addWaypoint() {
+  wpCount++;
+  var container = document.getElementById('waypoints-container');
+  var row = document.createElement('div');
+  row.className = 'waypoint-row';
+  row.innerHTML = '<span style="font-size:.75rem;color:#94A3B8;width:1.5rem;text-align:center;">' + wpCount + '</span>' +
+    '<input type="text" class="input-field" placeholder="Stop location" />' +
+    '<input type="text" class="input-field" placeholder="Purpose" style="max-width:200px;" />' +
+    '<button type="button" class="remove-wp" onclick="removeWaypoint(this)"><i class="fa-solid fa-xmark"></i></button>';
+  container.appendChild(row);
+}
+function removeWaypoint(btn) {
+  var rows = document.querySelectorAll('.waypoint-row');
+  if (rows.length > 1) btn.closest('.waypoint-row').remove();
+}
+
+/* === Truck/Driver previews === */
+document.getElementById('f-truck').addEventListener('change', function() {
+  var v = this.value;
+  var prev = document.getElementById('truck-preview');
+  if (v) {
+    prev.style.display = 'block';
+    document.getElementById('tp-name').textContent = v.split('—')[0].trim();
+    document.getElementById('tp-details').textContent = v.split('—')[1] ? v.split('—')[1].trim() : '';
+  } else { prev.style.display = 'none'; }
+});
+document.getElementById('f-driver').addEventListener('change', function() {
+  var v = this.value;
+  var prev = document.getElementById('driver-preview');
+  if (v) {
+    prev.style.display = 'block';
+    document.getElementById('dp-name').textContent = v;
+  } else { prev.style.display = 'none'; }
+});
+
+/* === Summary builder === */
+function gv(id) { var el = document.getElementById(id); return el ? (el.value || '—') : '—'; }
+function si(label, value) { return '<div class="summary-item"><div class="s-label">' + label + '</div><div class="s-value">' + value + '</div></div>'; }
+
+function buildSummary() {
+  document.getElementById('sum-route').innerHTML =
+    si('Trip Type', gv('f-trip-type')) + si('Priority', gv('f-priority')) +
+    si('Origin', gv('f-origin')) + si('Destination', gv('f-destination')) +
+    si('Departure', gv('f-depart')) + si('Arrival', gv('f-arrive')) +
+    si('Distance', gv('f-distance') + ' km');
+
+  document.getElementById('sum-vehicle').innerHTML =
+    si('Truck', gv('f-truck')) + si('Trailer', gv('f-trailer')) +
+    si('Driver', gv('f-driver')) + si('Turnboy', gv('f-turnboy')) +
+    si('Driver Phone', gv('f-driver-phone')) + si('License Exp.', gv('f-license-exp'));
+
+  document.getElementById('sum-cargo').innerHTML =
+    si('Cargo Type', gv('f-cargo-type')) + si('Description', gv('f-cargo-desc')) +
+    si('Weight', gv('f-weight') + ' kg') + si('Volume', gv('f-volume') + ' m³') +
+    si('Packages', gv('f-packages')) + si('Value', 'KES ' + gv('f-value')) +
+    si('Temp Control', gv('f-temp')) + si('Insurance', gv('f-insurance'));
+
+  document.getElementById('sum-client').innerHTML =
+    si('Client', gv('f-client')) + si('Contact', gv('f-contact-person')) +
+    si('Phone', gv('f-contact-phone')) + si('Email', gv('f-contact-email')) +
+    si('Rate', gv('f-rate-type') + ' — KES ' + gv('f-rate')) + si('Payment', gv('f-payment-terms')) +
+    si('PO #', gv('f-po'));
+}
+
+/* === Toast & Submit === */
+function showToast(msg, color) {
+  var t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.style.background = color || '#10B981';
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 3000);
+}
+function submitTrip() {
+  showToast('Trip #TRP-10458 created successfully!');
+  setTimeout(function() { window.location.href = 'pending-trips.html'; }, 1500);
+}
+function saveDraft() {
+  showToast('Trip saved to drafts!', '#64748B');
+  setTimeout(function() { window.location.href = 'draft-trips.html'; }, 1500);
+}
+</script>
+</body>
+</html>
