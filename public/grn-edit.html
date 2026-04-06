@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Edit GRN — FleetCtrl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    body{font-family:system-ui,-apple-system,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s,color .15s;}
+    .nav-link:hover{background:#1E293B;color:#fff;}
+    .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;width:100%;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;background:transparent;border:none;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
+    .dropdown-btn:hover{background:#1E293B;color:#fff;}
+    .dropdown-btn.open{color:#fff;background:#1E293B;}
+    .dropdown-items{display:none;padding-left:1.5rem;}
+    .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:.5rem;color:#94A3B8;font-size:.8rem;text-decoration:none;transition:background .15s,color .15s;}
+    .sub-link:hover{background:#1E293B;color:#fff;}
+    .sub-link.active{color:#60A5FA;}
+    .main{margin-left:240px;}
+    .card{background:#fff;border-radius:1rem;box-shadow:0 1px 4px rgba(0,0,0,.07);border:1px solid #E2E8F0;}
+    .pill{display:inline-flex;align-items:center;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;}
+    .pill-warning{background:#FEF3C7;color:#92400E;}
+    .pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-gray{background:#F1F5F9;color:#475569;}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 1rem;border-radius:.6rem;font-size:.85rem;font-weight:500;cursor:pointer;border:none;text-decoration:none;}
+    .btn-primary{background:#3B82F6;color:#fff;}
+    .btn-primary:hover{background:#2563EB;}
+    .btn-outline{background:#fff;color:#0F172A;border:1px solid #E2E8F0;}
+    .btn-outline:hover{background:#F8FAFC;}
+    .btn-danger{background:#EF4444;color:#fff;}
+    .btn-danger:hover{background:#DC2626;}
+    .btn-success{background:#10B981;color:#fff;}
+    table{width:100%;border-collapse:collapse;font-size:.85rem;}
+    thead th{text-align:left;padding:.75rem 1rem;color:#64748B;font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:2px solid #E2E8F0;background:#F8FAFC;}
+    tbody td{padding:.75rem 1rem;border-bottom:1px solid #F1F5F9;color:#334155;}
+    tbody tr:hover{background:#F8FAFC;}
+    .form-group{margin-bottom:1rem;}
+    .form-group label{display:block;font-size:.8rem;font-weight:600;color:#334155;margin-bottom:.35rem;}
+    .form-group input,.form-group select,.form-group textarea{width:100%;padding:.5rem .75rem;border:1px solid #E2E8F0;border-radius:.5rem;font-size:.85rem;outline:none;background:#fff;}
+    .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,.1);}
+    .toast{position:fixed;bottom:2rem;right:2rem;background:#0F172A;color:#fff;padding:1rem 1.5rem;border-radius:.75rem;font-size:.85rem;display:none;z-index:200;animation:slideUp .3s ease;}
+    @keyframes slideUp{from{opacity:0;transform:translateY(1rem);}to{opacity:1;transform:translateY(0);}}
+    @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+
+    <div class="nav-section">Logistics</div>
+    <button class="dropdown-btn" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="logistics">
+      <a href="create-fleet.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create Fleet</a>
+      <a href="draft-trips.html" class="sub-link"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="sub-link"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+
+    <div class="nav-section">Fleet</div>
+    <button class="dropdown-btn" onclick="toggleDD('fleet')"><i class="fa-solid fa-truck fa-fw"></i><span style="flex:1">Fleet</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="fleet">
+      <a href="trucks.html" class="sub-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a>
+      <a href="trailers.html" class="sub-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    </div>
+
+    <div class="nav-section">Finance</div>
+    <button class="dropdown-btn" onclick="toggleDD('invoices')"><i class="fa-solid fa-file-invoice fa-fw"></i><span style="flex:1">Invoices</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="invoices">
+      <a href="invoices-all.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>All Invoices</a>
+      <a href="invoices-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Invoice</a>
+      <a href="invoices-uninvoiced.html" class="sub-link"><i class="fa-solid fa-file-circle-question fa-fw"></i>Uninvoiced Trips</a>
+      <a href="invoices-credit-note.html" class="sub-link"><i class="fa-solid fa-file-invoice-dollar fa-fw"></i>Sales Credit Note</a>
+    </div>
+
+    <button class="dropdown-btn" onclick="toggleDD('procurement')"><i class="fa-solid fa-basket-shopping fa-fw"></i><span style="flex:1">Procurement</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="procurement">
+      <a href="lpo-archive.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>LPOs</a>
+      <a href="lpo-create.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create LPO</a>
+      <a href="grn-archive.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>GRNs</a>
+      <a href="grn-create.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create GRN</a>
+      <a href="purchase-invoice-archive.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>Purchase Invoices</a>
+      <a href="purchase-invoice-create.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create Purchase Invoice</a>
+    </div>
+
+    <div class="nav-section">People</div>
+    <button class="dropdown-btn" onclick="toggleDD('employees')"><i class="fa-solid fa-users fa-fw"></i><span style="flex:1">Employees</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="employees">
+      <a href="emp-drivers.html" class="sub-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+      <a href="emp-storekeepers.html" class="sub-link"><i class="fa-solid fa-boxes-stacked fa-fw"></i>Store Keepers</a>
+      <a href="emp-accountants.html" class="sub-link"><i class="fa-solid fa-calculator fa-fw"></i>Accountants</a>
+      <a href="emp-mechanics.html" class="sub-link"><i class="fa-solid fa-wrench fa-fw"></i>Mechanics</a>
+      <a href="emp-turnboys.html" class="sub-link"><i class="fa-solid fa-person fa-fw"></i>Turnboys</a>
+      <a href="emp-managers.html" class="sub-link"><i class="fa-solid fa-user-tie fa-fw"></i>Managers</a>
+    </div>
+
+    <button class="dropdown-btn" onclick="toggleDD('clients')"><i class="fa-solid fa-building fa-fw"></i><span style="flex:1">Clients</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="clients">
+      <a href="clients-list.html" class="sub-link"><i class="fa-solid fa-list fa-fw"></i>Client List</a>
+      <a href="clients-add.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Add Client</a>
+    </div>
+
+    <div class="nav-section">Store</div>
+    <button class="dropdown-btn" onclick="toggleDD('store')"><i class="fa-solid fa-store fa-fw"></i><span style="flex:1">Store</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="store">
+      <a href="store-inventory.html" class="sub-link"><i class="fa-solid fa-warehouse fa-fw"></i>Inventory</a>
+      <a href="store-suppliers.html" class="sub-link"><i class="fa-solid fa-truck-ramp-box fa-fw"></i>Suppliers</a>
+      <a href="store-warehouse.html" class="sub-link"><i class="fa-solid fa-building fa-fw"></i>Warehouse</a>
+      <a href="store-branch.html" class="sub-link"><i class="fa-solid fa-code-branch fa-fw"></i>Branch</a>
+      <a href="store-categories.html" class="sub-link"><i class="fa-solid fa-tags fa-fw"></i>Categories</a>
+      <a href="store-brands.html" class="sub-link"><i class="fa-solid fa-copyright fa-fw"></i>Brands</a>
+    </div>
+
+    <div class="nav-section">Management</div>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Store / Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-square-parking fa-fw"></i>Parking Yard</a>
+  </nav>
+  <div style="padding:.75rem .5rem;border-top:1px solid #1E293B;">
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.6rem;cursor:pointer;">
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+      <div><div style="color:#fff;font-size:.8rem;font-weight:600;">Admin User</div><div style="color:#64748B;font-size:.7rem;">admin@fleetctrl.com</div></div>
+    </div>
+  </div>
+</aside>
+<div class="main">
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <div style="flex:1;max-width:28rem;position:relative;"><i class="fa-solid fa-magnifying-glass" style="position:absolute;left:.75rem;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:.8rem;"></i><input type="text" placeholder="Search..." style="width:100%;padding:.5rem .75rem .5rem 2.25rem;font-size:.85rem;background:#F1F5F9;border:0;border-radius:.6rem;outline:none;" /></div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.75rem;">
+      <button style="position:relative;padding:.5rem;border:0;background:transparent;cursor:pointer;"><i class="fa-solid fa-bell" style="color:#64748B;font-size:1rem;"></i><span style="position:absolute;top:.3rem;right:.3rem;width:.5rem;height:.5rem;background:#EF4444;border-radius:999px;"></span></button>
+      <div style="width:2rem;height:2rem;background:#2563EB;border-radius:999px;display:flex;align-items:center;justify-content:center;"><span style="color:#fff;font-size:.7rem;font-weight:700;">AD</span></div>
+    </div>
+  </header>
+  <main style="padding:1.5rem;">
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;">
+      <a href="grn-view.html?id=GRN-2024-001" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i>Back</a>
+      <div><h1 style="font-size:1.5rem;font-weight:700;color:#0F172A;"><i class="fa-solid fa-clipboard-check" style="margin-right:.5rem;color:#3B82F6;"></i>Edit GRN-2024-001</h1></div>
+    </div>
+    <div class="card" style="padding:2rem;max-width:800px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group"><label>LPO Reference</label><select><option selected>LPO-2024-001</option><option >LPO-2024-002</option><option >LPO-2024-004</option></select></div><div class="form-group"><label>Date Received</label><input type="date" value="2024-06-20" /></div><div class="form-group"><label>Received By</label><select><option selected>John Kamau</option><option >Grace Wanjiku</option><option >Peter Mwangi</option></select></div><div class="form-group"><label>Warehouse</label><select><option selected>Main Warehouse</option><option >Satellite Depot A</option><option >Satellite Depot B</option></select></div><div class="form-group"><label>Condition</label><select><option selected>Good</option><option >Damaged</option><option >Mixed</option></select></div><div class="form-group"><label>Notes</label><textarea rows="3">All items received in good condition</textarea></div>
+      </div>
+      <h3 style="font-size:1rem;font-weight:700;color:#0F172A;margin:1.5rem 0 1rem;border-top:1px solid #E2E8F0;padding-top:1rem;">Line Items</h3>
+      <table>
+        <thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th><th></th></tr></thead>
+        <tbody id="items"><tr><td><input type="text" value="Brake Pads — Premium Ceramic" style="width:100%;padding:.4rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;"/></td><td><input type="number" value="50" style="width:5rem;padding:.4rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;"/></td><td><input type="number" value="45" style="width:7rem;padding:.4rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;"/></td><td style="font-weight:600;">$2,250.00</td><td><button onclick="this.closest('tr').remove()" class="btn btn-danger" style="padding:.3rem .5rem;font-size:.7rem;"><i class="fa-solid fa-trash"></i></button></td></tr><tr><td><input type="text" value="Brake Discs — Heavy Duty" style="width:100%;padding:.4rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;"/></td><td><input type="number" value="20" style="width:5rem;padding:.4rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;"/></td><td><input type="number" value="100" style="width:7rem;padding:.4rem;border:1px solid #E2E8F0;border-radius:.4rem;font-size:.8rem;"/></td><td style="font-weight:600;">$2,000.00</td><td><button onclick="this.closest('tr').remove()" class="btn btn-danger" style="padding:.3rem .5rem;font-size:.7rem;"><i class="fa-solid fa-trash"></i></button></td></tr></tbody>
+      </table>
+      <button onclick="addItem()" class="btn btn-outline" style="margin-top:.75rem;"><i class="fa-solid fa-plus"></i>Add Item</button>
+      <div style="display:flex;gap:.75rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid #E2E8F0;">
+        <button onclick="showToast('Changes saved!')" class="btn btn-primary"><i class="fa-solid fa-check"></i>Save Changes</button>
+        <a href="grn-view.html?id=GRN-2024-001" class="btn btn-outline">Cancel</a>
+      </div>
+    </div>
+    <script>
+    function addItem(){
+      const row=document.querySelector('#items tr').cloneNode(true);
+      row.querySelectorAll('input').forEach(i=>i.value=i.type==='number'?0:'');
+      document.getElementById('items').appendChild(row);
+    }
+    </script>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script>
+function toggleDD(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+  el.previousElementSibling.classList.toggle('open');
+}
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';
+  setTimeout(()=>t.style.display='none',3000);
+}
+// Auto-open active dropdown
+(function(){
+  const page=location.pathname.split('/').pop();
+  document.querySelectorAll('.sub-link').forEach(a=>{
+    if(a.getAttribute('href')===page){
+      a.classList.add('active');
+      const dd=a.closest('.dropdown-items');
+      if(dd){dd.classList.add('open');dd.previousElementSibling.classList.add('open');}
+    }
+  });
+  document.querySelectorAll('.nav-link').forEach(a=>{
+    if(a.getAttribute('href')===page)a.classList.add('active');
+  });
+})();
+</script>
+</body>
+</html>
