@@ -7,7 +7,16 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
-    body{font-family:system-ui,-apple-system,sans-serif;background:#F1F5F9;margin:0;}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#F1F5F9;margin:0;color:#0F172A;}
+    *{box-sizing:border-box;}
+    /* Page header banner */
+    .page-banner{background:linear-gradient(135deg,#1D4ED8 0%,#2563EB 60%,#3B82F6 100%);color:#fff;border-radius:1.25rem;padding:1.5rem 1.75rem;margin-bottom:1.5rem;position:relative;overflow:hidden;box-shadow:0 8px 24px -8px rgba(37,99,235,.45);}
+    .page-banner::after{content:'';position:absolute;right:-40px;bottom:-40px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.08);}
+    .page-banner::before{content:'';position:absolute;right:60px;top:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.06);}
+    .kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1.5rem;}
+    .kpi{background:#fff;border:1px solid #E2E8F0;border-radius:.85rem;padding:.85rem 1rem;display:flex;align-items:center;gap:.75rem;}
+    .kpi-icon{width:2.25rem;height:2.25rem;border-radius:.6rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    @media(max-width:900px){.kpi-strip{grid-template-columns:repeat(2,1fr);}}
     .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
     .nav-link{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s,color .15s;}
     .nav-link:hover{background:#1E293B;color:#fff;}

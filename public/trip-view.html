@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trip TRP-10458 — FleetCtrl</title>
+  <meta name="description" content="Detailed trip view with timeline, route, cargo, billing and live status." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8' },
+            ink:   { 900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC' }
+          },
+          boxShadow: {
+            soft:'0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.05)',
+            ring:'0 0 0 4px rgba(59,130,246,.12)'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#F1F5F9;margin:0;}
+    /* sidebar (matches existing template) */
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;transition:background .15s,color .15s;}
+    .nav-link:hover{background:#1E293B;color:#fff;}
+    .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;text-align:left;transition:background .15s,color .15s;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:.75rem;}
+    .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.75rem;padding:.45rem 1rem;border-radius:.5rem;color:#64748B;font-size:.8rem;text-decoration:none;transition:background .15s,color .15s;}
+    .sub-link:hover{background:#1E293B;color:#CBD5E1;}
+    .sub-link.active{color:#60A5FA;background:#1E293B;}
+    .main{margin-left:240px;}
+    @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+
+    .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;}
+    .pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-warning{background:#FEF3C7;color:#92400E;}
+    .pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-muted{background:#F1F5F9;color:#475569;}
+
+    /* Tabs */
+    .tab{padding:.7rem 1rem;font-size:.85rem;font-weight:600;color:#64748B;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem;}
+    .tab:hover{color:#0F172A;}
+    .tab.active{color:#2563EB;border-color:#2563EB;}
+    .tab-panel{display:none;}
+    .tab-panel.active{display:block;}
+
+    /* Timeline */
+    .tl{position:relative;padding-left:2rem;}
+    .tl::before{content:'';position:absolute;left:.7rem;top:.4rem;bottom:.4rem;width:2px;background:#E2E8F0;}
+    .tl-item{position:relative;padding-bottom:1.25rem;}
+    .tl-dot{position:absolute;left:-1.55rem;top:.2rem;width:1.1rem;height:1.1rem;border-radius:999px;background:#fff;border:2px solid #CBD5E1;display:flex;align-items:center;justify-content:center;font-size:.55rem;color:#fff;}
+    .tl-item.done .tl-dot{background:#10B981;border-color:#10B981;}
+    .tl-item.active .tl-dot{background:#3B82F6;border-color:#3B82F6;box-shadow:0 0 0 4px rgba(59,130,246,.18);}
+    .tl-item.done .tl-dot::before,.tl-item.active .tl-dot::before{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;}
+
+    /* Map */
+    .map{position:relative;height:280px;border-radius:.85rem;overflow:hidden;background:linear-gradient(135deg,#0F172A 0%,#1E293B 50%,#334155 100%);}
+    .map::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30h60M30 0v60' stroke='%23475569' stroke-width='.4' fill='none'/%3E%3C/svg%3E");opacity:.35;}
+    .map-pin{position:absolute;width:14px;height:14px;border-radius:999px;}
+    .map-pin.start{background:#3B82F6;box-shadow:0 0 0 5px rgba(59,130,246,.3);}
+    .map-pin.end{background:#EF4444;box-shadow:0 0 0 5px rgba(239,68,68,.3);}
+    .map-truck{position:absolute;background:#fff;width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:#2563EB;box-shadow:0 4px 12px rgba(0,0,0,.25);animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+    .map-route{position:absolute;height:3px;background:repeating-linear-gradient(90deg,#60A5FA 0 8px,transparent 8px 14px);transform-origin:left center;}
+
+    /* fuel/progress bars */
+    .bar{height:6px;background:#E2E8F0;border-radius:999px;overflow:hidden;}
+    .bar > span{display:block;height:100%;border-radius:999px;}
+  </style>
+</head>
+<body>
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar">
+  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
+    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
+    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
+  </div>
+  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
+    <div class="nav-section">Main Menu</div>
+    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
+    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
+    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
+    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
+
+    <div class="nav-section">Logistics</div>
+    <button class="dropdown-btn open" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items open" id="logistics">
+      <a href="create-trip.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create Trip</a>
+      <a href="draft-trips.html" class="sub-link"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
+      <a href="pending-trips.html" class="sub-link active"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
+      <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
+    </div>
+
+    <div class="nav-section">Fleet</div>
+    <a href="fleet-management.html" class="nav-link"><i class="fa-solid fa-truck-moving fa-fw"></i>Fleet Management</a>
+    <a href="trucks.html" class="nav-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a>
+    <a href="trailers.html" class="nav-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
+    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
+    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
+    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Parts</a>
+    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-square-parking fa-fw"></i>Parking Yard</a>
+
+    <div class="nav-section">Clients</div>
+    <a href="client-directory.html" class="nav-link"><i class="fa-solid fa-building fa-fw"></i>Client Directory</a>
+  </nav>
+</aside>
+
+<div class="main">
+  <!-- Header -->
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:1rem;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <a href="pending-trips.html" class="text-ink-500 hover:text-ink-900 text-sm flex items-center gap-2"><i class="fa-solid fa-arrow-left"></i> Back to Trips</a>
+    <div class="ml-auto flex items-center gap-2">
+      <button class="px-3 py-2 text-sm font-medium text-ink-700 border border-ink-200 rounded-lg hover:bg-ink-50 flex items-center gap-2"><i class="fa-solid fa-print"></i> Print</button>
+      <button class="px-3 py-2 text-sm font-medium text-ink-700 border border-ink-200 rounded-lg hover:bg-ink-50 flex items-center gap-2"><i class="fa-solid fa-share-nodes"></i> Share</button>
+      <button class="px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 flex items-center gap-2"><i class="fa-solid fa-pen"></i> Edit Trip</button>
+    </div>
+  </header>
+
+  <main class="p-6 max-w-[1400px] mx-auto">
+
+    <!-- ===== Trip Header Banner ===== -->
+    <div class="bg-white rounded-2xl shadow-soft border border-ink-200 p-6 mb-6">
+      <div class="flex items-start justify-between flex-wrap gap-4">
+        <div class="flex items-start gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white shadow-ring">
+            <i class="fa-solid fa-route text-xl"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 class="text-2xl font-bold text-ink-900">Trip TRP-10458</h1>
+              <span class="pill pill-primary"><i class="fa-solid fa-circle-play"></i> In Transit</span>
+              <span class="pill pill-warning"><i class="fa-solid fa-bolt"></i> High Priority</span>
+            </div>
+            <p class="text-ink-500 text-sm mt-1">
+              <i class="fa-solid fa-building mr-1"></i> Acme Logistics Ltd
+              <span class="mx-2 text-ink-200">•</span>
+              <i class="fa-solid fa-calendar mr-1"></i> Created Apr 14, 2026 by Admin User
+              <span class="mx-2 text-ink-200">•</span>
+              <i class="fa-solid fa-hashtag mr-1"></i> PO-58210
+            </p>
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-xs uppercase tracking-wider text-ink-400 font-semibold">Trip Value</div>
+          <div class="text-2xl font-bold text-ink-900">KES 285,000</div>
+          <div class="text-xs text-emerald-600 font-semibold mt-1"><i class="fa-solid fa-check-circle"></i> Invoiced • Net 30</div>
+        </div>
+      </div>
+
+      <!-- Origin → Destination strip -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-center gap-4 bg-ink-50 rounded-xl p-4">
+        <div>
+          <div class="text-xs uppercase tracking-wider text-ink-400 font-semibold">Origin</div>
+          <div class="font-bold text-ink-900 mt-1"><i class="fa-solid fa-circle text-brand-500 text-xs mr-2"></i>Nairobi Depot</div>
+          <div class="text-xs text-ink-500 mt-1">Apr 15, 2026 · 06:30 EAT</div>
+        </div>
+        <div class="hidden md:flex flex-col items-center text-ink-400 px-4">
+          <div class="text-xs font-semibold">485 km</div>
+          <div class="w-32 h-px border-t-2 border-dashed border-ink-200 my-2 relative">
+            <i class="fa-solid fa-truck absolute -top-2 left-1/2 -translate-x-1/2 bg-ink-50 px-2 text-brand-500"></i>
+          </div>
+          <div class="text-xs">~ 7h 45m</div>
+        </div>
+        <div class="md:text-right">
+          <div class="text-xs uppercase tracking-wider text-ink-400 font-semibold">Destination</div>
+          <div class="font-bold text-ink-900 mt-1"><i class="fa-solid fa-location-dot text-red-500 text-xs mr-2"></i>Mombasa Port</div>
+          <div class="text-xs text-ink-500 mt-1">Apr 15, 2026 · 14:15 EAT (ETA)</div>
+        </div>
+      </div>
+
+      <!-- KPI strip -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mt-5">
+        <div class="p-3 rounded-xl bg-blue-50 border border-blue-100">
+          <div class="text-xs text-ink-500">Distance</div>
+          <div class="text-lg font-bold text-ink-900">485 <span class="text-xs font-medium text-ink-500">km</span></div>
+          <div class="bar mt-2"><span style="width:62%;background:#3B82F6;"></span></div>
+          <div class="text-[.65rem] text-ink-500 mt-1">301 km completed</div>
+        </div>
+        <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-100">
+          <div class="text-xs text-ink-500">Fuel Used</div>
+          <div class="text-lg font-bold text-ink-900">142 <span class="text-xs font-medium text-ink-500">L</span></div>
+          <div class="bar mt-2"><span style="width:54%;background:#10B981;"></span></div>
+          <div class="text-[.65rem] text-ink-500 mt-1">3.4 km/L average</div>
+        </div>
+        <div class="p-3 rounded-xl bg-amber-50 border border-amber-100">
+          <div class="text-xs text-ink-500">Cargo Weight</div>
+          <div class="text-lg font-bold text-ink-900">18,000 <span class="text-xs font-medium text-ink-500">kg</span></div>
+          <div class="bar mt-2"><span style="width:75%;background:#F59E0B;"></span></div>
+          <div class="text-[.65rem] text-ink-500 mt-1">75% of capacity</div>
+        </div>
+        <div class="p-3 rounded-xl bg-violet-50 border border-violet-100">
+          <div class="text-xs text-ink-500">Avg Speed</div>
+          <div class="text-lg font-bold text-ink-900">62 <span class="text-xs font-medium text-ink-500">km/h</span></div>
+          <div class="bar mt-2"><span style="width:62%;background:#8B5CF6;"></span></div>
+          <div class="text-[.65rem] text-ink-500 mt-1">Within range</div>
+        </div>
+        <div class="p-3 rounded-xl bg-rose-50 border border-rose-100">
+          <div class="text-xs text-ink-500">Stops</div>
+          <div class="text-lg font-bold text-ink-900">2 <span class="text-xs font-medium text-ink-500">/ 3</span></div>
+          <div class="bar mt-2"><span style="width:66%;background:#EF4444;"></span></div>
+          <div class="text-[.65rem] text-ink-500 mt-1">1 remaining</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Two column layout ===== -->
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+
+      <!-- LEFT COLUMN -->
+      <div class="space-y-6">
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-2xl shadow-soft border border-ink-200 overflow-hidden">
+          <div class="flex border-b border-ink-200 px-4 overflow-x-auto">
+            <div class="tab active" data-tab="overview"><i class="fa-solid fa-circle-info"></i> Overview</div>
+            <div class="tab" data-tab="route"><i class="fa-solid fa-route"></i> Route & Map</div>
+            <div class="tab" data-tab="cargo"><i class="fa-solid fa-boxes-stacked"></i> Cargo</div>
+            <div class="tab" data-tab="documents"><i class="fa-solid fa-file-lines"></i> Documents <span class="pill pill-muted ml-1">5</span></div>
+            <div class="tab" data-tab="expenses"><i class="fa-solid fa-receipt"></i> Expenses</div>
+            <div class="tab" data-tab="activity"><i class="fa-solid fa-clock-rotate-left"></i> Activity</div>
+          </div>
+
+          <!-- Overview tab -->
+          <div class="tab-panel active p-6" data-panel="overview">
+            <h3 class="font-bold text-ink-900 mb-4 flex items-center gap-2"><i class="fa-solid fa-timeline text-brand-500"></i> Trip Timeline</h3>
+            <div class="tl">
+              <div class="tl-item done">
+                <div class="tl-dot"></div>
+                <div class="flex justify-between flex-wrap gap-2">
+                  <div>
+                    <div class="font-semibold text-ink-900 text-sm">Trip Created</div>
+                    <div class="text-xs text-ink-500">By Admin User · System generated PO-58210</div>
+                  </div>
+                  <div class="text-xs text-ink-500">Apr 14, 14:22</div>
+                </div>
+              </div>
+              <div class="tl-item done">
+                <div class="tl-dot"></div>
+                <div class="flex justify-between flex-wrap gap-2">
+                  <div>
+                    <div class="font-semibold text-ink-900 text-sm">Vehicle & Driver Assigned</div>
+                    <div class="text-xs text-ink-500">T-101 (KBZ 123A) · John Doe</div>
+                  </div>
+                  <div class="text-xs text-ink-500">Apr 14, 16:08</div>
+                </div>
+              </div>
+              <div class="tl-item done">
+                <div class="tl-dot"></div>
+                <div class="flex justify-between flex-wrap gap-2">
+                  <div>
+                    <div class="font-semibold text-ink-900 text-sm">Loaded at Origin</div>
+                    <div class="text-xs text-ink-500">Nairobi Depot · 24 packages, 18,000 kg verified</div>
+                  </div>
+                  <div class="text-xs text-ink-500">Apr 15, 06:12</div>
+                </div>
+              </div>
+              <div class="tl-item done">
+                <div class="tl-dot"></div>
+                <div class="flex justify-between flex-wrap gap-2">
+                  <div>
+                    <div class="font-semibold text-ink-900 text-sm">Departed Origin</div>
+                    <div class="text-xs text-ink-500">On schedule · GPS tracking activated</div>
+                  </div>
+                  <div class="text-xs text-ink-500">Apr 15, 06:34</div>
+                </div>
+              </div>
+              <div class="tl-item done">
+                <div class="tl-dot"></div>
+                <div class="flex justify-between flex-wrap gap-2">
+                  <div>
+                    <div class="font-semibold text-ink-900 text-sm">Stop 1: Mtito Andei (Fuel)</div>
+                    <div class="text-xs text-ink-500">42 min · 65 L diesel @ KES 178/L · Receipt #FU-7821</div>
+                  </div>
+                  <div class="text-xs text-ink-500">Apr 15, 09:48</div>
+                </div>
+              </div>
+              <div class="tl-item active">
+                <div class="tl-dot"></div>
+                <div class="flex justify-between flex-wrap gap-2">
+                  <div>
+                    <div class="font-semibold text-ink-900 text-sm">In Transit — Voi → Mombasa</div>
+                    <div class="text-xs text-ink-500">Currently 184 km from destination · ETA 14:15</div>
+                  </div>
+                  <div class="text-xs text-brand-600 font-semibold">Live</div>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="flex justify-between flex-wrap gap-2">
+                  <div>
+                    <div class="font-semibold text-ink-400 text-sm">Arrival at Mombasa Port</div>
+                    <div class="text-xs text-ink-400">Pending</div>
+                  </div>
+                  <div class="text-xs text-ink-400">~ 14:15</div>
+                </div>
+              </div>
+              <div class="tl-item">
+                <div class="tl-dot"></div>
+                <div class="flex justify-between flex-wrap gap-2">
+                  <div>
+                    <div class="font-semibold text-ink-400 text-sm">Proof of Delivery</div>
+                    <div class="text-xs text-ink-400">Awaiting consignee signature</div>
+                  </div>
+                  <div class="text-xs text-ink-400">Pending</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Route tab -->
+          <div class="tab-panel p-6" data-panel="route">
+            <div class="map mb-4">
+              <div class="map-pin start" style="left:14%;top:62%;"></div>
+              <div class="map-pin end" style="left:82%;top:35%;"></div>
+              <div class="map-route" style="left:calc(14% + 7px);top:calc(62% - 1px);width:calc(68% - 7px);transform:rotate(-22deg);"></div>
+              <div class="map-truck" style="left:48%;top:48%;"><i class="fa-solid fa-truck text-xs"></i></div>
+              <div class="absolute top-3 left-3 bg-white/95 rounded-lg px-3 py-2 text-xs">
+                <div class="flex items-center gap-2 font-semibold text-ink-900"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live tracking</div>
+                <div class="text-ink-500 mt-0.5">Updated 12 sec ago</div>
+              </div>
+              <div class="absolute bottom-3 right-3 flex flex-col gap-1">
+                <button class="w-8 h-8 bg-white rounded shadow text-ink-700 text-sm">+</button>
+                <button class="w-8 h-8 bg-white rounded shadow text-ink-700 text-sm">−</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3 text-center text-sm">
+              <div class="p-3 bg-ink-50 rounded-lg">
+                <div class="text-xs text-ink-500">Distance covered</div>
+                <div class="font-bold text-ink-900 mt-1">301 / 485 km</div>
+              </div>
+              <div class="p-3 bg-ink-50 rounded-lg">
+                <div class="text-xs text-ink-500">Time elapsed</div>
+                <div class="font-bold text-ink-900 mt-1">5h 12m</div>
+              </div>
+              <div class="p-3 bg-ink-50 rounded-lg">
+                <div class="text-xs text-ink-500">ETA</div>
+                <div class="font-bold text-emerald-600 mt-1">On time</div>
+              </div>
+            </div>
+
+            <h4 class="font-bold text-ink-900 mt-6 mb-3 text-sm flex items-center gap-2"><i class="fa-solid fa-location-crosshairs text-amber-500"></i> Waypoints</h4>
+            <div class="space-y-2">
+              <div class="flex items-center gap-3 p-3 border border-ink-200 rounded-lg">
+                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">1</div>
+                <div class="flex-1">
+                  <div class="font-semibold text-ink-900 text-sm">Mtito Andei</div>
+                  <div class="text-xs text-ink-500">Fuel stop · Total Petrol Station</div>
+                </div>
+                <span class="pill pill-success"><i class="fa-solid fa-check"></i> Done</span>
+              </div>
+              <div class="flex items-center gap-3 p-3 border border-ink-200 rounded-lg">
+                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">2</div>
+                <div class="flex-1">
+                  <div class="font-semibold text-ink-900 text-sm">Voi Weighbridge</div>
+                  <div class="text-xs text-ink-500">Mandatory weight check</div>
+                </div>
+                <span class="pill pill-warning"><i class="fa-solid fa-clock"></i> ETA 12:30</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cargo tab -->
+          <div class="tab-panel p-6" data-panel="cargo">
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div><div class="text-xs text-ink-400 uppercase font-semibold">Cargo Type</div><div class="font-semibold text-ink-900 mt-1">Containers (TEU)</div></div>
+              <div><div class="text-xs text-ink-400 uppercase font-semibold">Description</div><div class="font-semibold text-ink-900 mt-1">2x 20ft containers — electronics</div></div>
+              <div><div class="text-xs text-ink-400 uppercase font-semibold">Weight</div><div class="font-semibold text-ink-900 mt-1">18,000 kg</div></div>
+              <div><div class="text-xs text-ink-400 uppercase font-semibold">Volume</div><div class="font-semibold text-ink-900 mt-1">65 m³</div></div>
+              <div><div class="text-xs text-ink-400 uppercase font-semibold">Packages</div><div class="font-semibold text-ink-900 mt-1">24</div></div>
+              <div><div class="text-xs text-ink-400 uppercase font-semibold">Declared Value</div><div class="font-semibold text-ink-900 mt-1">KES 5,000,000</div></div>
+              <div><div class="text-xs text-ink-400 uppercase font-semibold">Temperature</div><div class="font-semibold text-ink-900 mt-1">Ambient</div></div>
+              <div><div class="text-xs text-ink-400 uppercase font-semibold">Insurance</div><div class="font-semibold text-ink-900 mt-1">Full Cover · KES 18,500</div></div>
+            </div>
+            <h4 class="font-bold text-ink-900 mb-3 text-sm">Special Handling</h4>
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="pill pill-warning"><i class="fa-solid fa-wine-glass"></i> Fragile</span>
+              <span class="pill pill-primary"><i class="fa-solid fa-shield-halved"></i> High Value</span>
+            </div>
+            <h4 class="font-bold text-ink-900 mb-3 text-sm">Consignment Items</h4>
+            <table class="w-full text-sm">
+              <thead><tr class="text-xs text-ink-500 uppercase border-b border-ink-200"><th class="text-left py-2">SKU</th><th class="text-left py-2">Description</th><th class="text-right py-2">Qty</th><th class="text-right py-2">Weight</th></tr></thead>
+              <tbody class="text-ink-700">
+                <tr class="border-b border-ink-100"><td class="py-2.5 font-mono text-xs">CNT-A-001</td><td>Container A — Mixed Electronics</td><td class="text-right">12</td><td class="text-right">9,200 kg</td></tr>
+                <tr class="border-b border-ink-100"><td class="py-2.5 font-mono text-xs">CNT-B-002</td><td>Container B — Telecom Equipment</td><td class="text-right">12</td><td class="text-right">8,800 kg</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Documents tab -->
+          <div class="tab-panel p-6" data-panel="documents">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="p-4 border border-ink-200 rounded-xl flex items-center gap-3 hover:bg-ink-50 cursor-pointer">
+                <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center"><i class="fa-solid fa-file-pdf"></i></div>
+                <div class="flex-1 min-w-0"><div class="font-semibold text-sm text-ink-900 truncate">Bill of Lading.pdf</div><div class="text-xs text-ink-500">2.4 MB · Apr 15</div></div>
+                <i class="fa-solid fa-download text-ink-400"></i>
+              </div>
+              <div class="p-4 border border-ink-200 rounded-xl flex items-center gap-3 hover:bg-ink-50 cursor-pointer">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center"><i class="fa-solid fa-file-invoice"></i></div>
+                <div class="flex-1 min-w-0"><div class="font-semibold text-sm text-ink-900 truncate">Commercial Invoice.pdf</div><div class="text-xs text-ink-500">186 KB · Apr 14</div></div>
+                <i class="fa-solid fa-download text-ink-400"></i>
+              </div>
+              <div class="p-4 border border-ink-200 rounded-xl flex items-center gap-3 hover:bg-ink-50 cursor-pointer">
+                <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-file-shield"></i></div>
+                <div class="flex-1 min-w-0"><div class="font-semibold text-sm text-ink-900 truncate">Insurance Certificate.pdf</div><div class="text-xs text-ink-500">412 KB · Apr 14</div></div>
+                <i class="fa-solid fa-download text-ink-400"></i>
+              </div>
+              <div class="p-4 border border-ink-200 rounded-xl flex items-center gap-3 hover:bg-ink-50 cursor-pointer">
+                <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-file-image"></i></div>
+                <div class="flex-1 min-w-0"><div class="font-semibold text-sm text-ink-900 truncate">Loading Photos (8).zip</div><div class="text-xs text-ink-500">14.2 MB · Apr 15</div></div>
+                <i class="fa-solid fa-download text-ink-400"></i>
+              </div>
+              <div class="p-4 border border-dashed border-ink-200 rounded-xl flex items-center justify-center text-sm text-brand-600 font-semibold cursor-pointer hover:bg-brand-50">
+                <i class="fa-solid fa-plus mr-2"></i> Upload document
+              </div>
+            </div>
+          </div>
+
+          <!-- Expenses tab -->
+          <div class="tab-panel p-6" data-panel="expenses">
+            <table class="w-full text-sm">
+              <thead><tr class="text-xs text-ink-500 uppercase border-b border-ink-200"><th class="text-left py-2">Date</th><th class="text-left py-2">Category</th><th class="text-left py-2">Description</th><th class="text-right py-2">Amount (KES)</th></tr></thead>
+              <tbody class="text-ink-700">
+                <tr class="border-b border-ink-100"><td class="py-2.5 text-ink-500">Apr 15</td><td><span class="pill pill-primary">Fuel</span></td><td>Mtito Andei – 65 L diesel</td><td class="text-right font-semibold">11,570</td></tr>
+                <tr class="border-b border-ink-100"><td class="py-2.5 text-ink-500">Apr 15</td><td><span class="pill pill-warning">Tolls</span></td><td>Nairobi – Mombasa highway</td><td class="text-right font-semibold">2,400</td></tr>
+                <tr class="border-b border-ink-100"><td class="py-2.5 text-ink-500">Apr 15</td><td><span class="pill pill-muted">Driver Allowance</span></td><td>Per diem · 2 days</td><td class="text-right font-semibold">3,000</td></tr>
+                <tr class="border-b border-ink-100"><td class="py-2.5 text-ink-500">Apr 14</td><td><span class="pill pill-success">Insurance</span></td><td>Full cover for KES 5M cargo</td><td class="text-right font-semibold">18,500</td></tr>
+              </tbody>
+              <tfoot><tr><td colspan="3" class="py-3 text-right font-bold text-ink-900">Total Expenses</td><td class="py-3 text-right font-bold text-ink-900">35,470</td></tr></tfoot>
+            </table>
+            <div class="mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-between">
+              <div>
+                <div class="text-xs text-emerald-700 font-semibold uppercase">Estimated Margin</div>
+                <div class="text-xl font-bold text-emerald-700">KES 249,530</div>
+              </div>
+              <div class="text-right text-xs text-emerald-700">87.6% of trip revenue</div>
+            </div>
+          </div>
+
+          <!-- Activity tab -->
+          <div class="tab-panel p-6" data-panel="activity">
+            <div class="space-y-3 text-sm">
+              <div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-xs font-bold">JD</div><div class="flex-1"><div><b>John Doe</b> updated location <span class="text-ink-500">— passed Voi checkpoint</span></div><div class="text-xs text-ink-400">12 minutes ago</div></div></div>
+              <div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs font-bold">SY</div><div class="flex-1"><div><b>System</b> auto-recalculated ETA <span class="text-ink-500">— now 14:15 (no delay)</span></div><div class="text-xs text-ink-400">38 minutes ago</div></div></div>
+              <div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">JD</div><div class="flex-1"><div><b>John Doe</b> uploaded fuel receipt <span class="text-ink-500">— Mtito Andei, KES 11,570</span></div><div class="text-xs text-ink-400">2 hours ago</div></div></div>
+              <div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs font-bold">AD</div><div class="flex-1"><div><b>Admin User</b> approved trip <span class="text-ink-500">— status changed to In Transit</span></div><div class="text-xs text-ink-400">Yesterday, 17:40</div></div></div>
+              <div class="flex gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">AD</div><div class="flex-1"><div><b>Admin User</b> created trip <b>TRP-10458</b></div><div class="text-xs text-ink-400">Yesterday, 14:22</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <aside class="space-y-6 lg:sticky lg:top-20 lg:self-start">
+        <!-- Vehicle -->
+        <div class="bg-white rounded-2xl shadow-soft border border-ink-200 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-ink-900 text-sm flex items-center gap-2"><i class="fa-solid fa-truck text-brand-500"></i> Vehicle</h3>
+            <a href="trucks.html" class="text-xs text-brand-600 font-semibold">View →</a>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-lg bg-ink-900 flex items-center justify-center text-brand-500"><i class="fa-solid fa-truck-moving"></i></div>
+            <div>
+              <div class="font-bold text-ink-900 text-sm">T-101</div>
+              <div class="text-xs text-ink-500">Volvo FH16 · KBZ 123A</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 mt-4 text-xs">
+            <div class="p-2 bg-ink-50 rounded-lg"><div class="text-ink-400">Odometer</div><div class="font-bold text-ink-900">186,420 km</div></div>
+            <div class="p-2 bg-ink-50 rounded-lg"><div class="text-ink-400">Fuel level</div><div class="font-bold text-emerald-600">68%</div></div>
+            <div class="p-2 bg-ink-50 rounded-lg"><div class="text-ink-400">Last service</div><div class="font-bold text-ink-900">12 days</div></div>
+            <div class="p-2 bg-ink-50 rounded-lg"><div class="text-ink-400">Insurance</div><div class="font-bold text-emerald-600">Active</div></div>
+          </div>
+          <div class="mt-3 text-xs text-ink-500 flex items-center gap-2 p-2 bg-amber-50 border border-amber-100 rounded-lg">
+            <i class="fa-solid fa-trailer text-amber-600"></i> Trailer: <b class="text-ink-900">TR-204</b> Container Chassis 40ft
+          </div>
+        </div>
+
+        <!-- Driver -->
+        <div class="bg-white rounded-2xl shadow-soft border border-ink-200 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-ink-900 text-sm flex items-center gap-2"><i class="fa-solid fa-user-tie text-emerald-500"></i> Driver</h3>
+            <a href="drivers.html" class="text-xs text-brand-600 font-semibold">View →</a>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold">JD</div>
+            <div class="flex-1">
+              <div class="font-bold text-ink-900 text-sm">John Doe</div>
+              <div class="text-xs text-ink-500">DL-4521 · Class CE</div>
+            </div>
+            <span class="pill pill-success">On Duty</span>
+          </div>
+          <div class="mt-3 text-xs space-y-1.5">
+            <div class="flex justify-between"><span class="text-ink-500"><i class="fa-solid fa-phone mr-1"></i> Contact</span><span class="font-semibold text-ink-900">+254 712 345 678</span></div>
+            <div class="flex justify-between"><span class="text-ink-500"><i class="fa-solid fa-star mr-1 text-amber-400"></i> Rating</span><span class="font-semibold text-ink-900">4.8 / 5</span></div>
+            <div class="flex justify-between"><span class="text-ink-500"><i class="fa-solid fa-flag-checkered mr-1"></i> Trips done</span><span class="font-semibold text-ink-900">142</span></div>
+            <div class="flex justify-between"><span class="text-ink-500"><i class="fa-solid fa-id-card mr-1"></i> License exp.</span><span class="font-semibold text-ink-900">Aug 2027</span></div>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-2">
+            <button class="py-2 text-xs font-semibold text-brand-600 border border-brand-100 bg-brand-50 rounded-lg hover:bg-brand-100"><i class="fa-solid fa-phone mr-1"></i> Call</button>
+            <button class="py-2 text-xs font-semibold text-emerald-600 border border-emerald-100 bg-emerald-50 rounded-lg hover:bg-emerald-100"><i class="fa-brands fa-whatsapp mr-1"></i> Chat</button>
+          </div>
+        </div>
+
+        <!-- Client -->
+        <div class="bg-white rounded-2xl shadow-soft border border-ink-200 p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-ink-900 text-sm flex items-center gap-2"><i class="fa-solid fa-building text-violet-500"></i> Client</h3>
+            <a href="client-directory.html" class="text-xs text-brand-600 font-semibold">View →</a>
+          </div>
+          <div class="font-bold text-ink-900">Acme Logistics Ltd</div>
+          <div class="text-xs text-ink-500 mt-1">Sarah Karanja · Operations Manager</div>
+          <div class="text-xs text-ink-500 mt-2 space-y-1">
+            <div><i class="fa-solid fa-envelope mr-1.5 text-ink-400"></i> sarah@acmelog.co.ke</div>
+            <div><i class="fa-solid fa-phone mr-1.5 text-ink-400"></i> +254 720 998 776</div>
+          </div>
+        </div>
+
+        <!-- Billing -->
+        <div class="bg-white rounded-2xl shadow-soft border border-ink-200 p-5">
+          <h3 class="font-bold text-ink-900 text-sm flex items-center gap-2 mb-3"><i class="fa-solid fa-money-bill-wave text-emerald-500"></i> Billing</h3>
+          <div class="text-xs space-y-2">
+            <div class="flex justify-between"><span class="text-ink-500">Rate type</span><span class="font-semibold text-ink-900">Per Trip (Flat)</span></div>
+            <div class="flex justify-between"><span class="text-ink-500">Trip rate</span><span class="font-semibold text-ink-900">KES 285,000</span></div>
+            <div class="flex justify-between"><span class="text-ink-500">Payment terms</span><span class="font-semibold text-ink-900">Net 30</span></div>
+            <div class="flex justify-between"><span class="text-ink-500">PO #</span><span class="font-mono text-ink-900">PO-58210</span></div>
+            <div class="flex justify-between"><span class="text-ink-500">Invoice</span><span class="font-semibold text-brand-600">INV-2026-0418 ↗</span></div>
+          </div>
+          <div class="mt-3 p-3 bg-emerald-50 rounded-lg text-xs text-emerald-700 font-semibold flex items-center gap-2"><i class="fa-solid fa-check-circle"></i> Invoice issued · awaiting payment</div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="bg-white rounded-2xl shadow-soft border border-ink-200 p-5">
+          <h3 class="font-bold text-ink-900 text-sm mb-3"><i class="fa-solid fa-bolt text-amber-500 mr-1"></i> Quick Actions</h3>
+          <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+            <button class="py-2.5 border border-ink-200 rounded-lg hover:bg-ink-50 text-ink-700"><i class="fa-solid fa-location-dot mr-1"></i> Track Live</button>
+            <button class="py-2.5 border border-ink-200 rounded-lg hover:bg-ink-50 text-ink-700"><i class="fa-solid fa-comment mr-1"></i> Message</button>
+            <button class="py-2.5 border border-ink-200 rounded-lg hover:bg-ink-50 text-ink-700"><i class="fa-solid fa-flag mr-1"></i> Report Issue</button>
+            <button class="py-2.5 border border-rose-200 text-rose-600 rounded-lg hover:bg-rose-50"><i class="fa-solid fa-circle-stop mr-1"></i> Cancel</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleDD(id){var el=document.getElementById(id);if(!el)return;var open=el.classList.contains('open');document.querySelectorAll('.dropdown-items').forEach(function(d){d.classList.remove('open');});document.querySelectorAll('.dropdown-btn').forEach(function(b){b.classList.remove('open');});if(!open){el.classList.add('open');el.previousElementSibling.classList.add('open');}}
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click',function(){
+    var name=t.dataset.tab;
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.tab-panel').forEach(function(x){x.classList.remove('active');});
+    t.classList.add('active');
+    var p=document.querySelector('.tab-panel[data-panel="'+name+'"]');
+    if(p)p.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
