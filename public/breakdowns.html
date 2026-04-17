@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Breakdowns Register — FleetCtrl</title>
+  <meta name="description" content="Enterprise breakdown management: SLA tracking, root-cause analysis, downtime KPIs and recovery workflow." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors: {
+        brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},
+        ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}
+      },
+      boxShadow:{soft:'0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.05)'}
+    } } }
+  </script>
+  <style>
+    body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;}
+    .nav-link:hover{background:#1E293B;color:#fff;} .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;text-align:left;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:.75rem;} .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.75rem;padding:.45rem 1rem;border-radius:.5rem;color:#64748B;font-size:.8rem;text-decoration:none;}
+    .sub-link:hover{background:#1E293B;color:#CBD5E1;} .sub-link.active{color:#60A5FA;background:#1E293B;}
+    .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+    .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;} .pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-warning{background:#FEF3C7;color:#92400E;} .pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-muted{background:#F1F5F9;color:#475569;} .pill-purple{background:#EDE9FE;color:#5B21B6;}
+    .kpi-card{background:#fff;border-radius:1rem;padding:1.25rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+    .row-hover:hover{background:#F8FAFC;}
+    .sev-bar{height:4px;border-radius:999px;}
+    .heatcell{aspect-ratio:1;border-radius:.4rem;}
+    .tab{padding:.55rem .9rem;font-size:.8rem;font-weight:600;color:#64748B;border-bottom:2px solid transparent;cursor:pointer;}
+    .tab.active{color:#2563EB;border-color:#2563EB;}
+    .filter-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .65rem;border-radius:999px;background:#EFF6FF;color:#1D4ED8;font-size:.72rem;font-weight:600;}
+    .drawer{position:fixed;top:0;right:0;height:100vh;width:480px;background:#fff;box-shadow:-10px 0 40px rgba(15,23,42,.15);transform:translateX(100%);transition:transform .25s;z-index:50;overflow-y:auto;}
+    .drawer.open{transform:translateX(0);}
+    .backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:49;display:none;}
+    .backdrop.open{display:block;}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="px-4 py-4 flex items-center gap-2 border-b border-slate-800">
+    <div class="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white"><i class="fas fa-truck-fast"></i></div>
+    <div><div class="text-white font-bold text-sm">FleetCtrl</div><div class="text-[10px] text-slate-500 uppercase tracking-wider">ERP Suite</div></div>
+  </div>
+  <nav class="px-2 py-3 flex-1">
+    <a href="dashboard.html" class="nav-link"><i class="fas fa-gauge-high w-4"></i>Dashboard</a>
+    <a href="tracking.html" class="nav-link"><i class="fas fa-location-dot w-4"></i>Live Tracking</a>
+    <div class="nav-section">Logistics</div>
+    <a href="create-trip.html" class="nav-link"><i class="fas fa-route w-4"></i>Create Trip</a>
+    <a href="pending-trips.html" class="nav-link"><i class="fas fa-hourglass-half w-4"></i>Pending Trips</a>
+    <a href="complete-trips.html" class="nav-link"><i class="fas fa-flag-checkered w-4"></i>Completed Trips</a>
+    <div class="nav-section">Fleet</div>
+    <a href="trucks.html" class="nav-link"><i class="fas fa-truck w-4"></i>Trucks</a>
+    <a href="trailers.html" class="nav-link"><i class="fas fa-trailer w-4"></i>Trailers</a>
+    <a href="drivers.html" class="nav-link"><i class="fas fa-id-card w-4"></i>Drivers</a>
+    <div class="nav-section">Incidents</div>
+    <a href="breakdowns.html" class="nav-link active"><i class="fas fa-screwdriver-wrench w-4"></i>Breakdowns</a>
+    <a href="accidents.html" class="nav-link"><i class="fas fa-car-burst w-4"></i>Accidents</a>
+    <div class="nav-section">Workshop</div>
+    <a href="parts.html" class="nav-link"><i class="fas fa-gears w-4"></i>Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fas fa-circle-notch w-4"></i>Tyres</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <!-- TOPBAR -->
+  <header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div>
+      <div class="text-[11px] text-ink-500 font-medium"><a href="dashboard.html" class="hover:text-brand-600">Dashboard</a> / Incidents / <span class="text-ink-900">Breakdowns</span></div>
+      <h1 class="text-lg font-bold text-ink-900">Breakdown Register</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-file-export mr-1"></i>Export</button>
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-print mr-1"></i>Print</button>
+      <a href="#" onclick="openCreate()" class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700"><i class="fas fa-plus mr-1"></i>Log Breakdown</a>
+    </div>
+  </header>
+
+  <div class="p-6 space-y-6">
+
+    <!-- HERO BANNER -->
+    <section class="rounded-2xl overflow-hidden relative bg-gradient-to-br from-ink-900 via-slate-800 to-brand-700 text-white p-6">
+      <div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,%3Csvg width=%2240%22 height=%2240%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M0 20h40M20 0v40%22 stroke=%22%23fff%22 stroke-width=%22.4%22/%3E%3C/svg%3E');"></div>
+      <div class="relative flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider bg-white/15 px-2.5 py-1 rounded-full backdrop-blur"><i class="fas fa-screwdriver-wrench"></i> Mechanical Operations</div>
+          <h2 class="text-2xl font-bold mt-3">Breakdown Command Center</h2>
+          <p class="text-sm text-slate-300 mt-1 max-w-xl">Real-time visibility into vehicle failures, recovery progress, downtime impact, and root-cause patterns across your fleet.</p>
+        </div>
+        <div class="flex gap-3">
+          <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3"><div class="text-[10px] uppercase text-slate-300 tracking-wider">Active Now</div><div class="text-2xl font-bold flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-red-400 animate-pulse"></span>4</div></div>
+          <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3"><div class="text-[10px] uppercase text-slate-300 tracking-wider">MTTR</div><div class="text-2xl font-bold">6.2h</div></div>
+          <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3"><div class="text-[10px] uppercase text-slate-300 tracking-wider">Downtime Cost</div><div class="text-2xl font-bold">$18.4K</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI STRIP -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="kpi-card">
+        <div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Open Cases</div><span class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-triangle-exclamation"></i></span></div>
+        <div class="text-2xl font-bold text-ink-900 mt-2">12</div>
+        <div class="text-[11px] text-red-600 font-medium mt-1"><i class="fas fa-arrow-up"></i> 3 vs last week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Resolved (30d)</div><span class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center"><i class="fas fa-circle-check"></i></span></div>
+        <div class="text-2xl font-bold text-ink-900 mt-2">47</div>
+        <div class="text-[11px] text-emerald-600 font-medium mt-1"><i class="fas fa-arrow-up"></i> 12% improvement</div>
+      </div>
+      <div class="kpi-card">
+        <div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Avg Response</div><span class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center"><i class="fas fa-stopwatch"></i></span></div>
+        <div class="text-2xl font-bold text-ink-900 mt-2">42<span class="text-sm text-ink-500">min</span></div>
+        <div class="text-[11px] text-emerald-600 font-medium mt-1">SLA: 60min ✓</div>
+      </div>
+      <div class="kpi-card">
+        <div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Repair Cost MTD</div><span class="w-8 h-8 bg-brand-50 text-brand-600 rounded-lg flex items-center justify-center"><i class="fas fa-dollar-sign"></i></span></div>
+        <div class="text-2xl font-bold text-ink-900 mt-2">$24.8K</div>
+        <div class="text-[11px] text-ink-500 font-medium mt-1">Budget: $35K</div>
+      </div>
+      <div class="kpi-card">
+        <div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Fleet Availability</div><span class="w-8 h-8 bg-purple-50 text-purple-600 rounded-lg flex items-center justify-center"><i class="fas fa-truck"></i></span></div>
+        <div class="text-2xl font-bold text-ink-900 mt-2">94.2%</div>
+        <div class="bar mt-2" style="height:6px;background:#E2E8F0;border-radius:999px;overflow:hidden"><span style="display:block;width:94%;height:100%;background:#10B981"></span></div>
+      </div>
+    </section>
+
+    <!-- ANALYTICS ROW -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Failure category breakdown -->
+      <div class="bg-white rounded-2xl p-5 shadow-soft lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-ink-900">Failure Categories — Last 90 Days</h3>
+          <div class="flex gap-1 text-[11px]"><button class="px-2 py-1 rounded bg-ink-100 font-semibold text-ink-700">90d</button><button class="px-2 py-1 rounded text-ink-500">30d</button><button class="px-2 py-1 rounded text-ink-500">7d</button></div>
+        </div>
+        <div class="space-y-3">
+          <div><div class="flex justify-between text-xs mb-1"><span class="font-medium text-ink-700"><i class="fas fa-engine-warning text-red-500 mr-1"></i> Engine / Powertrain</span><span class="text-ink-500">18 cases · $9.2K</span></div><div class="bar" style="height:8px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:72%;height:100%;background:linear-gradient(90deg,#EF4444,#F97316)"></span></div></div>
+          <div><div class="flex justify-between text-xs mb-1"><span class="font-medium text-ink-700"><i class="fas fa-circle-notch text-amber-500 mr-1"></i> Tyres & Wheels</span><span class="text-ink-500">14 cases · $4.1K</span></div><div class="bar" style="height:8px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:56%;height:100%;background:#F59E0B"></span></div></div>
+          <div><div class="flex justify-between text-xs mb-1"><span class="font-medium text-ink-700"><i class="fas fa-bolt text-yellow-500 mr-1"></i> Electrical / Battery</span><span class="text-ink-500">9 cases · $2.8K</span></div><div class="bar" style="height:8px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:36%;height:100%;background:#EAB308"></span></div></div>
+          <div><div class="flex justify-between text-xs mb-1"><span class="font-medium text-ink-700"><i class="fas fa-gas-pump text-blue-500 mr-1"></i> Fuel System</span><span class="text-ink-500">6 cases · $1.9K</span></div><div class="bar" style="height:8px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:24%;height:100%;background:#3B82F6"></span></div></div>
+          <div><div class="flex justify-between text-xs mb-1"><span class="font-medium text-ink-700"><i class="fas fa-snowflake text-cyan-500 mr-1"></i> Cooling / HVAC</span><span class="text-ink-500">4 cases · $1.2K</span></div><div class="bar" style="height:8px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:16%;height:100%;background:#06B6D4"></span></div></div>
+        </div>
+      </div>
+
+      <!-- Repeat offenders -->
+      <div class="bg-white rounded-2xl p-5 shadow-soft">
+        <h3 class="font-semibold text-ink-900 mb-3">Repeat Offenders</h3>
+        <div class="space-y-2">
+          <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ink-50"><div class="w-9 h-9 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-xs">5x</div><div class="flex-1 min-w-0"><div class="text-sm font-semibold text-ink-900 truncate">KCA 442N · Scania R450</div><div class="text-[11px] text-ink-500">Engine overheating · 240k km</div></div><span class="pill pill-danger">High</span></div>
+          <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ink-50"><div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">3x</div><div class="flex-1 min-w-0"><div class="text-sm font-semibold text-ink-900 truncate">KDD 781P · Volvo FH16</div><div class="text-[11px] text-ink-500">Air brake leaks · 198k km</div></div><span class="pill pill-warning">Med</span></div>
+          <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ink-50"><div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-xs">3x</div><div class="flex-1 min-w-0"><div class="text-sm font-semibold text-ink-900 truncate">KBX 105M · MAN TGS</div><div class="text-[11px] text-ink-500">Alternator failure</div></div><span class="pill pill-warning">Med</span></div>
+          <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-ink-50"><div class="w-9 h-9 rounded-lg bg-ink-100 text-ink-600 flex items-center justify-center font-bold text-xs">2x</div><div class="flex-1 min-w-0"><div class="text-sm font-semibold text-ink-900 truncate">KCQ 309L · Isuzu FVR</div><div class="text-[11px] text-ink-500">Tyre blowouts</div></div><span class="pill pill-muted">Low</span></div>
+        </div>
+        <a href="#" class="block text-center text-xs font-semibold text-brand-600 mt-3 hover:underline">View full reliability report →</a>
+      </div>
+    </section>
+
+    <!-- HEATMAP + SLA -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="bg-white rounded-2xl p-5 shadow-soft lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-ink-900">Breakdown Heatmap (by hour × day)</h3>
+          <div class="flex items-center gap-2 text-[10px] text-ink-500"><span>Low</span><div class="flex gap-1"><span class="w-3 h-3 rounded bg-emerald-100"></span><span class="w-3 h-3 rounded bg-emerald-300"></span><span class="w-3 h-3 rounded bg-amber-300"></span><span class="w-3 h-3 rounded bg-red-400"></span><span class="w-3 h-3 rounded bg-red-700"></span></div><span>High</span></div>
+        </div>
+        <div class="grid grid-cols-[40px_repeat(24,1fr)] gap-1 text-[9px] text-ink-400">
+          <div></div>
+          <script>for(let i=0;i<24;i++)document.write(`<div class="text-center">${i%3===0?i:''}</div>`)</script>
+          <script>
+            const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+            days.forEach(d=>{
+              document.write(`<div class="text-right pr-1 self-center font-medium">${d}</div>`);
+              for(let h=0;h<24;h++){
+                const v=Math.random();
+                let c='bg-emerald-100';
+                if(v>.85)c='bg-red-700';else if(v>.7)c='bg-red-400';else if(v>.5)c='bg-amber-300';else if(v>.3)c='bg-emerald-300';
+                document.write(`<div class="heatcell ${c}" title="${d} ${h}:00"></div>`);
+              }
+            });
+          </script>
+        </div>
+        <p class="text-[11px] text-ink-500 mt-3"><i class="fas fa-lightbulb text-amber-500"></i> Peak failures occur Tue–Thu 14:00–18:00 — consider pre-trip inspections during morning shifts.</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-soft">
+        <h3 class="font-semibold text-ink-900 mb-3">SLA Compliance</h3>
+        <div class="relative w-32 h-32 mx-auto">
+          <svg viewBox="0 0 36 36" class="w-32 h-32">
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#E2E8F0" stroke-width="3"/>
+            <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#10B981" stroke-width="3" stroke-dasharray="87,100" stroke-linecap="round"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center"><div class="text-2xl font-bold text-ink-900">87%</div><div class="text-[10px] text-ink-500">SLA met</div></div>
+        </div>
+        <div class="mt-4 space-y-2 text-xs">
+          <div class="flex justify-between"><span class="text-ink-500">Response &lt; 60min</span><span class="font-semibold text-emerald-600">94%</span></div>
+          <div class="flex justify-between"><span class="text-ink-500">Recovery &lt; 8h</span><span class="font-semibold text-emerald-600">82%</span></div>
+          <div class="flex justify-between"><span class="text-ink-500">Closure &lt; 48h</span><span class="font-semibold text-amber-600">76%</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTERS + TABLE -->
+    <section class="bg-white rounded-2xl shadow-soft">
+      <div class="p-5 border-b border-ink-100">
+        <div class="flex items-center gap-2 border-b border-ink-100 -mx-5 px-5 mb-4 -mt-1">
+          <div class="tab active" onclick="setTab(event,'all')">All <span class="ml-1 pill pill-muted">63</span></div>
+          <div class="tab" onclick="setTab(event,'open')">Open <span class="ml-1 pill pill-danger">12</span></div>
+          <div class="tab" onclick="setTab(event,'progress')">In Recovery <span class="ml-1 pill pill-warning">4</span></div>
+          <div class="tab" onclick="setTab(event,'resolved')">Resolved <span class="ml-1 pill pill-success">47</span></div>
+          <div class="tab" onclick="setTab(event,'critical')">Critical <span class="ml-1 pill pill-danger">3</span></div>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="relative flex-1 min-w-[240px]"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i><input placeholder="Search by ID, vehicle, driver, location, fault code…" class="w-full pl-9 pr-3 py-2 text-sm border border-ink-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500/30"></div>
+          <select class="px-3 py-2 text-xs border border-ink-200 rounded-lg"><option>All severities</option><option>Critical</option><option>Major</option><option>Minor</option></select>
+          <select class="px-3 py-2 text-xs border border-ink-200 rounded-lg"><option>All categories</option><option>Engine</option><option>Tyres</option><option>Electrical</option><option>Brakes</option><option>Fuel</option></select>
+          <select class="px-3 py-2 text-xs border border-ink-200 rounded-lg"><option>All depots</option><option>Nairobi HQ</option><option>Mombasa</option><option>Eldoret</option></select>
+          <input type="date" class="px-3 py-2 text-xs border border-ink-200 rounded-lg">
+          <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-sliders mr-1"></i>More</button>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <span class="filter-chip">Status: Open <i class="fas fa-times cursor-pointer"></i></span>
+          <span class="filter-chip">Severity: Critical <i class="fas fa-times cursor-pointer"></i></span>
+          <button class="text-[11px] text-ink-500 hover:underline">Clear all</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-ink-50 text-[11px] uppercase tracking-wider text-ink-500">
+            <tr>
+              <th class="p-3 text-left"><input type="checkbox" class="rounded"></th>
+              <th class="p-3 text-left">Case ID</th>
+              <th class="p-3 text-left">Vehicle / Driver</th>
+              <th class="p-3 text-left">Issue</th>
+              <th class="p-3 text-left">Location</th>
+              <th class="p-3 text-left">Severity</th>
+              <th class="p-3 text-left">Reported</th>
+              <th class="p-3 text-left">Status</th>
+              <th class="p-3 text-left">Downtime</th>
+              <th class="p-3 text-left">Cost</th>
+              <th class="p-3 text-left"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-ink-100" id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between p-4 border-t border-ink-100 text-xs text-ink-500">
+        <div>Showing <b>1-10</b> of <b>63</b> cases</div>
+        <div class="flex gap-1"><button class="px-2.5 py-1 border border-ink-200 rounded">‹</button><button class="px-2.5 py-1 bg-brand-600 text-white rounded">1</button><button class="px-2.5 py-1 border border-ink-200 rounded">2</button><button class="px-2.5 py-1 border border-ink-200 rounded">3</button><button class="px-2.5 py-1 border border-ink-200 rounded">›</button></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- DRAWER: detail quick view -->
+<div class="backdrop" id="bd" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="p-5 border-b border-ink-100 flex items-center justify-between sticky top-0 bg-white z-10">
+    <div><div class="text-[11px] text-ink-500 uppercase font-semibold">Case BD-2041</div><h3 class="text-base font-bold text-ink-900">Engine overheating — KCA 442N</h3></div>
+    <button onclick="closeDrawer()" class="text-ink-500 hover:text-ink-900"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="p-5 space-y-5">
+    <div class="flex flex-wrap gap-2"><span class="pill pill-danger"><i class="fas fa-circle text-[6px]"></i> Critical</span><span class="pill pill-warning">In Recovery</span><span class="pill pill-muted">Engine</span><span class="pill pill-primary">Trip TRP-10458</span></div>
+
+    <div>
+      <h4 class="text-xs font-semibold text-ink-500 uppercase mb-2">Recovery Timeline</h4>
+      <div class="space-y-3 text-xs">
+        <div class="flex gap-3"><div class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5"></div><div class="flex-1"><div class="font-semibold text-ink-900">Reported by driver</div><div class="text-ink-500">14:22 · J. Otieno via mobile app</div></div></div>
+        <div class="flex gap-3"><div class="w-2 h-2 rounded-full bg-emerald-500 mt-1.5"></div><div class="flex-1"><div class="font-semibold text-ink-900">Dispatched recovery</div><div class="text-ink-500">14:38 · Mechanic team B (16min response)</div></div></div>
+        <div class="flex gap-3"><div class="w-2 h-2 rounded-full bg-brand-500 mt-1.5 ring-4 ring-brand-100"></div><div class="flex-1"><div class="font-semibold text-ink-900">On-site repair in progress</div><div class="text-ink-500">15:12 · Replacing thermostat & coolant</div></div></div>
+        <div class="flex gap-3 opacity-50"><div class="w-2 h-2 rounded-full bg-ink-300 mt-1.5"></div><div class="flex-1"><div class="font-semibold text-ink-700">Resume operations</div><div class="text-ink-500">Pending</div></div></div>
+      </div>
+    </div>
+
+    <div>
+      <h4 class="text-xs font-semibold text-ink-500 uppercase mb-2">Cost Breakdown</h4>
+      <div class="bg-ink-50 rounded-lg p-3 text-xs space-y-1.5">
+        <div class="flex justify-between"><span>Parts (Thermostat, coolant)</span><b>$184</b></div>
+        <div class="flex justify-between"><span>Labour (3.5h × $45)</span><b>$157</b></div>
+        <div class="flex justify-between"><span>Recovery vehicle</span><b>$120</b></div>
+        <div class="flex justify-between"><span class="text-ink-500">Lost revenue (est.)</span><span class="text-ink-500">$420</span></div>
+        <div class="flex justify-between pt-2 border-t border-ink-200"><b>Total Impact</b><b class="text-red-600">$881</b></div>
+      </div>
+    </div>
+
+    <div>
+      <h4 class="text-xs font-semibold text-ink-500 uppercase mb-2">Linked Records</h4>
+      <div class="space-y-1.5 text-xs">
+        <a href="trip-view.html" class="flex items-center justify-between p-2 rounded hover:bg-ink-50"><span><i class="fas fa-route text-brand-500 mr-2"></i>Trip TRP-10458 · Nairobi → Kisumu</span><i class="fas fa-arrow-right text-ink-400"></i></a>
+        <a href="trucks.html" class="flex items-center justify-between p-2 rounded hover:bg-ink-50"><span><i class="fas fa-truck text-brand-500 mr-2"></i>KCA 442N · Scania R450</span><i class="fas fa-arrow-right text-ink-400"></i></a>
+        <a href="drivers.html" class="flex items-center justify-between p-2 rounded hover:bg-ink-50"><span><i class="fas fa-id-card text-brand-500 mr-2"></i>James Otieno · DRV-0214</span><i class="fas fa-arrow-right text-ink-400"></i></a>
+      </div>
+    </div>
+
+    <div class="flex gap-2 pt-2"><a href="#" onclick="openCreate()" class="flex-1 px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg text-center">Update case</a><button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg"><i class="fas fa-print"></i></button></div>
+  </div>
+</aside>
+
+<!-- CREATE MODAL -->
+<div class="backdrop" id="cb" onclick="closeCreate()"></div>
+<div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl">
+    <div class="sticky top-0 bg-white border-b border-ink-100 p-5 flex items-center justify-between z-10">
+      <div><div class="text-[11px] text-ink-500 uppercase font-semibold">New Incident</div><h3 class="text-lg font-bold text-ink-900">Log Breakdown</h3></div>
+      <button onclick="closeCreate()" class="text-ink-500 hover:text-ink-900 w-8 h-8 rounded-lg hover:bg-ink-100"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Stepper -->
+    <div class="px-5 pt-4">
+      <div class="flex items-center gap-2 text-[11px] font-semibold">
+        <div class="flex items-center gap-2 text-brand-600"><span class="w-6 h-6 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs">1</span> Identification</div>
+        <div class="flex-1 h-px bg-ink-200"></div>
+        <div class="flex items-center gap-2 text-ink-400"><span class="w-6 h-6 rounded-full bg-ink-200 flex items-center justify-center text-xs">2</span> Diagnostics</div>
+        <div class="flex-1 h-px bg-ink-200"></div>
+        <div class="flex items-center gap-2 text-ink-400"><span class="w-6 h-6 rounded-full bg-ink-200 flex items-center justify-center text-xs">3</span> Recovery Plan</div>
+        <div class="flex-1 h-px bg-ink-200"></div>
+        <div class="flex items-center gap-2 text-ink-400"><span class="w-6 h-6 rounded-full bg-ink-200 flex items-center justify-center text-xs">4</span> Review</div>
+      </div>
+    </div>
+
+    <div class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <!-- Form -->
+      <div class="lg:col-span-2 space-y-5">
+        <div class="bg-ink-50 rounded-xl p-4">
+          <h4 class="text-xs font-bold uppercase text-ink-500 mb-3">Incident Identification</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-semibold text-ink-700">Case ID</label><input value="BD-2042" readonly class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg bg-white"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Date & Time *</label><input type="datetime-local" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Vehicle *</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>KCA 442N · Scania R450</option><option>KDD 781P · Volvo FH16</option><option>KBX 105M · MAN TGS</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Driver *</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>James Otieno · DRV-0214</option><option>Peter Kamau · DRV-0188</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Linked Trip</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>TRP-10458 · Nairobi → Kisumu</option><option>None</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Odometer (km)</label><input type="number" placeholder="240,512" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div class="col-span-2"><label class="text-xs font-semibold text-ink-700">Location *</label><div class="flex gap-2 mt-1"><input placeholder="GPS or address (e.g. A104, near Naivasha)" class="flex-1 px-3 py-2 text-sm border border-ink-200 rounded-lg"><button class="px-3 py-2 text-xs font-semibold text-brand-600 bg-brand-50 rounded-lg"><i class="fas fa-location-crosshairs"></i> Capture</button></div></div>
+          </div>
+        </div>
+
+        <div class="bg-ink-50 rounded-xl p-4">
+          <h4 class="text-xs font-bold uppercase text-ink-500 mb-3">Failure Diagnostics</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-semibold text-ink-700">Category *</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Engine / Powertrain</option><option>Tyres & Wheels</option><option>Brakes</option><option>Electrical</option><option>Fuel System</option><option>Cooling / HVAC</option><option>Bodywork</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Severity *</label><select id="sev" onchange="updSev()" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Critical — vehicle immobile</option><option>Major — degraded operation</option><option>Minor — drivable, schedule repair</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Fault Code (OBD)</label><input placeholder="P0128, P0420…" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Suspected Root Cause</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Wear & tear</option><option>Poor maintenance</option><option>Driver behaviour</option><option>Manufacturing defect</option><option>External (road/debris)</option></select></div>
+            <div class="col-span-2"><label class="text-xs font-semibold text-ink-700">Symptoms / Description *</label><textarea rows="3" placeholder="Describe what happened, warning lights, sounds, smells…" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></textarea></div>
+            <div class="col-span-2">
+              <label class="text-xs font-semibold text-ink-700">Photos / Evidence</label>
+              <div class="mt-1 border-2 border-dashed border-ink-200 rounded-lg p-4 text-center text-xs text-ink-500"><i class="fas fa-cloud-arrow-up text-2xl text-ink-400 mb-1"></i><div>Drag & drop photos or <a href="#" class="text-brand-600 font-semibold">browse</a></div><div class="text-[10px] mt-1">JPG, PNG, MP4 up to 25MB each</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-ink-50 rounded-xl p-4">
+          <h4 class="text-xs font-bold uppercase text-ink-500 mb-3">Recovery Plan</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-semibold text-ink-700">Action</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>On-site repair</option><option>Tow to depot</option><option>Tow to external workshop</option><option>Driver self-resolved</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Assign to</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Mechanic Team B</option><option>Mechanic Team A</option><option>External: AutoFix Garage</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">ETA (hours)</label><input type="number" placeholder="3" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Estimated Cost ($)</label><input type="number" placeholder="500" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div class="col-span-2 flex items-center gap-4 text-xs"><label class="flex items-center gap-2"><input type="checkbox" class="rounded">Notify dispatch</label><label class="flex items-center gap-2"><input type="checkbox" class="rounded" checked>Notify client (trip impact)</label><label class="flex items-center gap-2"><input type="checkbox" class="rounded">Trigger insurance claim</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live preview -->
+      <aside class="lg:col-span-1 space-y-4">
+        <div class="rounded-xl border border-ink-200 overflow-hidden sticky top-4">
+          <div class="bg-gradient-to-br from-ink-900 to-brand-700 text-white p-4">
+            <div class="text-[10px] uppercase opacity-75">Live Preview</div>
+            <div class="text-lg font-bold mt-1">BD-2042</div>
+            <div class="text-xs opacity-90">KCA 442N · Scania R450</div>
+            <span id="sevPill" class="pill pill-danger mt-2 inline-flex">Critical</span>
+          </div>
+          <div class="p-4 space-y-3 text-xs">
+            <div class="flex justify-between"><span class="text-ink-500">Driver</span><b>James Otieno</b></div>
+            <div class="flex justify-between"><span class="text-ink-500">Trip</span><b>TRP-10458</b></div>
+            <div class="flex justify-between"><span class="text-ink-500">Category</span><b>Engine</b></div>
+            <div class="flex justify-between"><span class="text-ink-500">Est. downtime</span><b>3h</b></div>
+            <div class="flex justify-between pt-2 border-t border-ink-100"><span class="text-ink-500">Est. cost</span><b class="text-red-600">$500</b></div>
+          </div>
+          <div class="p-4 bg-ink-50 text-[11px] text-ink-500"><i class="fas fa-shield-halved text-emerald-500"></i> Audit trail enabled · all changes logged.</div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="sticky bottom-0 bg-white border-t border-ink-100 p-4 flex items-center justify-between">
+      <button class="text-xs font-semibold text-ink-500 hover:text-ink-900"><i class="fas fa-floppy-disk mr-1"></i>Save as draft</button>
+      <div class="flex gap-2">
+        <button onclick="closeCreate()" class="px-4 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg">Cancel</button>
+        <button onclick="submitBd()" class="px-5 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700">Submit Case</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="fixed bottom-6 right-6 bg-ink-900 text-white text-sm px-4 py-3 rounded-lg shadow-2xl translate-y-20 opacity-0 transition-all z-[60] flex items-center gap-2"><i class="fas fa-circle-check text-emerald-400"></i><span id="toastMsg">Saved</span></div>
+
+<script>
+  // Demo data
+  const sevMap={Critical:'pill-danger',Major:'pill-warning',Minor:'pill-muted'};
+  const statusMap={Open:'pill-danger','In Recovery':'pill-warning',Resolved:'pill-success',Closed:'pill-muted'};
+  const data=[
+    {id:'BD-2041',v:'KCA 442N',vt:'Scania R450',drv:'J. Otieno',issue:'Engine overheating',cat:'Engine',loc:'A104, Naivasha',sev:'Critical',rep:'Today 14:22',st:'In Recovery',dt:'3h 12m',cost:'$881',trip:'TRP-10458'},
+    {id:'BD-2040',v:'KDD 781P',vt:'Volvo FH16',drv:'P. Kamau',issue:'Air brake leak',cat:'Brakes',loc:'Mombasa Rd KM 42',sev:'Major',rep:'Today 09:10',st:'Open',dt:'—',cost:'Est $620',trip:'TRP-10455'},
+    {id:'BD-2039',v:'KBX 105M',vt:'MAN TGS',drv:'S. Wanjiru',issue:'Alternator failure',cat:'Electrical',loc:'Eldoret Depot',sev:'Major',rep:'Yesterday',st:'Resolved',dt:'5h 40m',cost:'$412',trip:'—'},
+    {id:'BD-2038',v:'KCQ 309L',vt:'Isuzu FVR',drv:'M. Achieng',issue:'Front-left tyre blowout',cat:'Tyres',loc:'Thika Hwy',sev:'Critical',rep:'2 days ago',st:'Resolved',dt:'2h 05m',cost:'$340',trip:'TRP-10440'},
+    {id:'BD-2037',v:'KAS 220H',vt:'Mercedes Actros',drv:'D. Mwangi',issue:'Fuel injector clogged',cat:'Fuel',loc:'Nakuru',sev:'Minor',rep:'2 days ago',st:'Closed',dt:'1h 30m',cost:'$180',trip:'—'},
+    {id:'BD-2036',v:'KCA 442N',vt:'Scania R450',drv:'J. Otieno',issue:'Coolant leak',cat:'Engine',loc:'Nairobi HQ',sev:'Major',rep:'3 days ago',st:'Closed',dt:'4h 00m',cost:'$295',trip:'—'},
+    {id:'BD-2035',v:'KDP 558N',vt:'Hino 700',drv:'L. Ngugi',issue:'Battery dead',cat:'Electrical',loc:'Kisumu Yard',sev:'Minor',rep:'3 days ago',st:'Closed',dt:'45m',cost:'$95',trip:'—'},
+    {id:'BD-2034',v:'KDD 781P',vt:'Volvo FH16',drv:'P. Kamau',issue:'Gearbox grinding',cat:'Powertrain',loc:'A2 Karatina',sev:'Critical',rep:'4 days ago',st:'Resolved',dt:'12h 20m',cost:'$2,140',trip:'TRP-10421'},
+    {id:'BD-2033',v:'KBX 105M',vt:'MAN TGS',drv:'S. Wanjiru',issue:'AC compressor',cat:'HVAC',loc:'Mombasa',sev:'Minor',rep:'5 days ago',st:'Closed',dt:'2h 10m',cost:'$220',trip:'—'},
+    {id:'BD-2032',v:'KAJ 712C',vt:'Iveco Stralis',drv:'B. Kiptoo',issue:'Headlight wiring',cat:'Electrical',loc:'Eldoret',sev:'Minor',rep:'5 days ago',st:'Closed',dt:'30m',cost:'$60',trip:'—'},
+  ];
+  function render(){
+    const html=data.map(r=>`
+      <tr class="row-hover cursor-pointer" onclick="openDrawer()">
+        <td class="p-3" onclick="event.stopPropagation()"><input type="checkbox" class="rounded"></td>
+        <td class="p-3 font-semibold text-brand-600">${r.id}</td>
+        <td class="p-3"><div class="font-semibold text-ink-900">${r.v}</div><div class="text-[11px] text-ink-500">${r.vt} · ${r.drv}</div></td>
+        <td class="p-3"><div class="text-ink-900">${r.issue}</div><div class="text-[11px] text-ink-500">${r.cat}${r.trip!=='—'?` · <a href="trip-view.html" class="text-brand-600 hover:underline">${r.trip}</a>`:''}</div></td>
+        <td class="p-3 text-ink-700"><i class="fas fa-location-dot text-ink-400 text-[10px]"></i> ${r.loc}</td>
+        <td class="p-3"><span class="pill ${sevMap[r.sev]}">${r.sev}</span></td>
+        <td class="p-3 text-ink-500 text-xs">${r.rep}</td>
+        <td class="p-3"><span class="pill ${statusMap[r.st]}">${r.st}</span></td>
+        <td class="p-3 text-ink-700">${r.dt}</td>
+        <td class="p-3 font-semibold text-ink-900">${r.cost}</td>
+        <td class="p-3" onclick="event.stopPropagation()">
+          <div class="flex gap-1 text-ink-400"><button class="hover:text-brand-600"><i class="fas fa-eye"></i></button><button class="hover:text-brand-600"><i class="fas fa-pen"></i></button><button class="hover:text-red-600"><i class="fas fa-ellipsis-vertical"></i></button></div>
+        </td>
+      </tr>
+    `).join('');
+    document.getElementById('rows').innerHTML=html;
+  }
+  render();
+
+  function setTab(e,k){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));e.currentTarget.classList.add('active');}
+  function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('bd').classList.add('open');}
+  function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('bd').classList.remove('open');}
+  function openCreate(){document.getElementById('createModal').classList.remove('hidden');document.getElementById('createModal').classList.add('flex');document.getElementById('cb').classList.add('open');}
+  function closeCreate(){document.getElementById('createModal').classList.add('hidden');document.getElementById('createModal').classList.remove('flex');document.getElementById('cb').classList.remove('open');}
+  function updSev(){const v=document.getElementById('sev').value.split(' ')[0];const p=document.getElementById('sevPill');p.className='pill mt-2 inline-flex '+(sevMap[v]||'pill-muted');p.textContent=v;}
+  function submitBd(){closeCreate();toast('Breakdown case BD-2042 logged & dispatched');}
+  function toast(m){const t=document.getElementById('toast');document.getElementById('toastMsg').textContent=m;t.classList.remove('translate-y-20','opacity-0');setTimeout(()=>t.classList.add('translate-y-20','opacity-0'),2800);}
+</script>
+</body>
+</html>
