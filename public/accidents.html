@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accident Register — FleetCtrl</title>
+  <meta name="description" content="Enterprise accident management: severity tracking, parties involved, insurance claims, witness statements and HSE compliance." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}},
+      boxShadow:{soft:'0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.05)'}
+    } } }
+  </script>
+  <style>
+    body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;text-decoration:none;}
+    .nav-link:hover{background:#1E293B;color:#fff;} .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+    .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+    .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;} .pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-warning{background:#FEF3C7;color:#92400E;} .pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-muted{background:#F1F5F9;color:#475569;} .pill-purple{background:#EDE9FE;color:#5B21B6;}
+    .kpi-card{background:#fff;border-radius:1rem;padding:1.25rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+    .row-hover:hover{background:#F8FAFC;}
+    .tab{padding:.55rem .9rem;font-size:.8rem;font-weight:600;color:#64748B;border-bottom:2px solid transparent;cursor:pointer;}
+    .tab.active{color:#2563EB;border-color:#2563EB;}
+    .filter-chip{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .65rem;border-radius:999px;background:#FEE2E2;color:#991B1B;font-size:.72rem;font-weight:600;}
+    .drawer{position:fixed;top:0;right:0;height:100vh;width:520px;background:#fff;box-shadow:-10px 0 40px rgba(15,23,42,.15);transform:translateX(100%);transition:transform .25s;z-index:50;overflow-y:auto;}
+    .drawer.open{transform:translateX(0);}
+    .backdrop{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:49;display:none;}
+    .backdrop.open{display:block;}
+    .step{display:flex;align-items:center;gap:.5rem;font-size:.72rem;font-weight:600;color:#94A3B8;}
+    .step.active{color:#2563EB;}
+    .step .num{width:1.5rem;height:1.5rem;border-radius:999px;background:#E2E8F0;color:#64748B;display:flex;align-items:center;justify-content:center;font-size:.65rem;}
+    .step.active .num{background:#2563EB;color:#fff;}
+    .step.done .num{background:#10B981;color:#fff;}
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="px-4 py-4 flex items-center gap-2 border-b border-slate-800">
+    <div class="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white"><i class="fas fa-truck-fast"></i></div>
+    <div><div class="text-white font-bold text-sm">FleetCtrl</div><div class="text-[10px] text-slate-500 uppercase tracking-wider">ERP Suite</div></div>
+  </div>
+  <nav class="px-2 py-3 flex-1">
+    <a href="dashboard.html" class="nav-link"><i class="fas fa-gauge-high w-4"></i>Dashboard</a>
+    <a href="tracking.html" class="nav-link"><i class="fas fa-location-dot w-4"></i>Live Tracking</a>
+    <div class="nav-section">Logistics</div>
+    <a href="create-trip.html" class="nav-link"><i class="fas fa-route w-4"></i>Create Trip</a>
+    <a href="pending-trips.html" class="nav-link"><i class="fas fa-hourglass-half w-4"></i>Pending Trips</a>
+    <a href="complete-trips.html" class="nav-link"><i class="fas fa-flag-checkered w-4"></i>Completed Trips</a>
+    <div class="nav-section">Fleet</div>
+    <a href="trucks.html" class="nav-link"><i class="fas fa-truck w-4"></i>Trucks</a>
+    <a href="trailers.html" class="nav-link"><i class="fas fa-trailer w-4"></i>Trailers</a>
+    <a href="drivers.html" class="nav-link"><i class="fas fa-id-card w-4"></i>Drivers</a>
+    <div class="nav-section">Incidents</div>
+    <a href="breakdowns.html" class="nav-link"><i class="fas fa-screwdriver-wrench w-4"></i>Breakdowns</a>
+    <a href="accidents.html" class="nav-link active"><i class="fas fa-car-burst w-4"></i>Accidents</a>
+    <div class="nav-section">Workshop</div>
+    <a href="parts.html" class="nav-link"><i class="fas fa-gears w-4"></i>Parts</a>
+    <a href="tyres.html" class="nav-link"><i class="fas fa-circle-notch w-4"></i>Tyres</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div>
+      <div class="text-[11px] text-ink-500 font-medium"><a href="dashboard.html" class="hover:text-brand-600">Dashboard</a> / Incidents / <span class="text-ink-900">Accidents</span></div>
+      <h1 class="text-lg font-bold text-ink-900">Accident Register</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-shield-halved mr-1"></i>HSE Report</button>
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-file-export mr-1"></i>Export</button>
+      <a href="#" onclick="openCreate()" class="px-3 py-2 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700"><i class="fas fa-triangle-exclamation mr-1"></i>Report Accident</a>
+    </div>
+  </header>
+
+  <div class="p-6 space-y-6">
+
+    <!-- HERO -->
+    <section class="rounded-2xl overflow-hidden relative bg-gradient-to-br from-red-900 via-red-700 to-orange-600 text-white p-6">
+      <div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,%3Csvg width=%2240%22 height=%2240%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M0 20h40M20 0v40%22 stroke=%22%23fff%22 stroke-width=%22.4%22/%3E%3C/svg%3E');"></div>
+      <div class="relative flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider bg-white/15 px-2.5 py-1 rounded-full backdrop-blur"><i class="fas fa-shield-halved"></i> HSE & Insurance</div>
+          <h2 class="text-2xl font-bold mt-3">Accident Management Hub</h2>
+          <p class="text-sm text-white/80 mt-1 max-w-xl">Centralised record of road incidents — driver safety, third-party claims, regulatory filings, and prevention analytics.</p>
+        </div>
+        <div class="flex gap-3">
+          <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3"><div class="text-[10px] uppercase opacity-80 tracking-wider">Days Since Last</div><div class="text-2xl font-bold">7</div></div>
+          <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3"><div class="text-[10px] uppercase opacity-80 tracking-wider">Open Claims</div><div class="text-2xl font-bold">5</div></div>
+          <div class="bg-white/10 backdrop-blur rounded-xl px-4 py-3"><div class="text-[10px] uppercase opacity-80 tracking-wider">Total Liability</div><div class="text-2xl font-bold">$142K</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="kpi-card"><div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">YTD Incidents</div><span class="w-8 h-8 bg-red-50 text-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-car-burst"></i></span></div><div class="text-2xl font-bold text-ink-900 mt-2">23</div><div class="text-[11px] text-emerald-600 font-medium mt-1"><i class="fas fa-arrow-down"></i> 18% YoY</div></div>
+      <div class="kpi-card"><div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Injuries</div><span class="w-8 h-8 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center"><i class="fas fa-kit-medical"></i></span></div><div class="text-2xl font-bold text-ink-900 mt-2">3</div><div class="text-[11px] text-ink-500 font-medium mt-1">0 fatalities</div></div>
+      <div class="kpi-card"><div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Open Claims</div><span class="w-8 h-8 bg-brand-50 text-brand-600 rounded-lg flex items-center justify-center"><i class="fas fa-file-shield"></i></span></div><div class="text-2xl font-bold text-ink-900 mt-2">5</div><div class="text-[11px] text-ink-500 font-medium mt-1">Avg age: 21d</div></div>
+      <div class="kpi-card"><div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Recovered</div><span class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center"><i class="fas fa-hand-holding-dollar"></i></span></div><div class="text-2xl font-bold text-ink-900 mt-2">$48K</div><div class="text-[11px] text-emerald-600 font-medium mt-1">+$12K this mo</div></div>
+      <div class="kpi-card"><div class="flex items-center justify-between"><div class="text-[11px] text-ink-500 uppercase font-semibold">Safety Score</div><span class="w-8 h-8 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center"><i class="fas fa-star"></i></span></div><div class="text-2xl font-bold text-ink-900 mt-2">A-</div><div class="bar mt-2" style="height:6px;background:#E2E8F0;border-radius:999px;overflow:hidden"><span style="display:block;width:88%;height:100%;background:#10B981"></span></div></div>
+    </section>
+
+    <!-- ANALYTICS -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="bg-white rounded-2xl p-5 shadow-soft lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-ink-900">Incidents by Severity & Month</h3>
+          <select class="text-xs border border-ink-200 rounded-lg px-2 py-1"><option>Last 6 months</option><option>Last 12 months</option></select>
+        </div>
+        <div class="grid grid-cols-6 gap-3 items-end h-44">
+          <script>
+            const months=['Nov','Dec','Jan','Feb','Mar','Apr'];
+            months.forEach((m,i)=>{
+              const cr=[1,0,2,1,0,1][i],mj=[2,1,3,2,1,2][i],mn=[3,4,2,3,4,2][i];
+              document.write(`
+                <div class="flex flex-col items-center gap-1 h-full justify-end">
+                  <div class="w-full flex flex-col gap-0.5 items-center">
+                    <div class="w-8 bg-red-500 rounded-t" style="height:${cr*16}px" title="${cr} critical"></div>
+                    <div class="w-8 bg-amber-400" style="height:${mj*14}px" title="${mj} major"></div>
+                    <div class="w-8 bg-emerald-400 rounded-b" style="height:${mn*10}px" title="${mn} minor"></div>
+                  </div>
+                  <div class="text-[10px] text-ink-500 font-medium">${m}</div>
+                </div>
+              `);
+            });
+          </script>
+        </div>
+        <div class="flex gap-4 mt-4 text-[11px] text-ink-500"><span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-red-500 rounded"></span>Critical</span><span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-amber-400 rounded"></span>Major</span><span class="flex items-center gap-1"><span class="w-2.5 h-2.5 bg-emerald-400 rounded"></span>Minor</span></div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-soft">
+        <h3 class="font-semibold text-ink-900 mb-3">Top Causes</h3>
+        <div class="space-y-3 text-xs">
+          <div><div class="flex justify-between mb-1"><span><i class="fas fa-mobile-screen text-red-500 mr-1"></i> Driver distraction</span><b>32%</b></div><div class="bar" style="height:6px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:32%;height:100%;background:#EF4444"></span></div></div>
+          <div><div class="flex justify-between mb-1"><span><i class="fas fa-cloud-rain text-blue-500 mr-1"></i> Weather conditions</span><b>24%</b></div><div class="bar" style="height:6px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:24%;height:100%;background:#3B82F6"></span></div></div>
+          <div><div class="flex justify-between mb-1"><span><i class="fas fa-gauge-high text-amber-500 mr-1"></i> Speeding</span><b>18%</b></div><div class="bar" style="height:6px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:18%;height:100%;background:#F59E0B"></span></div></div>
+          <div><div class="flex justify-between mb-1"><span><i class="fas fa-road text-purple-500 mr-1"></i> Poor road surface</span><b>14%</b></div><div class="bar" style="height:6px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:14%;height:100%;background:#8B5CF6"></span></div></div>
+          <div><div class="flex justify-between mb-1"><span><i class="fas fa-user text-ink-500 mr-1"></i> Third-party fault</span><b>12%</b></div><div class="bar" style="height:6px;background:#F1F5F9;border-radius:999px;overflow:hidden"><span style="display:block;width:12%;height:100%;background:#64748B"></span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLAIM STAGES + MAP -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="bg-white rounded-2xl p-5 shadow-soft lg:col-span-2">
+        <h3 class="font-semibold text-ink-900 mb-4">Insurance Claim Pipeline</h3>
+        <div class="grid grid-cols-5 gap-2">
+          <div class="bg-ink-50 rounded-lg p-3"><div class="text-[10px] uppercase font-bold text-ink-500">Reported</div><div class="text-xl font-bold text-ink-900 mt-1">8</div><div class="text-[10px] text-ink-500">Avg 2d to file</div></div>
+          <div class="bg-blue-50 rounded-lg p-3"><div class="text-[10px] uppercase font-bold text-blue-700">Investigating</div><div class="text-xl font-bold text-ink-900 mt-1">5</div><div class="text-[10px] text-ink-500">Surveyor assigned</div></div>
+          <div class="bg-amber-50 rounded-lg p-3"><div class="text-[10px] uppercase font-bold text-amber-700">Estimated</div><div class="text-xl font-bold text-ink-900 mt-1">3</div><div class="text-[10px] text-ink-500">Quotes in</div></div>
+          <div class="bg-purple-50 rounded-lg p-3"><div class="text-[10px] uppercase font-bold text-purple-700">Approved</div><div class="text-xl font-bold text-ink-900 mt-1">2</div><div class="text-[10px] text-ink-500">Awaiting payout</div></div>
+          <div class="bg-emerald-50 rounded-lg p-3"><div class="text-[10px] uppercase font-bold text-emerald-700">Settled</div><div class="text-xl font-bold text-ink-900 mt-1">5</div><div class="text-[10px] text-ink-500">$48K recovered</div></div>
+        </div>
+        <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-xs flex items-start gap-2"><i class="fas fa-bell text-amber-600 mt-0.5"></i><div><b>2 claims overdue</b> — AC-1109 pending surveyor 14d, AC-1112 documents missing.</div></div>
+      </div>
+      <div class="bg-white rounded-2xl p-5 shadow-soft">
+        <h3 class="font-semibold text-ink-900 mb-3">Hotspot Map</h3>
+        <div class="relative rounded-lg overflow-hidden h-44 bg-gradient-to-br from-ink-900 via-slate-800 to-brand-700">
+          <div class="absolute inset-0 opacity-30" style="background-image:url('data:image/svg+xml,%3Csvg width=%2240%22 height=%2240%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cpath d=%22M0 20h40M20 0v40%22 stroke=%22%23475569%22 stroke-width=%22.5%22/%3E%3C/svg%3E');"></div>
+          <span class="absolute" style="top:30%;left:25%"><span class="w-4 h-4 rounded-full bg-red-500/80 ring-4 ring-red-500/30 animate-ping absolute"></span><span class="w-4 h-4 rounded-full bg-red-500 absolute"></span></span>
+          <span class="absolute" style="top:55%;left:60%"><span class="w-3 h-3 rounded-full bg-amber-400 absolute"></span></span>
+          <span class="absolute" style="top:70%;left:40%"><span class="w-3 h-3 rounded-full bg-amber-400 absolute"></span></span>
+          <span class="absolute" style="top:20%;left:70%"><span class="w-3 h-3 rounded-full bg-emerald-400 absolute"></span></span>
+        </div>
+        <div class="mt-3 text-xs space-y-1.5">
+          <div class="flex justify-between"><span class="text-ink-500">Mombasa Rd KM 42</span><b class="text-red-600">5 incidents</b></div>
+          <div class="flex justify-between"><span class="text-ink-500">A104 Naivasha</span><b class="text-amber-600">3</b></div>
+          <div class="flex justify-between"><span class="text-ink-500">Thika Hwy</span><b class="text-amber-600">2</b></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TABLE -->
+    <section class="bg-white rounded-2xl shadow-soft">
+      <div class="p-5 border-b border-ink-100">
+        <div class="flex items-center gap-2 border-b border-ink-100 -mx-5 px-5 mb-4 -mt-1">
+          <div class="tab active" onclick="setTab(event)">All <span class="ml-1 pill pill-muted">23</span></div>
+          <div class="tab" onclick="setTab(event)">Open <span class="ml-1 pill pill-danger">8</span></div>
+          <div class="tab" onclick="setTab(event)">Investigating <span class="ml-1 pill pill-warning">5</span></div>
+          <div class="tab" onclick="setTab(event)">Closed <span class="ml-1 pill pill-success">10</span></div>
+          <div class="tab" onclick="setTab(event)">With Injuries <span class="ml-1 pill pill-danger">3</span></div>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="relative flex-1 min-w-[240px]"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i><input placeholder="Search by case ID, vehicle, driver, location, claim ref…" class="w-full pl-9 pr-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+          <select class="px-3 py-2 text-xs border border-ink-200 rounded-lg"><option>All severities</option><option>Fatal</option><option>Major</option><option>Minor</option></select>
+          <select class="px-3 py-2 text-xs border border-ink-200 rounded-lg"><option>All claim status</option><option>Reported</option><option>Investigating</option><option>Settled</option></select>
+          <select class="px-3 py-2 text-xs border border-ink-200 rounded-lg"><option>All fault types</option><option>At-fault</option><option>Not at-fault</option><option>Shared</option></select>
+          <input type="date" class="px-3 py-2 text-xs border border-ink-200 rounded-lg">
+        </div>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <span class="filter-chip">Severity: Major <i class="fas fa-times cursor-pointer"></i></span>
+          <button class="text-[11px] text-ink-500 hover:underline">Clear all</button>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-ink-50 text-[11px] uppercase tracking-wider text-ink-500">
+            <tr>
+              <th class="p-3 text-left"><input type="checkbox"></th>
+              <th class="p-3 text-left">Case ID</th>
+              <th class="p-3 text-left">Vehicle / Driver</th>
+              <th class="p-3 text-left">Description</th>
+              <th class="p-3 text-left">Location</th>
+              <th class="p-3 text-left">Severity</th>
+              <th class="p-3 text-left">Fault</th>
+              <th class="p-3 text-left">Claim</th>
+              <th class="p-3 text-left">Liability</th>
+              <th class="p-3 text-left">Date</th>
+              <th class="p-3 text-left"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-ink-100" id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="flex items-center justify-between p-4 border-t border-ink-100 text-xs text-ink-500">
+        <div>Showing <b>1-10</b> of <b>23</b></div>
+        <div class="flex gap-1"><button class="px-2.5 py-1 border border-ink-200 rounded">‹</button><button class="px-2.5 py-1 bg-brand-600 text-white rounded">1</button><button class="px-2.5 py-1 border border-ink-200 rounded">2</button><button class="px-2.5 py-1 border border-ink-200 rounded">3</button><button class="px-2.5 py-1 border border-ink-200 rounded">›</button></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- DRAWER -->
+<div class="backdrop" id="bd" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="p-5 border-b border-ink-100 flex items-center justify-between sticky top-0 bg-white z-10">
+    <div><div class="text-[11px] text-ink-500 uppercase font-semibold">Case AC-1115</div><h3 class="text-base font-bold text-ink-900">Rear-end collision — KDD 781P</h3></div>
+    <button onclick="closeDrawer()" class="text-ink-500 hover:text-ink-900"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="p-5 space-y-5">
+    <div class="flex flex-wrap gap-2"><span class="pill pill-warning">Major</span><span class="pill pill-primary">Investigating</span><span class="pill pill-purple">Not at-fault</span><span class="pill pill-muted">Trip TRP-10455</span></div>
+
+    <div>
+      <h4 class="text-xs font-semibold text-ink-500 uppercase mb-2">Claim Workflow</h4>
+      <div class="space-y-2">
+        <div class="step done"><span class="num"><i class="fas fa-check text-[9px]"></i></span> Reported · Apr 12, 09:14</div>
+        <div class="step done"><span class="num"><i class="fas fa-check text-[9px]"></i></span> Police Notified · OB# 47/12/04</div>
+        <div class="step active"><span class="num">3</span> Surveyor assessment · scheduled Apr 18</div>
+        <div class="step"><span class="num">4</span> Repair quote</div>
+        <div class="step"><span class="num">5</span> Claim approval</div>
+        <div class="step"><span class="num">6</span> Settlement</div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3">
+      <div class="bg-ink-50 rounded-lg p-3"><div class="text-[10px] uppercase text-ink-500 font-bold">Insurance</div><div class="text-sm font-bold text-ink-900 mt-1">Britam · POL-44219</div><div class="text-[11px] text-ink-500">Policy expires Aug 2026</div></div>
+      <div class="bg-ink-50 rounded-lg p-3"><div class="text-[10px] uppercase text-ink-500 font-bold">Estimated Liability</div><div class="text-sm font-bold text-red-600 mt-1">$8,400</div><div class="text-[11px] text-ink-500">Repair + 3rd party</div></div>
+    </div>
+
+    <div>
+      <h4 class="text-xs font-semibold text-ink-500 uppercase mb-2">Parties Involved</h4>
+      <div class="space-y-2 text-xs">
+        <div class="p-3 border border-ink-200 rounded-lg"><div class="flex justify-between"><b>Our Vehicle</b><span class="pill pill-success">Not at-fault</span></div><div class="text-ink-500 mt-1">KDD 781P · Volvo FH16 · Driver: P. Kamau</div></div>
+        <div class="p-3 border border-ink-200 rounded-lg"><div class="flex justify-between"><b>Third Party</b><span class="pill pill-danger">At-fault</span></div><div class="text-ink-500 mt-1">KCM 309X · Toyota Hilux · Driver: M. Hassan (ID #2233)</div></div>
+      </div>
+    </div>
+
+    <div>
+      <h4 class="text-xs font-semibold text-ink-500 uppercase mb-2">Documents</h4>
+      <div class="grid grid-cols-3 gap-2 text-[11px]">
+        <div class="border border-ink-200 rounded-lg p-2 text-center"><i class="fas fa-file-pdf text-red-500 text-xl"></i><div class="mt-1 truncate">Police_Abstract.pdf</div></div>
+        <div class="border border-ink-200 rounded-lg p-2 text-center"><i class="fas fa-image text-blue-500 text-xl"></i><div class="mt-1 truncate">Damage_01.jpg</div></div>
+        <div class="border border-ink-200 rounded-lg p-2 text-center"><i class="fas fa-image text-blue-500 text-xl"></i><div class="mt-1 truncate">Damage_02.jpg</div></div>
+        <div class="border border-dashed border-ink-300 rounded-lg p-2 text-center text-ink-500"><i class="fas fa-plus text-xl"></i><div class="mt-1">Add</div></div>
+      </div>
+    </div>
+
+    <div>
+      <h4 class="text-xs font-semibold text-ink-500 uppercase mb-2">Linked</h4>
+      <div class="space-y-1 text-xs">
+        <a href="trip-view.html" class="flex justify-between p-2 rounded hover:bg-ink-50"><span><i class="fas fa-route text-brand-500 mr-2"></i>Trip TRP-10455</span><i class="fas fa-arrow-right text-ink-400"></i></a>
+        <a href="trucks.html" class="flex justify-between p-2 rounded hover:bg-ink-50"><span><i class="fas fa-truck text-brand-500 mr-2"></i>KDD 781P · Volvo FH16</span><i class="fas fa-arrow-right text-ink-400"></i></a>
+        <a href="drivers.html" class="flex justify-between p-2 rounded hover:bg-ink-50"><span><i class="fas fa-id-card text-brand-500 mr-2"></i>Peter Kamau · DRV-0188</span><i class="fas fa-arrow-right text-ink-400"></i></a>
+      </div>
+    </div>
+
+    <div class="flex gap-2"><button class="flex-1 px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg">Update claim</button><button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg"><i class="fas fa-print"></i></button></div>
+  </div>
+</aside>
+
+<!-- CREATE MODAL -->
+<div class="backdrop" id="cb" onclick="closeCreate()"></div>
+<div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-5xl max-h-[92vh] overflow-y-auto shadow-2xl">
+    <div class="sticky top-0 bg-white border-b border-ink-100 p-5 flex items-center justify-between z-10">
+      <div><div class="text-[11px] text-red-600 uppercase font-bold">Critical · HSE</div><h3 class="text-lg font-bold text-ink-900">Report Accident</h3></div>
+      <button onclick="closeCreate()" class="text-ink-500 hover:text-ink-900 w-8 h-8 rounded-lg hover:bg-ink-100"><i class="fas fa-times"></i></button>
+    </div>
+
+    <div class="px-5 pt-4">
+      <div class="flex items-center gap-2">
+        <div class="step active"><span class="num">1</span>Incident</div>
+        <div class="flex-1 h-px bg-ink-200"></div>
+        <div class="step"><span class="num">2</span>Parties</div>
+        <div class="flex-1 h-px bg-ink-200"></div>
+        <div class="step"><span class="num">3</span>Damages & Injuries</div>
+        <div class="flex-1 h-px bg-ink-200"></div>
+        <div class="step"><span class="num">4</span>Insurance & Legal</div>
+        <div class="flex-1 h-px bg-ink-200"></div>
+        <div class="step"><span class="num">5</span>Review</div>
+      </div>
+    </div>
+
+    <div class="p-5 grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div class="lg:col-span-2 space-y-5">
+        <!-- Section 1 -->
+        <div class="bg-red-50 border border-red-100 rounded-xl p-4">
+          <h4 class="text-xs font-bold uppercase text-red-700 mb-3"><i class="fas fa-triangle-exclamation"></i> Incident Details</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-semibold text-ink-700">Case ID</label><input value="AC-1116" readonly class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg bg-white"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Date & Time *</label><input type="datetime-local" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Severity *</label><select id="sev" onchange="updSev()" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Fatal</option><option>Major — vehicle damage / injuries</option><option selected>Minor — scratch / dent</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Collision Type</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Rear-end</option><option>Head-on</option><option>Side-swipe</option><option>Roll-over</option><option>Pedestrian</option><option>Single-vehicle</option></select></div>
+            <div class="col-span-2"><label class="text-xs font-semibold text-ink-700">Location *</label><input placeholder="GPS coords or full address + landmark" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Weather</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Clear</option><option>Rain</option><option>Fog</option><option>Night</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Road Surface</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Dry tarmac</option><option>Wet tarmac</option><option>Gravel</option><option>Pothole</option></select></div>
+            <div class="col-span-2"><label class="text-xs font-semibold text-ink-700">Narrative *</label><textarea rows="3" placeholder="Describe the sequence of events factually…" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></textarea></div>
+          </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="bg-ink-50 rounded-xl p-4">
+          <div class="flex justify-between items-center mb-3"><h4 class="text-xs font-bold uppercase text-ink-500"><i class="fas fa-users"></i> Parties Involved</h4><button class="text-xs font-semibold text-brand-600"><i class="fas fa-plus"></i> Add party</button></div>
+          <div class="space-y-3">
+            <div class="bg-white rounded-lg p-3 border border-ink-200">
+              <div class="flex justify-between items-center mb-2"><b class="text-sm">Our Vehicle</b><select class="text-xs border border-ink-200 rounded px-2 py-1"><option>Not at-fault</option><option>At-fault</option><option>Shared</option></select></div>
+              <div class="grid grid-cols-2 gap-2">
+                <select class="px-2 py-1.5 text-xs border border-ink-200 rounded"><option>KDD 781P · Volvo FH16</option></select>
+                <select class="px-2 py-1.5 text-xs border border-ink-200 rounded"><option>P. Kamau · DRV-0188</option></select>
+                <select class="px-2 py-1.5 text-xs border border-ink-200 rounded"><option>Trip TRP-10455</option></select>
+                <input type="number" placeholder="Speed at impact (km/h)" class="px-2 py-1.5 text-xs border border-ink-200 rounded">
+              </div>
+            </div>
+            <div class="bg-white rounded-lg p-3 border border-ink-200">
+              <div class="flex justify-between items-center mb-2"><b class="text-sm">Third Party 1</b><select class="text-xs border border-ink-200 rounded px-2 py-1"><option>At-fault</option><option>Not at-fault</option></select></div>
+              <div class="grid grid-cols-2 gap-2">
+                <input placeholder="Vehicle reg (e.g. KCM 309X)" class="px-2 py-1.5 text-xs border border-ink-200 rounded">
+                <input placeholder="Make / Model" class="px-2 py-1.5 text-xs border border-ink-200 rounded">
+                <input placeholder="Driver name" class="px-2 py-1.5 text-xs border border-ink-200 rounded">
+                <input placeholder="Driver ID / Licence" class="px-2 py-1.5 text-xs border border-ink-200 rounded">
+                <input placeholder="Insurance co." class="px-2 py-1.5 text-xs border border-ink-200 rounded">
+                <input placeholder="Phone" class="px-2 py-1.5 text-xs border border-ink-200 rounded">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="bg-ink-50 rounded-xl p-4">
+          <h4 class="text-xs font-bold uppercase text-ink-500 mb-3"><i class="fas fa-kit-medical"></i> Damages & Casualties</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-semibold text-ink-700">Injuries (count)</label><input type="number" value="0" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Fatalities (count)</label><input type="number" value="0" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div class="col-span-2"><label class="text-xs font-semibold text-ink-700">Vehicle Damage</label><textarea rows="2" placeholder="e.g. Front bumper cracked, headlight broken" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></textarea></div>
+            <div class="col-span-2"><label class="text-xs font-semibold text-ink-700">Cargo Damage</label><textarea rows="2" placeholder="Affected SKUs and units, if any" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></textarea></div>
+            <div class="col-span-2">
+              <label class="text-xs font-semibold text-ink-700">Photos / Video Evidence</label>
+              <div class="mt-1 border-2 border-dashed border-ink-300 rounded-lg p-4 text-center text-xs text-ink-500"><i class="fas fa-camera text-2xl text-ink-400 mb-1"></i><div>Upload scene photos, dashcam clips, damage close-ups</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4 -->
+        <div class="bg-ink-50 rounded-xl p-4">
+          <h4 class="text-xs font-bold uppercase text-ink-500 mb-3"><i class="fas fa-file-shield"></i> Insurance, Police & Witnesses</h4>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="text-xs font-semibold text-ink-700">Police Notified</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Yes</option><option>No</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">OB Number</label><input placeholder="OB# 47/12/04" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Police Station</label><input placeholder="Naivasha Central" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Insurance Co.</label><select class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>Britam</option><option>Jubilee</option><option>APA</option><option>UAP</option></select></div>
+            <div><label class="text-xs font-semibold text-ink-700">Policy #</label><input placeholder="POL-44219" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div><label class="text-xs font-semibold text-ink-700">Estimated Liability ($)</label><input type="number" placeholder="8,400" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></div>
+            <div class="col-span-2"><label class="text-xs font-semibold text-ink-700">Witnesses</label><textarea rows="2" placeholder="Name, phone, statement summary (one per line)" class="mt-1 w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"></textarea></div>
+            <div class="col-span-2 flex items-center gap-4 text-xs flex-wrap"><label class="flex items-center gap-2"><input type="checkbox" class="rounded">Notify HSE Officer</label><label class="flex items-center gap-2"><input type="checkbox" class="rounded" checked>Notify Insurance broker</label><label class="flex items-center gap-2"><input type="checkbox" class="rounded">File NTSA report</label><label class="flex items-center gap-2"><input type="checkbox" class="rounded">Suspend driver pending review</label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live preview -->
+      <aside class="lg:col-span-1 space-y-4">
+        <div class="rounded-xl border border-ink-200 overflow-hidden sticky top-4">
+          <div class="bg-gradient-to-br from-red-700 to-orange-600 text-white p-4">
+            <div class="text-[10px] uppercase opacity-80">Incident Preview</div>
+            <div class="text-lg font-bold mt-1">AC-1116</div>
+            <div class="text-xs opacity-90">KDD 781P · Volvo FH16</div>
+            <span id="sevPill" class="pill pill-muted mt-2 inline-flex">Minor</span>
+          </div>
+          <div class="p-4 space-y-2 text-xs">
+            <div class="flex justify-between"><span class="text-ink-500">Driver</span><b>P. Kamau</b></div>
+            <div class="flex justify-between"><span class="text-ink-500">Trip</span><b>TRP-10455</b></div>
+            <div class="flex justify-between"><span class="text-ink-500">Collision</span><b>Rear-end</b></div>
+            <div class="flex justify-between"><span class="text-ink-500">Injuries</span><b>0</b></div>
+            <div class="flex justify-between"><span class="text-ink-500">Police</span><b>OB# pending</b></div>
+            <div class="flex justify-between pt-2 border-t border-ink-100"><span class="text-ink-500">Liability</span><b class="text-red-600">$8,400</b></div>
+          </div>
+          <div class="p-3 bg-amber-50 text-[11px] text-amber-700 border-t border-amber-200"><i class="fas fa-circle-info"></i> NTSA filing required within 24h for major incidents.</div>
+        </div>
+        <div class="rounded-xl border border-ink-200 p-4 text-xs space-y-2">
+          <h5 class="font-bold text-ink-900">Auto-actions</h5>
+          <div class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> Create insurance claim draft</div>
+          <div class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> Lock vehicle from new trips</div>
+          <div class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> Add to driver safety record</div>
+          <div class="flex items-center gap-2"><i class="fas fa-check text-emerald-500"></i> Notify line manager</div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="sticky bottom-0 bg-white border-t border-ink-100 p-4 flex items-center justify-between">
+      <button class="text-xs font-semibold text-ink-500"><i class="fas fa-floppy-disk mr-1"></i>Save draft</button>
+      <div class="flex gap-2">
+        <button onclick="closeCreate()" class="px-4 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg">Cancel</button>
+        <button class="px-4 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg">← Back</button>
+        <button onclick="submitAc()" class="px-5 py-2 text-xs font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700">Submit & Open Claim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="fixed bottom-6 right-6 bg-ink-900 text-white text-sm px-4 py-3 rounded-lg shadow-2xl translate-y-20 opacity-0 transition-all z-[60] flex items-center gap-2"><i class="fas fa-circle-check text-emerald-400"></i><span id="toastMsg">Saved</span></div>
+
+<script>
+  const sevMap={Fatal:'pill-danger',Major:'pill-warning',Minor:'pill-muted'};
+  const claimMap={Reported:'pill-muted',Investigating:'pill-primary',Estimated:'pill-warning',Approved:'pill-purple',Settled:'pill-success'};
+  const faultMap={'At-fault':'pill-danger','Not at-fault':'pill-success','Shared':'pill-warning'};
+  const data=[
+    {id:'AC-1115',v:'KDD 781P',vt:'Volvo FH16',drv:'P. Kamau',desc:'Rear-end collision with Toyota Hilux',loc:'A104 Naivasha',sev:'Major',fault:'Not at-fault',claim:'Investigating',liab:'$8,400',date:'Apr 12, 2026',trip:'TRP-10455'},
+    {id:'AC-1114',v:'KAS 220H',vt:'Mercedes Actros',drv:'D. Mwangi',desc:'Side-swipe in roundabout',loc:'Westlands NRB',sev:'Minor',fault:'Shared',claim:'Estimated',liab:'$1,200',date:'Apr 09',trip:'TRP-10449'},
+    {id:'AC-1113',v:'KCQ 309L',vt:'Isuzu FVR',drv:'M. Achieng',desc:'Trailer detached, no other party',loc:'Mombasa Rd KM 42',sev:'Major',fault:'At-fault',claim:'Approved',liab:'$5,600',date:'Apr 05',trip:'TRP-10438'},
+    {id:'AC-1112',v:'KBX 105M',vt:'MAN TGS',drv:'S. Wanjiru',desc:'Rolled over on wet bend',loc:'Sagana A2',sev:'Major',fault:'Not at-fault',claim:'Investigating',liab:'$22,000',date:'Apr 02',trip:'TRP-10430'},
+    {id:'AC-1111',v:'KCA 442N',vt:'Scania R450',drv:'J. Otieno',desc:'Minor scratch parking',loc:'Eldoret Yard',sev:'Minor',fault:'At-fault',claim:'Settled',liab:'$320',date:'Mar 28',trip:'—'},
+    {id:'AC-1110',v:'KDP 558N',vt:'Hino 700',drv:'L. Ngugi',desc:'Pedestrian near-miss, no contact',loc:'Kisumu CBD',sev:'Minor',fault:'Not at-fault',claim:'Settled',liab:'$0',date:'Mar 25',trip:'TRP-10412'},
+    {id:'AC-1109',v:'KDD 781P',vt:'Volvo FH16',drv:'P. Kamau',desc:'Front collision with matatu',loc:'Thika Hwy',sev:'Major',fault:'Not at-fault',claim:'Investigating',liab:'$11,200',date:'Mar 22',trip:'TRP-10408'},
+    {id:'AC-1108',v:'KAJ 712C',vt:'Iveco Stralis',drv:'B. Kiptoo',desc:'Pothole damage to suspension',loc:'A1 Bungoma',sev:'Minor',fault:'Not at-fault',claim:'Settled',liab:'$680',date:'Mar 18',trip:'—'},
+  ];
+  function render(){
+    document.getElementById('rows').innerHTML=data.map(r=>`
+      <tr class="row-hover cursor-pointer" onclick="openDrawer()">
+        <td class="p-3" onclick="event.stopPropagation()"><input type="checkbox"></td>
+        <td class="p-3 font-semibold text-brand-600">${r.id}</td>
+        <td class="p-3"><div class="font-semibold text-ink-900">${r.v}</div><div class="text-[11px] text-ink-500">${r.vt} · ${r.drv}</div></td>
+        <td class="p-3 text-ink-700 max-w-xs"><div class="truncate">${r.desc}</div>${r.trip!=='—'?`<a href="trip-view.html" class="text-[11px] text-brand-600 hover:underline">${r.trip}</a>`:''}</td>
+        <td class="p-3 text-ink-700"><i class="fas fa-location-dot text-ink-400 text-[10px]"></i> ${r.loc}</td>
+        <td class="p-3"><span class="pill ${sevMap[r.sev]}">${r.sev}</span></td>
+        <td class="p-3"><span class="pill ${faultMap[r.fault]}">${r.fault}</span></td>
+        <td class="p-3"><span class="pill ${claimMap[r.claim]}">${r.claim}</span></td>
+        <td class="p-3 font-semibold text-ink-900">${r.liab}</td>
+        <td class="p-3 text-ink-500 text-xs">${r.date}</td>
+        <td class="p-3" onclick="event.stopPropagation()">
+          <div class="flex gap-1 text-ink-400"><button class="hover:text-brand-600"><i class="fas fa-eye"></i></button><button class="hover:text-brand-600"><i class="fas fa-pen"></i></button><button class="hover:text-red-600"><i class="fas fa-ellipsis-vertical"></i></button></div>
+        </td>
+      </tr>
+    `).join('');
+  }
+  render();
+  function setTab(e){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));e.currentTarget.classList.add('active');}
+  function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('bd').classList.add('open');}
+  function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('bd').classList.remove('open');}
+  function openCreate(){document.getElementById('createModal').classList.remove('hidden');document.getElementById('createModal').classList.add('flex');document.getElementById('cb').classList.add('open');}
+  function closeCreate(){document.getElementById('createModal').classList.add('hidden');document.getElementById('createModal').classList.remove('flex');document.getElementById('cb').classList.remove('open');}
+  function updSev(){const v=document.getElementById('sev').value.split(' ')[0];const p=document.getElementById('sevPill');p.className='pill mt-2 inline-flex '+(sevMap[v]||'pill-muted');p.textContent=v;}
+  function submitAc(){closeCreate();const t=document.getElementById('toast');document.getElementById('toastMsg').textContent='Accident AC-1116 reported · claim draft created';t.classList.remove('translate-y-20','opacity-0');setTimeout(()=>t.classList.add('translate-y-20','opacity-0'),3000);}
+</script>
+</body>
+</html>
