@@ -30,6 +30,7 @@ function renderSidebar(active){
       <a href="tyres-fitment.html" class="sub-link ${active==='fitment'?'active':''}"><i class="fas fa-truck-monster w-4"></i>Vehicle Fitment</a>
       <a href="tyres-inspection.html" class="sub-link ${active==='inspection'?'active':''}"><i class="fas fa-clipboard-check w-4"></i>Inspections</a>
       <a href="tyres-rotation.html" class="sub-link ${active==='rotation'?'active':''}"><i class="fas fa-rotate w-4"></i>Rotation & Replace</a>
+      <a href="tyre-detail.html" class="sub-link ${active==='detail'?'active':''}"><i class="fas fa-magnifying-glass-chart w-4"></i>Tyre Lifecycle</a>
     </div>
   </nav>`;
   document.getElementById('sidebar').innerHTML = html;
