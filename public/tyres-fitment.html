@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vehicle Tyre Fitment — FleetCtrl</title>
+  <meta name="description" content="Live fitment diagrams for trucks and trailers including multi-axle units up to 22+ tyres." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},
+      ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}}
+    } } }
+  </script>
+  <style>
+    body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;text-decoration:none;}
+    .nav-link:hover{background:#1E293B;color:#fff;} .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:.9rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:.5rem;} .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;border-radius:.5rem;color:#64748B;font-size:.78rem;text-decoration:none;}
+    .sub-link:hover{background:#1E293B;color:#CBD5E1;} .sub-link.active{color:#60A5FA;background:#1E293B;}
+    .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+    .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;}.pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-warning{background:#FEF3C7;color:#92400E;}.pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-muted{background:#F1F5F9;color:#475569;}
+    .card{background:#fff;border-radius:1rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+    .tyre{width:26px;height:42px;border-radius:5px;border:2px solid #fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .15s;}
+    .tyre:hover{transform:scale(1.15);}
+    .axle-row{display:flex;align-items:center;gap:8px;padding:6px 0;}
+    .axle-bar{flex:1;height:6px;background:linear-gradient(90deg,#94A3B8,#64748B,#94A3B8);border-radius:3px;position:relative;}
+    .vehicle-card{cursor:pointer;transition:all .15s;}
+    .vehicle-card.selected{border:2px solid #2563EB;box-shadow:0 0 0 4px rgba(37,99,235,.1);}
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div>
+      <div class="text-[11px] text-ink-500 font-medium"><a href="tyres.html" class="hover:text-brand-600">Tyres</a> / <span class="text-ink-900">Vehicle Fitment</span></div>
+      <h1 class="text-lg font-bold text-ink-900">Vehicle Tyre Fitment</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-print mr-1"></i>Print Diagram</button>
+      <a href="tyres-rotation.html" class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700"><i class="fas fa-rotate mr-1"></i>Plan Rotation</a>
+    </div>
+  </header>
+
+  <div class="p-6 grid grid-cols-1 xl:grid-cols-12 gap-5">
+
+    <!-- LEFT: VEHICLE LIST -->
+    <aside class="xl:col-span-3 space-y-3">
+      <div class="card p-3">
+        <div class="relative"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i><input class="w-full pl-9 pr-3 py-2 text-sm border border-ink-200 rounded-lg" placeholder="Search vehicles…"/></div>
+        <div class="flex gap-2 mt-2 text-[11px]">
+          <button class="px-2 py-1 rounded bg-brand-50 text-brand-700 font-semibold">All</button>
+          <button class="px-2 py-1 rounded text-ink-500 hover:bg-ink-100">Trucks</button>
+          <button class="px-2 py-1 rounded text-ink-500 hover:bg-ink-100">Trailers</button>
+        </div>
+      </div>
+      <div id="vehicleList" class="space-y-2"></div>
+    </aside>
+
+    <!-- RIGHT: FITMENT DIAGRAM -->
+    <section class="xl:col-span-9 space-y-5">
+      <div class="card p-5" id="vehicleHeader"></div>
+
+      <!-- Diagram -->
+      <div class="card p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-ink-900">Wheel Configuration</h3>
+          <div class="flex gap-3 text-[11px]">
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-emerald-500"></span>New</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-brand-600"></span>Good</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-amber-500"></span>Worn</span>
+            <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-sm bg-red-500"></span>Critical</span>
+          </div>
+        </div>
+        <div id="diagram" class="bg-ink-50 rounded-xl p-6 overflow-x-auto"></div>
+        <div class="mt-3 text-[11px] text-ink-500 text-center"><i class="fas fa-circle-info mr-1"></i>Click any tyre to view details, rotate, swap or replace.</div>
+      </div>
+
+      <!-- Position table -->
+      <div class="card overflow-hidden">
+        <div class="px-4 py-3 border-b border-ink-200 flex items-center justify-between">
+          <h3 class="font-bold text-ink-900 text-sm">Position Detail</h3>
+          <span class="text-[11px] text-ink-500" id="posCount"></span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-ink-50 text-[11px] uppercase text-ink-500">
+              <tr><th class="px-3 py-2 text-left">Pos</th><th class="px-3 py-2 text-left">Serial</th><th class="px-3 py-2 text-left">Brand</th><th class="px-3 py-2 text-left">Tread</th><th class="px-3 py-2 text-right">PSI</th><th class="px-3 py-2 text-right">Mileage</th><th class="px-3 py-2 text-left">Status</th><th class="px-3 py-2 text-right">Action</th></tr>
+            </thead>
+            <tbody id="posTable" class="divide-y divide-ink-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script src="tyres-sidebar.js"></script>
+<script>
+// Tyre status helpers
+const cfg={new:{c:'#10B981',p:'pill-success',l:'New'},good:{c:'#2563EB',p:'pill-primary',l:'Good'},worn:{c:'#F59E0B',p:'pill-warning',l:'Worn'},critical:{c:'#DC2626',p:'pill-danger',l:'Critical'}};
+
+// Build a tyre randomly-ish but stable
+function mkT(sn,brand,tread,psi,km,status){return{sn,brand,tread,psi,km,status};}
+
+// Vehicles — rigid 4-tyre, 6×4 with 10 tyres, 8×4 with 12 tyres, prime mover + multi-axle trailer up to 22 tyres
+const vehicles = [
+  {
+    id:"T-101", name:"Volvo FH16 6×4", plate:"MH 12 AD 1234", driver:"John Doe", type:"Prime Mover",
+    axles:[
+      {label:"Front (Steer)", positions:[mkT("MX-3912-22","Michelin",8.4,118,42000,"good"),mkT("MX-3913-22","Michelin",8.2,116,42000,"good")]},
+      {label:"Drive 1 (Twin)", positions:[mkT("BR-7820-21","Bridgestone",6.1,108,71000,"good"),mkT("BR-7821-21","Bridgestone",6.0,110,71000,"good"),mkT("BR-7822-21","Bridgestone",5.8,109,71000,"good"),mkT("BR-7823-21","Bridgestone",1.2,98,87000,"critical")]},
+      {label:"Drive 2 (Twin)", positions:[mkT("BR-7830-21","Bridgestone",5.7,108,72000,"good"),mkT("BR-7831-21","Bridgestone",5.6,110,72000,"good"),mkT("BR-7832-21","Bridgestone",5.5,109,72000,"good"),mkT("BR-7833-21","Bridgestone",5.4,109,72000,"good")]}
+    ]
+  },
+  {
+    id:"TR-440", name:"Lowboy 8-Axle Trailer", plate:"AE 88 LB 9012", driver:"— Hooked to T-101 —", type:"Trailer",
+    axles:Array.from({length:8},(_,i)=>({
+      label:`Axle ${i+1} (Twin)`,
+      positions:[
+        mkT(`AP-${6600+i*4}-23`,"Apollo",6.5-i*0.4,108,48000+i*2000, i>=5?"worn":"good"),
+        mkT(`AP-${6601+i*4}-23`,"Apollo",6.4-i*0.4,108,48000+i*2000, i>=5?"worn":"good"),
+        mkT(`AP-${6602+i*4}-23`,"Apollo",6.3-i*0.4,108,48000+i*2000, i>=6?"critical":i>=5?"worn":"good"),
+        mkT(`AP-${6603+i*4}-23`,"Apollo",6.2-i*0.4,108,48000+i*2000, i>=5?"worn":"good"),
+      ]
+    }))  // 8 axles × 4 tyres = 32 tyres (super-heavy lowboy)
+  },
+  {
+    id:"T-220", name:"Scania R450 8×4", plate:"GA 07 BC 3311", driver:"Emma Johnson", type:"Rigid Truck",
+    axles:[
+      {label:"Steer 1", positions:[mkT("MX-4001","Michelin",10.2,118,28000,"good"),mkT("MX-4002","Michelin",10.1,118,28000,"good")]},
+      {label:"Steer 2", positions:[mkT("MX-4003","Michelin",9.8,118,28000,"good"),mkT("MX-4004","Michelin",9.9,118,28000,"good")]},
+      {label:"Drive 1 (Twin)", positions:[mkT("GY-4520","Goodyear",2.8,109,74000,"worn"),mkT("GY-4521","Goodyear",0.9,98,92000,"critical"),mkT("GY-4522","Goodyear",2.6,109,74000,"worn"),mkT("GY-4523","Goodyear",2.9,109,74000,"worn")]},
+      {label:"Drive 2 (Twin)", positions:[mkT("GY-4530","Goodyear",3.1,109,72000,"worn"),mkT("GY-4531","Goodyear",3.0,109,72000,"worn"),mkT("GY-4532","Goodyear",3.2,109,72000,"worn"),mkT("GY-4533","Goodyear",3.1,109,72000,"worn")]},
+    ]
+  },
+  {
+    id:"T-108", name:"MAN TGS 4×2", plate:"KA 05 QW 8899", driver:"Mike Chen", type:"Rigid Truck",
+    axles:[
+      {label:"Front (Steer)", positions:[mkT("CO-9182","Continental",12.1,118,8000,"new"),mkT("CO-9183","Continental",12.0,118,8000,"new")]},
+      {label:"Drive (Twin)", positions:[mkT("CO-9190","Continental",10.5,109,35000,"good"),mkT("CO-9191","Continental",10.4,109,35000,"good"),mkT("CO-9192","Continental",10.6,109,35000,"good"),mkT("CO-9193","Continental",10.3,109,35000,"good")]}
+    ]
+  }
+];
+
+let selectedIdx = 0;
+
+function totalTyres(v){return v.axles.reduce((s,a)=>s+a.positions.length,0);}
+
+function renderVehicleList(){
+  document.getElementById('vehicleList').innerHTML = vehicles.map((v,i)=>{
+    const total = totalTyres(v);
+    const critical = v.axles.flatMap(a=>a.positions).filter(t=>t.status==='critical').length;
+    const worn = v.axles.flatMap(a=>a.positions).filter(t=>t.status==='worn').length;
+    const stat = critical>0?'pill-danger':worn>0?'pill-warning':'pill-success';
+    const statL = critical>0?`${critical} Critical`:worn>0?`${worn} Worn`:'Healthy';
+    return `<div onclick="selectVehicle(${i})" class="vehicle-card card p-3 ${i===selectedIdx?'selected':''}">
+      <div class="flex items-start justify-between"><div><div class="font-bold text-ink-900 text-sm">${v.id}</div><div class="text-[11px] text-ink-500">${v.name}</div></div><span class="pill pill-muted">${total} tyres</span></div>
+      <div class="text-[11px] text-ink-500 mt-1">${v.plate}</div>
+      <div class="mt-2"><span class="pill ${stat}">${statL}</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderHeader(){
+  const v = vehicles[selectedIdx];
+  const total = totalTyres(v);
+  const all = v.axles.flatMap(a=>a.positions);
+  const avgTread = (all.reduce((s,t)=>s+t.tread,0)/all.length).toFixed(1);
+  const critical = all.filter(t=>t.status==='critical').length;
+  document.getElementById('vehicleHeader').innerHTML = `
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl"><i class="fas fa-truck"></i></div>
+        <div>
+          <div class="text-[11px] text-ink-500 uppercase font-semibold">${v.type}</div>
+          <div class="text-xl font-bold text-ink-900">${v.id} · ${v.name}</div>
+          <div class="text-xs text-ink-500">${v.plate} · ${v.driver}</div>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <div class="text-center px-4 py-2 bg-ink-50 rounded-lg"><div class="text-[10px] text-ink-500 uppercase">Tyres</div><div class="text-xl font-bold text-ink-900">${total}</div></div>
+        <div class="text-center px-4 py-2 bg-ink-50 rounded-lg"><div class="text-[10px] text-ink-500 uppercase">Axles</div><div class="text-xl font-bold text-ink-900">${v.axles.length}</div></div>
+        <div class="text-center px-4 py-2 bg-ink-50 rounded-lg"><div class="text-[10px] text-ink-500 uppercase">Avg Tread</div><div class="text-xl font-bold text-brand-600">${avgTread} mm</div></div>
+        <div class="text-center px-4 py-2 ${critical?'bg-red-50':'bg-emerald-50'} rounded-lg"><div class="text-[10px] ${critical?'text-red-700':'text-emerald-700'} uppercase">${critical?'Critical':'Status'}</div><div class="text-xl font-bold ${critical?'text-red-600':'text-emerald-600'}">${critical||'OK'}</div></div>
+      </div>
+    </div>`;
+}
+
+function renderDiagram(){
+  const v = vehicles[selectedIdx];
+  // Each axle as a horizontal row: tyres-left | axle-bar | tyres-right
+  const rows = v.axles.map((axle,ai)=>{
+    const half = Math.ceil(axle.positions.length/2);
+    const left = axle.positions.slice(0,half).reverse(); // outer-to-inner visually
+    const right = axle.positions.slice(half);
+    const tyreHTML = (t,side,axleI,posI)=>`<div class="tyre" style="background:${cfg[t.status].c}" title="${t.sn} · ${t.brand} · ${t.tread}mm · ${t.psi} PSI" onclick="alert('${t.sn}\\n${t.brand} · ${t.tread}mm tread · ${t.psi} PSI · ${t.km.toLocaleString()}km')">${t.tread.toFixed(1)}</div>`;
+    return `<div class="axle-row">
+      <div class="w-28 text-right"><div class="text-[11px] font-semibold text-ink-700">${axle.label}</div><div class="text-[10px] text-ink-500">Axle ${ai+1}</div></div>
+      <div class="flex gap-1 justify-end" style="min-width:90px">${left.map(t=>tyreHTML(t,'L',ai)).join('')}</div>
+      <div class="axle-bar"></div>
+      <div class="flex gap-1" style="min-width:90px">${right.map(t=>tyreHTML(t,'R',ai)).join('')}</div>
+      <div class="w-12 text-[10px] text-ink-500">${axle.positions.length}T</div>
+    </div>`;
+  }).join('');
+  document.getElementById('diagram').innerHTML = `
+    <div class="flex items-center gap-3 mb-3"><div class="w-12 h-8 bg-ink-700 rounded text-white flex items-center justify-center text-[10px] font-bold">CAB</div><div class="text-[11px] text-ink-500">Direction of travel →</div></div>
+    <div class="bg-white rounded-lg p-4 border border-ink-200">${rows}</div>`;
+}
+
+function renderPosTable(){
+  const v = vehicles[selectedIdx];
+  let count=0;
+  const rows = v.axles.flatMap((a,ai)=>a.positions.map((t,pi)=>{
+    count++;
+    return `<tr class="hover:bg-ink-50">
+      <td class="px-3 py-2 font-mono text-[11px] font-semibold">A${ai+1}-P${pi+1}</td>
+      <td class="px-3 py-2 font-mono text-xs">${t.sn}</td>
+      <td class="px-3 py-2">${t.brand}</td>
+      <td class="px-3 py-2"><span class="font-bold" style="color:${cfg[t.status].c}">${t.tread} mm</span></td>
+      <td class="px-3 py-2 text-right">${t.psi}</td>
+      <td class="px-3 py-2 text-right">${t.km.toLocaleString()} km</td>
+      <td class="px-3 py-2"><span class="pill ${cfg[t.status].p}">${cfg[t.status].l}</span></td>
+      <td class="px-3 py-2 text-right"><button class="text-brand-600 text-xs font-semibold mr-2">Rotate</button><button class="text-red-600 text-xs font-semibold">Replace</button></td>
+    </tr>`;
+  })).join('');
+  document.getElementById('posTable').innerHTML = rows;
+  document.getElementById('posCount').textContent = `${count} positions`;
+}
+
+function selectVehicle(i){selectedIdx=i;renderVehicleList();renderHeader();renderDiagram();renderPosTable();}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  renderSidebar('fitment');
+  renderVehicleList();renderHeader();renderDiagram();renderPosTable();
+});
+</script>
+</body>
+</html>
