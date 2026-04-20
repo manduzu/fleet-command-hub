@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Edit Tyre Replacement — RPL-00219 — FleetCtrl</title>
+<meta name="description" content="Edit an existing tyre replacement record with audit trail and approval workflow." />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#EFF6FF',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},ink:{50:'#F8FAFC',100:'#F1F5F9',200:'#E2E8F0',300:'#CBD5E1',500:'#64748B',600:'#475569',700:'#334155',900:'#0F172A'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;}
+  .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;display:flex;flex-direction:column;z-index:40;}
+  .nav-link{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.55rem;color:#94A3B8;font-size:.85rem;font-weight:500;text-decoration:none;}
+  .nav-link:hover{background:#1E293B;color:#fff;}
+  .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+  .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.55rem;color:#94A3B8;font-size:.85rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;text-align:left;}
+  .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+  .dropdown-items{display:none;padding-left:.75rem;} .dropdown-items.open{display:block;}
+  .sub-link{display:flex;align-items:center;gap:.5rem;padding:.4rem .75rem;border-radius:.45rem;color:#94A3B8;font-size:.78rem;text-decoration:none;}
+  .sub-link:hover{background:#1E293B;color:#fff;} .sub-link.active{color:#60A5FA;background:#1E293B;}
+  .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+  .card{background:#fff;border-radius:1rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+  .field{display:block;width:100%;padding:.55rem .75rem;font-size:.85rem;border:1px solid #E2E8F0;border-radius:.55rem;background:#fff;}
+  .field:focus{outline:none;border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .field.changed{border-color:#F59E0B;background:#FFFBEB;}
+  .label{display:block;font-size:.72rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem;}
+  .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+  .pill-success{background:#D1FAE5;color:#065F46;} .pill-warning{background:#FEF3C7;color:#92400E;}
+  .pill-primary{background:#DBEAFE;color:#1D4ED8;} .pill-muted{background:#F1F5F9;color:#475569;}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="px-4 py-4 flex items-center gap-2 border-b border-slate-800">
+    <div class="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white"><i class="fas fa-truck-fast"></i></div>
+    <div><div class="text-white font-bold text-sm">FleetCtrl</div><div class="text-[10px] text-slate-500 uppercase tracking-wider">ERP Suite</div></div>
+  </div>
+  <nav class="px-2 py-3 flex-1 overflow-y-auto">
+    <a href="dashboard.html" class="nav-link"><i class="fas fa-gauge-high w-4"></i>Dashboard</a>
+    <div class="nav-section">Workshop</div>
+    <a href="parts.html" class="nav-link"><i class="fas fa-gears w-4"></i>Parts</a>
+    <button class="dropdown-btn open" onclick="this.classList.toggle('open');document.getElementById('tyresDD').classList.toggle('open');"><i class="fas fa-circle-notch w-4"></i><span style="flex:1">Tyre Management</span><i class="fas fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items open" id="tyresDD">
+      <a href="tyres.html" class="sub-link"><i class="fas fa-house w-4"></i>Command Center</a>
+      <a href="tyres-archive.html" class="sub-link"><i class="fas fa-warehouse w-4"></i>Tyre Register</a>
+      <a href="tyres-fitment.html" class="sub-link"><i class="fas fa-truck-monster w-4"></i>Vehicle Fitment</a>
+      <a href="tyres-inspection.html" class="sub-link"><i class="fas fa-clipboard-check w-4"></i>Inspections</a>
+      <a href="tyres-rotation.html" class="sub-link active"><i class="fas fa-rotate w-4"></i>Rotation & Replace</a>
+      <a href="tyre-detail.html" class="sub-link"><i class="fas fa-magnifying-glass-chart w-4"></i>Tyre Lifecycle</a>
+    </div>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="px-6 pt-6 pb-4 bg-gradient-to-r from-brand-700 to-brand-500 text-white">
+    <div class="flex items-center gap-2 text-xs opacity-80 mb-2">
+      <a href="tyres.html" class="hover:underline">Tyre Management</a><i class="fas fa-chevron-right text-[8px]"></i>
+      <a href="tyres-rotation.html" class="hover:underline">Replacements</a><i class="fas fa-chevron-right text-[8px]"></i>
+      <span>RPL-00219</span>
+    </div>
+    <div class="flex justify-between flex-wrap gap-3">
+      <div>
+        <h1 class="text-2xl font-bold">Edit Replacement <span class="font-mono">RPL-00219</span></h1>
+        <p class="text-sm opacity-90">T-220 · Pos RL · Created 02 Feb 2025 by A. Kamau</p>
+      </div>
+      <div class="flex gap-2 items-center flex-wrap">
+        <span class="pill bg-amber-300/30 text-white"><i class="fas fa-circle-half-stroke"></i> Pending Approval</span>
+        <a href="tyre-detail.html" class="px-3 py-1.5 bg-white/15 rounded-lg text-xs font-bold">Cancel</a>
+        <button class="px-3 py-1.5 bg-red-500 rounded-lg text-xs font-bold"><i class="fas fa-trash mr-1"></i>Delete</button>
+        <button class="px-3 py-1.5 bg-white text-brand-700 rounded-lg text-xs font-bold"><i class="fas fa-floppy-disk mr-1"></i>Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-6 py-5 grid grid-cols-1 xl:grid-cols-3 gap-5">
+    <!-- Form -->
+    <div class="xl:col-span-2 space-y-5">
+      <div class="card p-5">
+        <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-truck text-brand-600"></i>Vehicle & Position</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="label">Vehicle</label><input class="field" value="T-220 · Scania R500"/></div>
+          <div><label class="label">Axle</label><select class="field"><option>Rear 1 (Drive)</option></select></div>
+          <div><label class="label">Position</label><input class="field" value="RL"/></div>
+          <div><label class="label">Date</label><input class="field" type="date" value="2025-02-02"/></div>
+          <div><label class="label">Workshop</label><input class="field" value="Bay 3 — Bravo Yard"/></div>
+          <div><label class="label">Mechanic</label><input class="field" value="A. Kamau"/></div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-circle-notch text-amber-600"></i>Old Tyre</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="label">Tyre ID</label><input class="field" value="TYR-00399" readonly/></div>
+          <div><label class="label">Brand / Model</label><input class="field" value="Goodyear KMAX D"/></div>
+          <div><label class="label">Tread at removal (mm)</label><input class="field changed" type="number" step=".1" value="2.4"/><p class="text-[11px] text-amber-700 mt-1"><i class="fas fa-pen-to-square"></i> Was 2.8mm</p></div>
+          <div><label class="label">Mileage</label><input class="field" value="91,200 km"/></div>
+          <div><label class="label">Disposition</label><select class="field"><option>Scrap (condemned)</option><option>Retread</option><option>Warranty</option></select></div>
+          <div><label class="label">Casing grade</label><select class="field"><option>C — not retreadable</option><option>A</option><option>B</option></select></div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-circle-check text-emerald-600"></i>New Tyre</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div><label class="label">Tyre ID</label><input class="field" value="TYR-00482"/></div>
+          <div><label class="label">Brand / Model</label><input class="field" value="Michelin X Multi Energy Z"/></div>
+          <div><label class="label">Size</label><input class="field" value="315/80R22.5"/></div>
+          <div><label class="label">DOT</label><input class="field" value="2123"/></div>
+          <div><label class="label">Initial tread (mm)</label><input class="field" type="number" step=".1" value="14.0"/></div>
+          <div><label class="label">Initial PSI</label><input class="field" type="number" value="120"/></div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-coins text-emerald-600"></i>Costs</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div><label class="label">New tyre</label><input class="field changed" type="number" value="612.40"/><p class="text-[11px] text-amber-700 mt-1">Was 598.00</p></div>
+          <div><label class="label">Labour</label><input class="field" type="number" value="22"/></div>
+          <div><label class="label">Disposal</label><input class="field" type="number" value="6"/></div>
+          <div><label class="label">Total</label><input class="field bg-ink-50 font-bold" value="$640.40" readonly/></div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-comment text-brand-600"></i>Notes</h3>
+        <textarea class="field" rows="3">Tread reached condemnation depth on outer edge. Refitted Michelin pulled from warehouse stock (LPO-2284).</textarea>
+        <div class="mt-3"><label class="label">Reason for edit (required)</label><input class="field" placeholder="e.g. corrected tread reading after re-measurement"/></div>
+      </div>
+    </div>
+
+    <!-- Right column: audit + approvals -->
+    <div class="space-y-5">
+      <div class="card p-5">
+        <h3 class="text-xs font-bold uppercase text-ink-500 tracking-wider mb-3">Approval Workflow</h3>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fas fa-check text-xs"></i></div><div class="flex-1"><b class="text-sm">Submitted</b><div class="text-[11px] text-ink-500">A. Kamau · 02 Feb 2025 14:22</div></div></div>
+          <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fas fa-check text-xs"></i></div><div class="flex-1"><b class="text-sm">Foreman review</b><div class="text-[11px] text-ink-500">P. Otieno · 02 Feb 2025 16:08</div></div></div>
+          <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fas fa-hourglass-half text-xs"></i></div><div class="flex-1"><b class="text-sm">Workshop manager</b><div class="text-[11px] text-ink-500">Pending</div></div></div>
+          <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-ink-100 text-ink-500 flex items-center justify-center"><i class="fas fa-lock text-xs"></i></div><div class="flex-1"><b class="text-sm">Finance posting</b><div class="text-[11px] text-ink-500">Locked until approval</div></div></div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-xs font-bold uppercase text-ink-500 tracking-wider mb-3">Audit Trail</h3>
+        <div class="space-y-3 text-xs">
+          <div class="border-l-2 border-brand-500 pl-3"><b class="block">A. Kamau</b><span class="text-ink-500">Created record</span><div class="text-[10px] text-ink-400">02 Feb 2025 · 14:22</div></div>
+          <div class="border-l-2 border-amber-500 pl-3"><b class="block">P. Otieno</b><span class="text-ink-500">Updated tread reading 2.8 → 2.4mm</span><div class="text-[10px] text-ink-400">02 Feb 2025 · 16:08</div></div>
+          <div class="border-l-2 border-amber-500 pl-3"><b class="block">P. Otieno</b><span class="text-ink-500">Adjusted tyre cost 598.00 → 612.40</span><div class="text-[10px] text-ink-400">02 Feb 2025 · 16:09</div></div>
+          <div class="border-l-2 border-emerald-500 pl-3"><b class="block">System</b><span class="text-ink-500">Lifecycle records updated for TYR-00399 (retired) and TYR-00482 (fitted)</span><div class="text-[10px] text-ink-400">02 Feb 2025 · 16:09</div></div>
+        </div>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-xs font-bold uppercase text-ink-500 tracking-wider mb-3">Linked Records</h3>
+        <div class="space-y-2 text-sm">
+          <a href="tyre-detail.html" class="flex items-center gap-2 hover:bg-ink-50 -mx-2 px-2 py-1.5 rounded"><i class="fas fa-circle-notch text-brand-500"></i><span class="flex-1">TYR-00482 (fitted)</span><i class="fas fa-arrow-right text-ink-400 text-xs"></i></a>
+          <a href="tyre-detail.html" class="flex items-center gap-2 hover:bg-ink-50 -mx-2 px-2 py-1.5 rounded"><i class="fas fa-circle-notch text-ink-400"></i><span class="flex-1">TYR-00399 (removed)</span><i class="fas fa-arrow-right text-ink-400 text-xs"></i></a>
+          <a href="trucks.html" class="flex items-center gap-2 hover:bg-ink-50 -mx-2 px-2 py-1.5 rounded"><i class="fas fa-truck text-brand-500"></i><span class="flex-1">T-220 vehicle profile</span><i class="fas fa-arrow-right text-ink-400 text-xs"></i></a>
+          <a href="lpo-view.html" class="flex items-center gap-2 hover:bg-ink-50 -mx-2 px-2 py-1.5 rounded"><i class="fas fa-file-lines text-emerald-600"></i><span class="flex-1">LPO-2284</span><i class="fas fa-arrow-right text-ink-400 text-xs"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

@@ -63,7 +63,15 @@
     <a href="accidents.html" class="nav-link active"><i class="fas fa-car-burst w-4"></i>Accidents</a>
     <div class="nav-section">Workshop</div>
     <a href="parts.html" class="nav-link"><i class="fas fa-gears w-4"></i>Parts</a>
-    <a href="tyres.html" class="nav-link"><i class="fas fa-circle-notch w-4"></i>Tyres</a>
+    <button class="dropdown-btn" onclick="this.classList.toggle('open');document.getElementById('tyresDD').classList.toggle('open');"><i class="fas fa-circle-notch w-4"></i><span style="flex:1">Tyre Management</span><i class="fas fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items" id="tyresDD">
+      <a href="tyres.html" class="sub-link"><i class="fas fa-house w-4"></i>Command Center</a>
+      <a href="tyres-archive.html" class="sub-link"><i class="fas fa-warehouse w-4"></i>Tyre Register</a>
+      <a href="tyres-fitment.html" class="sub-link"><i class="fas fa-truck-monster w-4"></i>Vehicle Fitment</a>
+      <a href="tyres-inspection.html" class="sub-link"><i class="fas fa-clipboard-check w-4"></i>Inspections</a>
+      <a href="tyres-rotation.html" class="sub-link"><i class="fas fa-rotate w-4"></i>Rotation & Replace</a>
+      <a href="tyre-detail.html" class="sub-link"><i class="fas fa-magnifying-glass-chart w-4"></i>Tyre Lifecycle</a>
+    </div>
   </nav>
 </aside>
 
