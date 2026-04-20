@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tyre Register — FleetCtrl</title>
+  <meta name="description" content="Master register of every tyre across the fleet with serial, brand, position, condition and cost analytics." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},
+      ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}}
+    } } }
+  </script>
+  <style>
+    body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;text-decoration:none;}
+    .nav-link:hover{background:#1E293B;color:#fff;} .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:.9rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:.5rem;} .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;border-radius:.5rem;color:#64748B;font-size:.78rem;text-decoration:none;}
+    .sub-link:hover{background:#1E293B;color:#CBD5E1;} .sub-link.active{color:#60A5FA;background:#1E293B;}
+    .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+    .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;}.pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-warning{background:#FEF3C7;color:#92400E;}.pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-muted{background:#F1F5F9;color:#475569;}
+    .card{background:#fff;border-radius:1rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+    .row-hover:hover{background:#F8FAFC;}
+    .tread-bar{height:6px;border-radius:999px;background:#E2E8F0;position:relative;overflow:hidden;}
+    .tread-fill{position:absolute;inset:0;border-radius:999px;}
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div>
+      <div class="text-[11px] text-ink-500 font-medium"><a href="tyres.html" class="hover:text-brand-600">Tyres</a> / <span class="text-ink-900">Register</span></div>
+      <h1 class="text-lg font-bold text-ink-900">Tyre Register</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-file-import mr-1"></i>Import CSV</button>
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-file-export mr-1"></i>Export</button>
+      <button onclick="document.getElementById('addModal').classList.remove('hidden')" class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700"><i class="fas fa-plus mr-1"></i>Register Tyre</button>
+    </div>
+  </header>
+
+  <div class="p-6 space-y-5">
+
+    <!-- KPI ROW -->
+    <section class="grid grid-cols-2 md:grid-cols-6 gap-3">
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Total</div><div class="text-xl font-bold text-ink-900">1,248</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">In Service</div><div class="text-xl font-bold text-emerald-600">1,164</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Stock</div><div class="text-xl font-bold text-brand-600">61</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Critical</div><div class="text-xl font-bold text-red-600">23</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Retired YTD</div><div class="text-xl font-bold text-ink-700">186</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Asset Value</div><div class="text-xl font-bold text-ink-900">$412K</div></div>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="card p-4">
+      <div class="grid grid-cols-1 md:grid-cols-6 gap-3 items-end">
+        <div class="md:col-span-2"><label class="text-[11px] uppercase font-semibold text-ink-500">Search</label><div class="relative"><i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-ink-400 text-xs"></i><input class="w-full pl-9 pr-3 py-2 text-sm border border-ink-200 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:outline-none" placeholder="Serial, vehicle, brand…"/></div></div>
+        <div><label class="text-[11px] uppercase font-semibold text-ink-500">Brand</label><select class="w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>All brands</option><option>Michelin</option><option>Bridgestone</option><option>Continental</option><option>Goodyear</option><option>Apollo</option></select></div>
+        <div><label class="text-[11px] uppercase font-semibold text-ink-500">Status</label><select class="w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>All statuses</option><option>New</option><option>Good</option><option>Worn</option><option>Critical</option><option>Retired</option></select></div>
+        <div><label class="text-[11px] uppercase font-semibold text-ink-500">Vehicle Type</label><select class="w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"><option>All</option><option>Rigid Truck</option><option>Prime Mover</option><option>Trailer</option><option>Low-loader</option></select></div>
+        <div><button class="w-full px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700">Apply</button></div>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="pill pill-primary">Critical x23 <i class="fas fa-times ml-1 cursor-pointer"></i></span>
+        <span class="pill pill-warning">Worn x189 <i class="fas fa-times ml-1 cursor-pointer"></i></span>
+        <span class="pill pill-muted">Saved view: "Workshop weekly"</span>
+      </div>
+    </section>
+
+    <!-- MAIN TABLE -->
+    <section class="card overflow-hidden">
+      <div class="px-4 py-3 border-b border-ink-200 flex items-center justify-between">
+        <div class="text-sm font-semibold text-ink-900">Tyres <span class="text-ink-500 font-normal">(showing 12 of 1,248)</span></div>
+        <div class="flex gap-2">
+          <button class="px-3 py-1.5 text-xs font-semibold text-ink-700 border border-ink-200 rounded-lg hover:bg-ink-50"><i class="fas fa-rotate mr-1"></i>Bulk Rotate</button>
+          <button class="px-3 py-1.5 text-xs font-semibold text-ink-700 border border-ink-200 rounded-lg hover:bg-ink-50"><i class="fas fa-trash-can mr-1"></i>Retire Selected</button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-ink-50 text-[11px] uppercase text-ink-500">
+            <tr>
+              <th class="px-3 py-2 text-left"><input type="checkbox"/></th>
+              <th class="px-3 py-2 text-left">Serial</th>
+              <th class="px-3 py-2 text-left">Brand / Pattern</th>
+              <th class="px-3 py-2 text-left">Size</th>
+              <th class="px-3 py-2 text-left">Vehicle · Position</th>
+              <th class="px-3 py-2 text-left">Tread</th>
+              <th class="px-3 py-2 text-right">Mileage</th>
+              <th class="px-3 py-2 text-right">CPK</th>
+              <th class="px-3 py-2 text-left">Status</th>
+              <th class="px-3 py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tyreTbody" class="divide-y divide-ink-100"></tbody>
+        </table>
+      </div>
+      <div class="px-4 py-3 border-t border-ink-200 flex items-center justify-between text-xs text-ink-500">
+        <div>Showing 1–12 of 1,248</div>
+        <div class="flex gap-1">
+          <button class="px-2.5 py-1 border border-ink-200 rounded">‹</button>
+          <button class="px-2.5 py-1 bg-brand-600 text-white rounded">1</button>
+          <button class="px-2.5 py-1 border border-ink-200 rounded">2</button>
+          <button class="px-2.5 py-1 border border-ink-200 rounded">3</button>
+          <button class="px-2.5 py-1 border border-ink-200 rounded">›</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ADD TYRE MODAL -->
+<div id="addModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="px-5 py-4 border-b border-ink-200 flex items-center justify-between">
+      <div><div class="text-[11px] text-ink-500 uppercase">Register</div><h3 class="font-bold text-ink-900">New Tyre</h3></div>
+      <button onclick="document.getElementById('addModal').classList.add('hidden')" class="text-ink-500 hover:text-ink-900"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5 grid grid-cols-2 gap-4 text-sm">
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Serial Number *</label><input class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="e.g. MX-3912-22"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">DOT Code</label><input class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="DOT MJ8X K9LR 4022"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Brand</label><select class="w-full px-3 py-2 border border-ink-200 rounded-lg"><option>Michelin</option><option>Bridgestone</option><option>Continental</option><option>Goodyear</option><option>Apollo</option></select></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Pattern</label><input class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="X Multi Energy Z"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Size</label><input class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="295/80R22.5"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Load / Speed Index</label><input class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="152/148M"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Purchase Cost (USD)</label><input type="number" class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="420"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Supplier</label><input class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="Tyre Hub Co."/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Initial Tread (mm)</label><input type="number" step="0.1" class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="14.5"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Status</label><select class="w-full px-3 py-2 border border-ink-200 rounded-lg"><option>Stock</option><option>Fitted</option></select></div>
+      <div class="col-span-2"><label class="text-[11px] uppercase font-semibold text-ink-500">Assign to Vehicle / Position (optional)</label>
+        <div class="grid grid-cols-2 gap-2"><select class="w-full px-3 py-2 border border-ink-200 rounded-lg"><option>— Keep in stock —</option><option>T-101 Volvo FH16</option><option>T-220 Scania R450</option><option>TR-440 Trailer 8-axle</option></select><input class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="Position e.g. RR-Outer / Axle3-Pos5"/></div>
+      </div>
+    </div>
+    <div class="px-5 py-3 border-t border-ink-200 flex justify-end gap-2">
+      <button onclick="document.getElementById('addModal').classList.add('hidden')" class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg">Cancel</button>
+      <button onclick="alert('Tyre registered (demo)');document.getElementById('addModal').classList.add('hidden')" class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg">Save Tyre</button>
+    </div>
+  </div>
+</div>
+
+<script src="tyres-sidebar.js"></script>
+<script>
+const data = [
+  {sn:"MX-3912-22",brand:"Michelin",pattern:"X-Works Z",size:"295/80R22.5",vh:"T-101 · MH 12 AD 1234",pos:"FL",tread:8.4,initial:14.5,km:42000,cpk:0.038,status:"good"},
+  {sn:"MX-3913-22",brand:"Michelin",pattern:"X-Works Z",size:"295/80R22.5",vh:"T-101 · MH 12 AD 1234",pos:"FR",tread:8.2,initial:14.5,km:42000,cpk:0.039,status:"good"},
+  {sn:"BR-7821-21",brand:"Bridgestone",pattern:"M789",size:"295/80R22.5",vh:"T-101 · MH 12 AD 1234",pos:"RR-Outer",tread:1.2,initial:14,km:87000,cpk:0.041,status:"critical"},
+  {sn:"CO-9182-23",brand:"Continental",pattern:"HDR2",size:"315/80R22.5",vh:"T-108 · KA 05 QW 8899",pos:"FL",tread:12.1,initial:14,km:8000,cpk:0.029,status:"new"},
+  {sn:"CO-9183-23",brand:"Continental",pattern:"HDR2",size:"315/80R22.5",vh:"T-108 · KA 05 QW 8899",pos:"FR",tread:12.0,initial:14,km:8000,cpk:0.029,status:"new"},
+  {sn:"GY-4421-22",brand:"Goodyear",pattern:"KMAX S",size:"295/80R22.5",vh:"T-220 · GA 07 BC 3311",pos:"RL-Inner",tread:0.9,initial:14,km:92000,cpk:0.052,status:"critical"},
+  {sn:"AP-6691-23",brand:"Apollo",pattern:"Endurace LH",size:"295/80R22.5",vh:"TR-440 · 8-axle Trailer",pos:"Axle5-Pos9",tread:2.1,initial:14,km:64000,cpk:0.058,status:"worn"},
+  {sn:"BR-7902-22",brand:"Bridgestone",pattern:"R150",size:"315/80R22.5",vh:"TR-440 · 8-axle Trailer",pos:"Axle3-Pos5",tread:6.5,initial:14,km:48000,cpk:0.040,status:"good"},
+  {sn:"MX-4101-24",brand:"Michelin",pattern:"X Multi D",size:"315/80R22.5",vh:"— Stock —",pos:"Warehouse A · Bay 2",tread:14.5,initial:14.5,km:0,cpk:0,status:"new"},
+  {sn:"GY-4519-21",brand:"Goodyear",pattern:"KMAX S",size:"295/80R22.5",vh:"T-115 · QL 12 AB 1234",pos:"FL",tread:2.8,initial:14,km:65000,cpk:0.048,status:"worn"},
+  {sn:"CO-8801-22",brand:"Continental",pattern:"HDR2",size:"315/80R22.5",vh:"T-108 · KA 05 QW 8899",pos:"Spare",tread:13.2,initial:14,km:1200,cpk:0,status:"new"},
+  {sn:"BR-7011-20",brand:"Bridgestone",pattern:"M789",size:"295/80R22.5",vh:"— Retired —",pos:"Scrap yard",tread:0.4,initial:14,km:118000,cpk:0.036,status:"retired"},
+];
+const cfg={new:{p:'pill-success',l:'New'},good:{p:'pill-primary',l:'Good'},worn:{p:'pill-warning',l:'Worn'},critical:{p:'pill-danger',l:'Critical'},retired:{p:'pill-muted',l:'Retired'}};
+function treadColor(t){if(t<2)return'#DC2626';if(t<4)return'#F59E0B';if(t<8)return'#2563EB';return'#10B981';}
+function render(){
+  document.getElementById('tyreTbody').innerHTML = data.map(t=>{
+    const pct = Math.min(100, (t.tread / t.initial)*100);
+    return `<tr class="row-hover">
+      <td class="px-3 py-2.5"><input type="checkbox"/></td>
+      <td class="px-3 py-2.5 font-mono text-xs font-semibold text-ink-900">${t.sn}</td>
+      <td class="px-3 py-2.5"><div class="font-medium text-ink-900">${t.brand}</div><div class="text-[11px] text-ink-500">${t.pattern}</div></td>
+      <td class="px-3 py-2.5 text-ink-700">${t.size}</td>
+      <td class="px-3 py-2.5"><div class="font-medium text-ink-900">${t.vh}</div><div class="text-[11px] text-ink-500">${t.pos}</div></td>
+      <td class="px-3 py-2.5 w-40"><div class="flex items-center justify-between text-[11px] mb-1"><span class="font-semibold" style="color:${treadColor(t.tread)}">${t.tread} mm</span><span class="text-ink-500">/${t.initial}mm</span></div><div class="tread-bar"><div class="tread-fill" style="width:${pct}%;background:${treadColor(t.tread)}"></div></div></td>
+      <td class="px-3 py-2.5 text-right text-ink-700">${t.km.toLocaleString()} km</td>
+      <td class="px-3 py-2.5 text-right text-ink-700">${t.cpk?'$'+t.cpk.toFixed(3):'—'}</td>
+      <td class="px-3 py-2.5"><span class="pill ${cfg[t.status].p}">${cfg[t.status].l}</span></td>
+      <td class="px-3 py-2.5 text-right"><div class="flex justify-end gap-1"><button class="w-7 h-7 rounded hover:bg-ink-100 text-ink-500" title="View"><i class="fas fa-eye text-xs"></i></button><button class="w-7 h-7 rounded hover:bg-ink-100 text-ink-500" title="Rotate"><i class="fas fa-rotate text-xs"></i></button><button class="w-7 h-7 rounded hover:bg-ink-100 text-ink-500" title="Retire"><i class="fas fa-trash-can text-xs"></i></button></div></td>
+    </tr>`;
+  }).join('');
+}
+document.addEventListener('DOMContentLoaded',()=>{renderSidebar('archive');render();});
+</script>
+</body>
+</html>

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tyre Inspections — FleetCtrl</title>
+  <meta name="description" content="Tread depth, pressure, sidewall and DOT inspections with photo evidence and defect tracking." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},
+      ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}}
+    } } }
+  </script>
+  <style>
+    body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;text-decoration:none;}
+    .nav-link:hover{background:#1E293B;color:#fff;} .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:.9rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:.5rem;} .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;border-radius:.5rem;color:#64748B;font-size:.78rem;text-decoration:none;}
+    .sub-link:hover{background:#1E293B;color:#CBD5E1;} .sub-link.active{color:#60A5FA;background:#1E293B;}
+    .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+    .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;}.pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-warning{background:#FEF3C7;color:#92400E;}.pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-muted{background:#F1F5F9;color:#475569;}
+    .card{background:#fff;border-radius:1rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+    .step{flex:1;text-align:center;font-size:.7rem;font-weight:600;color:#94A3B8;position:relative;}
+    .step.active{color:#2563EB;} .step.done{color:#10B981;}
+    .step .dot{width:28px;height:28px;border-radius:50%;background:#E2E8F0;color:#64748B;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-weight:700;}
+    .step.active .dot{background:#2563EB;color:#fff;} .step.done .dot{background:#10B981;color:#fff;}
+    .step:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:#E2E8F0;z-index:-1;}
+    .step.done:not(:last-child)::after{background:#10B981;}
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div>
+      <div class="text-[11px] text-ink-500 font-medium"><a href="tyres.html" class="hover:text-brand-600">Tyres</a> / <span class="text-ink-900">Inspections</span></div>
+      <h1 class="text-lg font-bold text-ink-900">Tyre Inspections</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-download mr-1"></i>Inspection Report</button>
+      <button onclick="document.getElementById('newInsp').classList.remove('hidden')" class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700"><i class="fas fa-clipboard-check mr-1"></i>New Inspection</button>
+    </div>
+  </header>
+
+  <div class="p-6 space-y-5">
+
+    <!-- KPI -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Inspections (30d)</div><div class="text-2xl font-bold text-ink-900 mt-1">142</div><div class="text-[11px] text-emerald-600">+18%</div></div>
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Defects Found</div><div class="text-2xl font-bold text-red-600 mt-1">37</div><div class="text-[11px] text-ink-500">26% defect rate</div></div>
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Avg Tread Drop</div><div class="text-2xl font-bold text-ink-900 mt-1">0.4 mm</div><div class="text-[11px] text-ink-500">per inspection cycle</div></div>
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Pressure Variance</div><div class="text-2xl font-bold text-amber-600 mt-1">±9%</div><div class="text-[11px] text-amber-600">target ±5%</div></div>
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Due Today</div><div class="text-2xl font-bold text-brand-600 mt-1">3</div><div class="text-[11px] text-brand-600">vehicles</div></div>
+    </section>
+
+    <!-- TABS -->
+    <div class="card p-1 inline-flex gap-1">
+      <button class="px-4 py-2 text-xs font-semibold rounded-lg bg-brand-600 text-white">All</button>
+      <button class="px-4 py-2 text-xs font-semibold rounded-lg text-ink-700 hover:bg-ink-50">Pending</button>
+      <button class="px-4 py-2 text-xs font-semibold rounded-lg text-ink-700 hover:bg-ink-50">Defects</button>
+      <button class="px-4 py-2 text-xs font-semibold rounded-lg text-ink-700 hover:bg-ink-50">Passed</button>
+      <button class="px-4 py-2 text-xs font-semibold rounded-lg text-ink-700 hover:bg-ink-50">Scheduled</button>
+    </div>
+
+    <!-- LIST -->
+    <section class="card overflow-hidden">
+      <div class="px-4 py-3 border-b border-ink-200 flex items-center justify-between">
+        <div class="text-sm font-semibold">Recent Inspections</div>
+        <div class="flex gap-2"><input class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg" placeholder="Search…"/><select class="px-2 py-1.5 text-xs border border-ink-200 rounded-lg"><option>All inspectors</option><option>Mark Lee</option><option>Sara K.</option></select></div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-ink-50 text-[11px] uppercase text-ink-500">
+            <tr><th class="px-3 py-2 text-left">Inspection #</th><th class="px-3 py-2 text-left">Vehicle</th><th class="px-3 py-2 text-left">Date</th><th class="px-3 py-2 text-left">Inspector</th><th class="px-3 py-2 text-left">Tyres Checked</th><th class="px-3 py-2 text-left">Defects</th><th class="px-3 py-2 text-left">Result</th><th class="px-3 py-2 text-right"></th></tr>
+          </thead>
+          <tbody id="inspTbody" class="divide-y divide-ink-100"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- CHECKLIST GUIDE -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="card p-4"><div class="font-bold text-ink-900 mb-2"><i class="fas fa-ruler-vertical text-brand-600 mr-1"></i>Tread Depth</div><div class="text-xs text-ink-500">Measure the lowest groove on each tyre. Legal minimum: <b class="text-red-600">1.6 mm</b>. Replace below <b class="text-amber-600">3 mm</b>.</div></div>
+      <div class="card p-4"><div class="font-bold text-ink-900 mb-2"><i class="fas fa-gauge text-brand-600 mr-1"></i>Pressure</div><div class="text-xs text-ink-500">Cold tyre PSI must be within ±5% of OEM spec. Under-inflation increases CPK by up to 30%.</div></div>
+      <div class="card p-4"><div class="font-bold text-ink-900 mb-2"><i class="fas fa-eye text-brand-600 mr-1"></i>Visual / Sidewall</div><div class="text-xs text-ink-500">Check for cuts, bulges, exposed cords, irregular wear and DOT date code (max 6 yrs in service).</div></div>
+    </section>
+
+  </div>
+</main>
+
+<!-- NEW INSPECTION WIZARD -->
+<div id="newInsp" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto">
+    <div class="px-5 py-4 border-b border-ink-200 flex items-center justify-between">
+      <div><div class="text-[11px] text-ink-500 uppercase">Workshop</div><h3 class="font-bold text-ink-900">New Tyre Inspection</h3></div>
+      <button onclick="document.getElementById('newInsp').classList.add('hidden')" class="text-ink-500 hover:text-ink-900"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="px-5 pt-5">
+      <div class="flex items-center justify-between mb-6">
+        <div class="step done"><div class="dot"><i class="fas fa-check text-xs"></i></div>Vehicle</div>
+        <div class="step active"><div class="dot">2</div>Tread & PSI</div>
+        <div class="step"><div class="dot">3</div>Defects</div>
+        <div class="step"><div class="dot">4</div>Photos</div>
+        <div class="step"><div class="dot">5</div>Sign-off</div>
+      </div>
+      <div class="space-y-4">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="col-span-2"><label class="text-[11px] uppercase font-semibold text-ink-500">Vehicle</label><div class="px-3 py-2 border border-ink-200 rounded-lg text-sm font-semibold">T-101 · Volvo FH16 · MH 12 AD 1234</div></div>
+          <div><label class="text-[11px] uppercase font-semibold text-ink-500">Inspection Date</label><input type="date" value="2026-04-20" class="w-full px-3 py-2 text-sm border border-ink-200 rounded-lg"/></div>
+        </div>
+        <div class="bg-ink-50 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3"><div class="font-semibold text-ink-900 text-sm">Position Readings</div><div class="text-[11px] text-ink-500">10 tyres · enter tread (mm) and pressure (PSI)</div></div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-64 overflow-y-auto">
+            <div class="grid grid-cols-4 gap-2 items-center bg-white p-2 rounded"><div class="text-xs font-semibold col-span-1">FL Steer</div><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" placeholder="Tread mm" value="8.4"/><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" placeholder="PSI" value="118"/><span class="pill pill-success">OK</span></div>
+            <div class="grid grid-cols-4 gap-2 items-center bg-white p-2 rounded"><div class="text-xs font-semibold col-span-1">FR Steer</div><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" value="8.2"/><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" value="116"/><span class="pill pill-success">OK</span></div>
+            <div class="grid grid-cols-4 gap-2 items-center bg-white p-2 rounded"><div class="text-xs font-semibold col-span-1">D1-LO</div><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" value="6.1"/><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" value="108"/><span class="pill pill-primary">Good</span></div>
+            <div class="grid grid-cols-4 gap-2 items-center bg-white p-2 rounded"><div class="text-xs font-semibold col-span-1">D1-LI</div><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" value="6.0"/><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" value="110"/><span class="pill pill-primary">Good</span></div>
+            <div class="grid grid-cols-4 gap-2 items-center bg-white p-2 rounded"><div class="text-xs font-semibold col-span-1">D1-RI</div><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" value="5.8"/><input class="px-2 py-1.5 text-xs border border-ink-200 rounded" value="109"/><span class="pill pill-primary">Good</span></div>
+            <div class="grid grid-cols-4 gap-2 items-center bg-white p-2 rounded border-l-4 border-red-500"><div class="text-xs font-semibold col-span-1">D1-RO</div><input class="px-2 py-1.5 text-xs border border-red-300 rounded text-red-600 font-bold" value="1.2"/><input class="px-2 py-1.5 text-xs border border-red-300 rounded" value="98"/><span class="pill pill-danger">Critical</span></div>
+          </div>
+        </div>
+        <div><label class="text-[11px] uppercase font-semibold text-ink-500">Notes / Defects</label><textarea rows="2" class="w-full px-3 py-2 text-sm border border-ink-200 rounded-lg" placeholder="Cord exposed on D1-RO, replace immediately. Uneven wear on drive axle suggests misalignment."></textarea></div>
+      </div>
+    </div>
+    <div class="px-5 py-4 border-t border-ink-200 mt-5 flex justify-between">
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg">‹ Back</button>
+      <div class="flex gap-2">
+        <button onclick="document.getElementById('newInsp').classList.add('hidden')" class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg">Save Draft</button>
+        <button class="px-4 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg">Next: Defects ›</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="tyres-sidebar.js"></script>
+<script>
+const insp = [
+  {id:"INS-2410",vh:"T-101 · Volvo FH16",date:"20 Apr 2026",ins:"Mark Lee",cnt:10,def:1,res:"failed"},
+  {id:"INS-2409",vh:"T-108 · MAN TGS",date:"19 Apr 2026",ins:"Sara K.",cnt:6,def:0,res:"passed"},
+  {id:"INS-2408",vh:"TR-440 · Lowboy 8-Axle",date:"18 Apr 2026",ins:"Mark Lee",cnt:32,def:3,res:"failed"},
+  {id:"INS-2407",vh:"T-220 · Scania R450",date:"17 Apr 2026",ins:"Joao R.",cnt:12,def:2,res:"warning"},
+  {id:"INS-2406",vh:"T-115 · DAF XF",date:"16 Apr 2026",ins:"Sara K.",cnt:10,def:1,res:"warning"},
+  {id:"INS-2405",vh:"T-301 · Iveco Stralis",date:"15 Apr 2026",ins:"Mark Lee",cnt:6,def:0,res:"passed"},
+];
+const cfg={passed:{p:'pill-success',l:'Passed'},warning:{p:'pill-warning',l:'Action req.'},failed:{p:'pill-danger',l:'Failed'}};
+function render(){
+  document.getElementById('inspTbody').innerHTML = insp.map(i=>`<tr class="hover:bg-ink-50">
+    <td class="px-3 py-2.5 font-mono text-xs font-semibold">${i.id}</td>
+    <td class="px-3 py-2.5 font-medium text-ink-900">${i.vh}</td>
+    <td class="px-3 py-2.5 text-ink-700">${i.date}</td>
+    <td class="px-3 py-2.5 text-ink-700">${i.ins}</td>
+    <td class="px-3 py-2.5 text-ink-700">${i.cnt}</td>
+    <td class="px-3 py-2.5">${i.def?`<span class="text-red-600 font-bold">${i.def}</span>`:'<span class="text-ink-500">0</span>'}</td>
+    <td class="px-3 py-2.5"><span class="pill ${cfg[i.res].p}">${cfg[i.res].l}</span></td>
+    <td class="px-3 py-2.5 text-right"><button class="text-brand-600 text-xs font-semibold">Open ›</button></td>
+  </tr>`).join('');
+}
+document.addEventListener('DOMContentLoaded',()=>{renderSidebar('inspection');render();});
+</script>
+</body>
+</html>

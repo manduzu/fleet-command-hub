@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tyre Rotation & Replacement — FleetCtrl</title>
+  <meta name="description" content="Plan and track tyre rotations, replacements and supplier performance with full lifecycle cost analytics." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},
+      ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}}
+    } } }
+  </script>
+  <style>
+    body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;text-decoration:none;}
+    .nav-link:hover{background:#1E293B;color:#fff;} .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:.9rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:.5rem;} .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;border-radius:.5rem;color:#64748B;font-size:.78rem;text-decoration:none;}
+    .sub-link:hover{background:#1E293B;color:#CBD5E1;} .sub-link.active{color:#60A5FA;background:#1E293B;}
+    .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+    .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;}.pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-warning{background:#FEF3C7;color:#92400E;}.pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-muted{background:#F1F5F9;color:#475569;}
+    .card{background:#fff;border-radius:1rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+    .timeline-bar{height:24px;border-radius:6px;position:relative;background:#F1F5F9;}
+    .timeline-fill{position:absolute;top:0;height:100%;border-radius:6px;display:flex;align-items:center;padding:0 8px;color:#fff;font-size:11px;font-weight:600;}
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div>
+      <div class="text-[11px] text-ink-500 font-medium"><a href="tyres.html" class="hover:text-brand-600">Tyres</a> / <span class="text-ink-900">Rotation & Replacement</span></div>
+      <h1 class="text-lg font-bold text-ink-900">Rotation & Replacement Planner</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-calendar-day mr-1"></i>Calendar View</button>
+      <button onclick="document.getElementById('rotModal').classList.remove('hidden')" class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700"><i class="fas fa-plus mr-1"></i>Schedule Job</button>
+    </div>
+  </header>
+
+  <div class="p-6 space-y-5">
+
+    <!-- KPI -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Scheduled</div><div class="text-2xl font-bold text-ink-900 mt-1">41</div><div class="text-[11px] text-ink-500">next 7 days</div></div>
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Overdue</div><div class="text-2xl font-bold text-red-600 mt-1">8</div><div class="text-[11px] text-red-600">action now</div></div>
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Replacements MTD</div><div class="text-2xl font-bold text-ink-900 mt-1">62</div><div class="text-[11px] text-emerald-600">on plan</div></div>
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Spend MTD</div><div class="text-2xl font-bold text-ink-900 mt-1">$24.6K</div><div class="text-[11px] text-ink-500">vs $28K plan</div></div>
+      <div class="card p-4"><div class="text-[11px] text-ink-500 uppercase font-semibold">Saved by Rotation</div><div class="text-2xl font-bold text-emerald-600 mt-1">$6.2K</div><div class="text-[11px] text-emerald-600">vs no-rotation</div></div>
+    </section>
+
+    <!-- TWO COLUMN -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+
+      <!-- LEFT 2/3 -->
+      <div class="xl:col-span-2 space-y-5">
+
+        <!-- UPCOMING JOBS -->
+        <section class="card overflow-hidden">
+          <div class="px-4 py-3 border-b border-ink-200 flex items-center justify-between">
+            <div class="font-semibold text-ink-900 text-sm">Upcoming Jobs</div>
+            <div class="flex gap-2">
+              <button class="px-2 py-1 text-[11px] font-semibold rounded bg-brand-50 text-brand-700">All</button>
+              <button class="px-2 py-1 text-[11px] font-semibold rounded text-ink-500 hover:bg-ink-100">Rotation</button>
+              <button class="px-2 py-1 text-[11px] font-semibold rounded text-ink-500 hover:bg-ink-100">Replacement</button>
+              <button class="px-2 py-1 text-[11px] font-semibold rounded text-ink-500 hover:bg-ink-100">Retreading</button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-ink-50 text-[11px] uppercase text-ink-500"><tr><th class="px-3 py-2 text-left">Job #</th><th class="px-3 py-2 text-left">Vehicle</th><th class="px-3 py-2 text-left">Type</th><th class="px-3 py-2 text-left">Positions</th><th class="px-3 py-2 text-left">Scheduled</th><th class="px-3 py-2 text-right">Est. Cost</th><th class="px-3 py-2 text-left">Status</th><th class="px-3 py-2"></th></tr></thead>
+              <tbody id="jobTbody" class="divide-y divide-ink-100"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- COST TRENDS -->
+        <section class="card p-5">
+          <div class="flex items-center justify-between mb-3"><h3 class="font-bold text-ink-900">Tyre Spend (last 6 months)</h3><span class="text-[11px] text-ink-500">USD</span></div>
+          <div class="grid grid-cols-6 gap-3 items-end h-44">
+            <div class="text-center"><div class="bg-brand-100 rounded-t" style="height:60%"></div><div class="bg-brand-600 rounded-b" style="height:8px"></div><div class="text-[11px] mt-2 font-semibold">Nov</div><div class="text-[10px] text-ink-500">$18K</div></div>
+            <div class="text-center"><div class="bg-brand-100 rounded-t" style="height:72%"></div><div class="bg-brand-600 rounded-b" style="height:8px"></div><div class="text-[11px] mt-2 font-semibold">Dec</div><div class="text-[10px] text-ink-500">$22K</div></div>
+            <div class="text-center"><div class="bg-brand-100 rounded-t" style="height:55%"></div><div class="bg-brand-600 rounded-b" style="height:8px"></div><div class="text-[11px] mt-2 font-semibold">Jan</div><div class="text-[10px] text-ink-500">$16K</div></div>
+            <div class="text-center"><div class="bg-brand-100 rounded-t" style="height:80%"></div><div class="bg-brand-600 rounded-b" style="height:8px"></div><div class="text-[11px] mt-2 font-semibold">Feb</div><div class="text-[10px] text-ink-500">$25K</div></div>
+            <div class="text-center"><div class="bg-brand-100 rounded-t" style="height:90%"></div><div class="bg-brand-600 rounded-b" style="height:8px"></div><div class="text-[11px] mt-2 font-semibold">Mar</div><div class="text-[10px] text-ink-500">$28K</div></div>
+            <div class="text-center"><div class="bg-amber-100 rounded-t" style="height:78%"></div><div class="bg-amber-500 rounded-b" style="height:8px"></div><div class="text-[11px] mt-2 font-semibold">Apr</div><div class="text-[10px] text-amber-600 font-semibold">$24.6K</div></div>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT 1/3 -->
+      <div class="space-y-5">
+
+        <!-- WORKSHOP CAPACITY -->
+        <section class="card p-5">
+          <h3 class="font-bold text-ink-900 mb-3">Workshop Capacity (Today)</h3>
+          <div class="space-y-3">
+            <div><div class="flex justify-between text-xs mb-1"><span>Bay 1 — Tyre Pit</span><span class="font-semibold text-emerald-600">2/4</span></div><div class="timeline-bar"><div class="timeline-fill bg-emerald-500" style="width:50%">Available</div></div></div>
+            <div><div class="flex justify-between text-xs mb-1"><span>Bay 2 — Heavy Trailer</span><span class="font-semibold text-amber-600">3/4</span></div><div class="timeline-bar"><div class="timeline-fill bg-amber-500" style="width:75%">Busy</div></div></div>
+            <div><div class="flex justify-between text-xs mb-1"><span>Bay 3 — Wheel Align</span><span class="font-semibold text-red-600">4/4</span></div><div class="timeline-bar"><div class="timeline-fill bg-red-500" style="width:100%">Full</div></div></div>
+            <div><div class="flex justify-between text-xs mb-1"><span>Mobile Unit</span><span class="font-semibold text-brand-600">1/2</span></div><div class="timeline-bar"><div class="timeline-fill bg-brand-600" style="width:50%">On site</div></div></div>
+          </div>
+        </section>
+
+        <!-- SUPPLIERS -->
+        <section class="card p-5">
+          <h3 class="font-bold text-ink-900 mb-3">Top Suppliers</h3>
+          <div class="space-y-3 text-sm">
+            <div class="flex items-center justify-between border-b border-ink-100 pb-2"><div><div class="font-semibold">Tyre Hub Co.</div><div class="text-[11px] text-ink-500">Lead time: 2 days</div></div><span class="pill pill-success">98% OTIF</span></div>
+            <div class="flex items-center justify-between border-b border-ink-100 pb-2"><div><div class="font-semibold">Continental Direct</div><div class="text-[11px] text-ink-500">Lead time: 4 days</div></div><span class="pill pill-primary">94% OTIF</span></div>
+            <div class="flex items-center justify-between border-b border-ink-100 pb-2"><div><div class="font-semibold">Bridgestone WS</div><div class="text-[11px] text-ink-500">Lead time: 3 days</div></div><span class="pill pill-primary">92% OTIF</span></div>
+            <div class="flex items-center justify-between"><div><div class="font-semibold">RetreadPro</div><div class="text-[11px] text-ink-500">Lead time: 7 days</div></div><span class="pill pill-warning">81% OTIF</span></div>
+          </div>
+        </section>
+
+        <!-- ROTATION STRATEGY -->
+        <section class="card p-5 bg-gradient-to-br from-brand-50 to-white">
+          <div class="font-bold text-ink-900 mb-2"><i class="fas fa-lightbulb text-amber-500 mr-1"></i>Recommended Strategy</div>
+          <p class="text-xs text-ink-700">Rotate steer ↔ drive every <b>40,000 km</b>. Move best drives to inner positions. Retire below <b>3 mm</b> — re-tread sidewall-clean tyres for trailer use to cut CPK by ~22%.</p>
+          <button class="mt-3 w-full px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg">Generate AI Plan</button>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- SCHEDULE JOB MODAL -->
+<div id="rotModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl w-full max-w-2xl">
+    <div class="px-5 py-4 border-b border-ink-200 flex items-center justify-between"><h3 class="font-bold text-ink-900">Schedule Tyre Job</h3><button onclick="document.getElementById('rotModal').classList.add('hidden')" class="text-ink-500"><i class="fas fa-times"></i></button></div>
+    <div class="p-5 grid grid-cols-2 gap-4 text-sm">
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Job Type</label><select class="w-full px-3 py-2 border border-ink-200 rounded-lg"><option>Rotation</option><option>Replacement</option><option>Retread</option><option>Wheel Alignment</option></select></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Vehicle</label><select class="w-full px-3 py-2 border border-ink-200 rounded-lg"><option>T-101 · Volvo FH16</option><option>T-220 · Scania R450</option><option>TR-440 · Lowboy 8-axle</option></select></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Positions</label><input class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="e.g. D1-RO, A5-P9"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Scheduled Date</label><input type="date" class="w-full px-3 py-2 border border-ink-200 rounded-lg"/></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Workshop / Bay</label><select class="w-full px-3 py-2 border border-ink-200 rounded-lg"><option>Bay 1 - Tyre Pit</option><option>Bay 2 - Heavy</option><option>Mobile Unit</option></select></div>
+      <div><label class="text-[11px] uppercase font-semibold text-ink-500">Est. Cost (USD)</label><input type="number" class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="0"/></div>
+      <div class="col-span-2"><label class="text-[11px] uppercase font-semibold text-ink-500">Notes</label><textarea rows="2" class="w-full px-3 py-2 border border-ink-200 rounded-lg" placeholder="Pre-order 2× Michelin X Multi D 295/80R22.5"></textarea></div>
+    </div>
+    <div class="px-5 py-3 border-t border-ink-200 flex justify-end gap-2"><button onclick="document.getElementById('rotModal').classList.add('hidden')" class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg">Cancel</button><button onclick="alert('Job scheduled (demo)');document.getElementById('rotModal').classList.add('hidden')" class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg">Schedule</button></div>
+  </div>
+</div>
+
+<script src="tyres-sidebar.js"></script>
+<script>
+const jobs = [
+  {id:"JOB-8821",vh:"T-101 · Volvo FH16",type:"Replacement",pos:"D1-RO",dt:"21 Apr 2026",cost:480,status:"overdue"},
+  {id:"JOB-8822",vh:"T-220 · Scania R450",type:"Replacement",pos:"D1-LI, D1-RO",dt:"22 Apr 2026",cost:920,status:"scheduled"},
+  {id:"JOB-8823",vh:"TR-440 · Lowboy",type:"Rotation",pos:"Axle 5–8 (16 tyres)",dt:"23 Apr 2026",cost:240,status:"scheduled"},
+  {id:"JOB-8824",vh:"T-115 · DAF XF",type:"Retread",pos:"D1-LO, D1-LI",dt:"24 Apr 2026",cost:380,status:"scheduled"},
+  {id:"JOB-8825",vh:"T-108 · MAN TGS",type:"Wheel Alignment",pos:"All steer",dt:"25 Apr 2026",cost:160,status:"scheduled"},
+  {id:"JOB-8820",vh:"T-301 · Iveco Stralis",type:"Rotation",pos:"All drive (8 tyres)",dt:"19 Apr 2026",cost:200,status:"in_progress"},
+];
+const cfg={overdue:{p:'pill-danger',l:'Overdue'},scheduled:{p:'pill-primary',l:'Scheduled'},in_progress:{p:'pill-warning',l:'In progress'},done:{p:'pill-success',l:'Completed'}};
+function render(){
+  document.getElementById('jobTbody').innerHTML = jobs.map(j=>`<tr class="hover:bg-ink-50">
+    <td class="px-3 py-2.5 font-mono text-xs font-semibold">${j.id}</td>
+    <td class="px-3 py-2.5 font-medium text-ink-900">${j.vh}</td>
+    <td class="px-3 py-2.5"><span class="pill pill-muted">${j.type}</span></td>
+    <td class="px-3 py-2.5 text-ink-700">${j.pos}</td>
+    <td class="px-3 py-2.5 text-ink-700">${j.dt}</td>
+    <td class="px-3 py-2.5 text-right font-semibold">$${j.cost.toLocaleString()}</td>
+    <td class="px-3 py-2.5"><span class="pill ${cfg[j.status].p}">${cfg[j.status].l}</span></td>
+    <td class="px-3 py-2.5 text-right"><button class="text-brand-600 text-xs font-semibold">Open ›</button></td>
+  </tr>`).join('');
+}
+document.addEventListener('DOMContentLoaded',()=>{renderSidebar('rotation');render();});
+</script>
+</body>
+</html>
