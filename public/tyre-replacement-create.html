@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Log Tyre Replacement — FleetCtrl</title>
+<meta name="description" content="Create a new tyre replacement record with old/new tyre details, reason, costs and live preview." />
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#EFF6FF',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},ink:{50:'#F8FAFC',100:'#F1F5F9',200:'#E2E8F0',300:'#CBD5E1',500:'#64748B',600:'#475569',700:'#334155',900:'#0F172A'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;}
+  .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;display:flex;flex-direction:column;z-index:40;}
+  .nav-link{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.55rem;color:#94A3B8;font-size:.85rem;font-weight:500;text-decoration:none;}
+  .nav-link:hover{background:#1E293B;color:#fff;}
+  .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:1rem 1rem .25rem;}
+  .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.55rem;color:#94A3B8;font-size:.85rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;text-align:left;}
+  .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+  .dropdown-items{display:none;padding-left:.75rem;} .dropdown-items.open{display:block;}
+  .sub-link{display:flex;align-items:center;gap:.5rem;padding:.4rem .75rem;border-radius:.45rem;color:#94A3B8;font-size:.78rem;text-decoration:none;}
+  .sub-link:hover{background:#1E293B;color:#fff;} .sub-link.active{color:#60A5FA;background:#1E293B;}
+  .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+  .card{background:#fff;border-radius:1rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+  .field{display:block;width:100%;padding:.55rem .75rem;font-size:.85rem;border:1px solid #E2E8F0;border-radius:.55rem;background:#fff;}
+  .field:focus{outline:none;border-color:#2563EB;box-shadow:0 0 0 3px rgba(37,99,235,.12);}
+  .label{display:block;font-size:.72rem;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem;}
+  .step{display:flex;align-items:center;gap:.5rem;}
+  .step-circle{width:1.85rem;height:1.85rem;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;background:#E2E8F0;color:#64748B;}
+  .step.active .step-circle{background:#2563EB;color:#fff;box-shadow:0 0 0 4px rgba(37,99,235,.18);}
+  .step.done .step-circle{background:#10B981;color:#fff;}
+  .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+  .pill-success{background:#D1FAE5;color:#065F46;} .pill-warning{background:#FEF3C7;color:#92400E;}
+  .pill-danger{background:#FEE2E2;color:#991B1B;} .pill-primary{background:#DBEAFE;color:#1D4ED8;}
+  .reason-card{border:2px solid #E2E8F0;border-radius:.85rem;padding:.85rem;cursor:pointer;transition:all .15s;}
+  .reason-card:hover{border-color:#3B82F6;background:#EFF6FF;}
+  .reason-card.sel{border-color:#2563EB;background:#EFF6FF;box-shadow:0 0 0 3px rgba(37,99,235,.15);}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="px-4 py-4 flex items-center gap-2 border-b border-slate-800">
+    <div class="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white"><i class="fas fa-truck-fast"></i></div>
+    <div><div class="text-white font-bold text-sm">FleetCtrl</div><div class="text-[10px] text-slate-500 uppercase tracking-wider">ERP Suite</div></div>
+  </div>
+  <nav class="px-2 py-3 flex-1 overflow-y-auto">
+    <a href="dashboard.html" class="nav-link"><i class="fas fa-gauge-high w-4"></i>Dashboard</a>
+    <div class="nav-section">Workshop</div>
+    <a href="parts.html" class="nav-link"><i class="fas fa-gears w-4"></i>Parts</a>
+    <button class="dropdown-btn open" onclick="this.classList.toggle('open');document.getElementById('tyresDD').classList.toggle('open');"><i class="fas fa-circle-notch w-4"></i><span style="flex:1">Tyre Management</span><i class="fas fa-chevron-down" style="font-size:.65rem;"></i></button>
+    <div class="dropdown-items open" id="tyresDD">
+      <a href="tyres.html" class="sub-link"><i class="fas fa-house w-4"></i>Command Center</a>
+      <a href="tyres-archive.html" class="sub-link"><i class="fas fa-warehouse w-4"></i>Tyre Register</a>
+      <a href="tyres-fitment.html" class="sub-link"><i class="fas fa-truck-monster w-4"></i>Vehicle Fitment</a>
+      <a href="tyres-inspection.html" class="sub-link"><i class="fas fa-clipboard-check w-4"></i>Inspections</a>
+      <a href="tyres-rotation.html" class="sub-link active"><i class="fas fa-rotate w-4"></i>Rotation & Replace</a>
+      <a href="tyre-detail.html" class="sub-link"><i class="fas fa-magnifying-glass-chart w-4"></i>Tyre Lifecycle</a>
+    </div>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="px-6 pt-6 pb-4 bg-gradient-to-r from-brand-700 to-brand-500 text-white">
+    <div class="flex items-center gap-2 text-xs opacity-80 mb-2"><a href="tyres.html" class="hover:underline">Tyre Management</a><i class="fas fa-chevron-right text-[8px]"></i><span>New Replacement</span></div>
+    <div class="flex justify-between flex-wrap gap-3">
+      <div><h1 class="text-2xl font-bold">Log Tyre Replacement</h1><p class="text-sm opacity-90">Replace a worn or damaged tyre and update lifecycle records</p></div>
+      <div class="flex gap-2"><a href="tyres-archive.html" class="px-3 py-1.5 bg-white/15 rounded-lg text-xs font-bold">Cancel</a><button class="px-3 py-1.5 bg-white text-brand-700 rounded-lg text-xs font-bold"><i class="fas fa-floppy-disk mr-1"></i>Save Replacement</button></div>
+    </div>
+  </div>
+
+  <div class="px-6 py-5">
+    <!-- Steps -->
+    <div class="card p-4 mb-5 flex items-center gap-3 overflow-x-auto">
+      <div class="step done"><div class="step-circle"><i class="fas fa-check"></i></div><div class="text-xs font-semibold">Vehicle</div></div>
+      <div class="flex-1 h-px bg-emerald-300"></div>
+      <div class="step active"><div class="step-circle">2</div><div class="text-xs font-semibold">Old Tyre</div></div>
+      <div class="flex-1 h-px bg-ink-200"></div>
+      <div class="step"><div class="step-circle">3</div><div class="text-xs font-semibold">New Tyre</div></div>
+      <div class="flex-1 h-px bg-ink-200"></div>
+      <div class="step"><div class="step-circle">4</div><div class="text-xs font-semibold">Reason & Cost</div></div>
+      <div class="flex-1 h-px bg-ink-200"></div>
+      <div class="step"><div class="step-circle">5</div><div class="text-xs font-semibold">Review</div></div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+      <!-- FORM -->
+      <div class="xl:col-span-2 space-y-5">
+        <!-- Vehicle & Position -->
+        <div class="card p-5">
+          <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-truck text-brand-600"></i>Vehicle & Position</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div><label class="label">Vehicle</label><select class="field" id="vehicle"><option>T-220 · Scania R500 · QL 18 ZX 2200</option><option>T-101 · Volvo FH16</option><option>T-108 · Mercedes Actros</option><option>TR-006 · Lowboy Trailer</option></select></div>
+            <div><label class="label">Axle</label><select class="field"><option>Front (Steer)</option><option>Rear 1 (Drive)</option><option>Rear 2 (Drive)</option><option>Tag axle</option><option>Trailer 1</option></select></div>
+            <div><label class="label">Position</label><select class="field" id="position"><option>RL — Rear Left</option><option>RR — Rear Right</option><option>FL — Front Left</option><option>FR — Front Right</option><option>Spare</option></select></div>
+            <div><label class="label">Replacement date</label><input type="date" class="field" value="2025-04-20"/></div>
+            <div><label class="label">Workshop / Bay</label><input class="field" value="Bay 3 — Bravo Yard"/></div>
+            <div><label class="label">Mechanic</label><select class="field"><option>A. Kamau</option><option>P. Otieno</option><option>J. Mwangi</option></select></div>
+          </div>
+        </div>
+
+        <!-- Old tyre -->
+        <div class="card p-5">
+          <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-circle-notch text-amber-600"></i>Old Tyre (being removed)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div><label class="label">Tyre ID</label><input class="field" value="TYR-00482" id="oldId"/></div>
+            <div><label class="label">Brand / Model</label><input class="field" value="Michelin X Multi Z"/></div>
+            <div><label class="label">Size</label><input class="field" value="315/80R22.5"/></div>
+            <div><label class="label">Tread at removal (mm)</label><input class="field" type="number" step=".1" value="2.1"/></div>
+            <div><label class="label">Mileage on tyre</label><input class="field" value="82,450 km"/></div>
+            <div><label class="label">Disposition</label>
+              <select class="field" id="disp"><option value="retread">Retread (casing OK)</option><option value="scrap">Scrap (condemned)</option><option value="warranty">Warranty claim</option><option value="resell">Resell as used</option></select>
+            </div>
+          </div>
+        </div>
+
+        <!-- New tyre -->
+        <div class="card p-5">
+          <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-circle-check text-emerald-600"></i>New Tyre (being fitted)</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div><label class="label">Source</label><select class="field"><option>Pull from stock</option><option>New purchase (LPO)</option><option>Spare from another vehicle</option><option>Retread returned</option></select></div>
+            <div><label class="label">New Tyre ID</label><input class="field" value="TYR-00591" id="newId"/></div>
+            <div><label class="label">Brand / Model</label><input class="field" value="Bridgestone R150" id="newBrand"/></div>
+            <div><label class="label">Size</label><input class="field" value="315/80R22.5"/></div>
+            <div><label class="label">DOT code</label><input class="field" value="3624"/></div>
+            <div><label class="label">Initial tread (mm)</label><input class="field" type="number" step=".1" value="14.0"/></div>
+            <div><label class="label">Initial PSI</label><input class="field" type="number" value="120"/></div>
+            <div><label class="label">Balance weight (g)</label><input class="field" type="number" value="60"/></div>
+            <div><label class="label">Alignment check</label><select class="field"><option>Pass</option><option>Adjusted</option><option>Required</option></select></div>
+          </div>
+        </div>
+
+        <!-- Reason -->
+        <div class="card p-5">
+          <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-circle-question text-brand-600"></i>Reason for Replacement</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="reasons">
+            <div class="reason-card sel" data-r="Worn out"><i class="fas fa-stopwatch text-amber-600"></i><p class="text-sm font-bold mt-1">Worn out</p><p class="text-[11px] text-ink-500">End of life</p></div>
+            <div class="reason-card" data-r="Puncture"><i class="fas fa-droplet text-blue-600"></i><p class="text-sm font-bold mt-1">Puncture</p><p class="text-[11px] text-ink-500">Irreparable</p></div>
+            <div class="reason-card" data-r="Blowout"><i class="fas fa-bolt text-red-600"></i><p class="text-sm font-bold mt-1">Blowout</p><p class="text-[11px] text-ink-500">Catastrophic</p></div>
+            <div class="reason-card" data-r="Sidewall damage"><i class="fas fa-bandage text-orange-600"></i><p class="text-sm font-bold mt-1">Sidewall damage</p><p class="text-[11px] text-ink-500">Structural</p></div>
+            <div class="reason-card" data-r="Uneven wear"><i class="fas fa-wave-square text-purple-600"></i><p class="text-sm font-bold mt-1">Uneven wear</p><p class="text-[11px] text-ink-500">Alignment issue</p></div>
+            <div class="reason-card" data-r="Manufacturing defect"><i class="fas fa-industry text-pink-600"></i><p class="text-sm font-bold mt-1">Manufacturing defect</p><p class="text-[11px] text-ink-500">Warranty</p></div>
+            <div class="reason-card" data-r="Accident"><i class="fas fa-car-burst text-red-600"></i><p class="text-sm font-bold mt-1">Accident damage</p><p class="text-[11px] text-ink-500">Linked incident</p></div>
+            <div class="reason-card" data-r="Scheduled rotation"><i class="fas fa-rotate text-emerald-600"></i><p class="text-sm font-bold mt-1">Preventive</p><p class="text-[11px] text-ink-500">Scheduled</p></div>
+          </div>
+          <div class="mt-4"><label class="label">Notes / Inspector remarks</label><textarea class="field" rows="3" placeholder="e.g. Tread reached 2.1mm, retread approved by foreman..."></textarea></div>
+        </div>
+
+        <!-- Cost -->
+        <div class="card p-5">
+          <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-coins text-emerald-600"></i>Cost & Charges</h3>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div><label class="label">New tyre cost (USD)</label><input class="field" type="number" id="cTyre" value="635" oninput="recalc()"/></div>
+            <div><label class="label">Labour (USD)</label><input class="field" type="number" id="cLab" value="22" oninput="recalc()"/></div>
+            <div><label class="label">Disposal fee (USD)</label><input class="field" type="number" id="cDis" value="6" oninput="recalc()"/></div>
+            <div><label class="label">Other (USD)</label><input class="field" type="number" id="cOth" value="0" oninput="recalc()"/></div>
+            <div><label class="label">Cost centre</label><select class="field"><option>Operations - Fleet</option><option>Warranty (no charge)</option><option>Insurance claim</option></select></div>
+            <div><label class="label">LPO / Invoice ref</label><input class="field" value="LPO-2284"/></div>
+            <div><label class="label">Linked incident</label><select class="field"><option>— none —</option><option>BD-2038 · Tyre blowout</option><option>AC-118 · Side collision</option></select></div>
+            <div><label class="label">Linked trip</label><select class="field"><option>— none —</option><option>TRP-10440 · Mombasa → Kampala</option></select></div>
+          </div>
+        </div>
+
+        <!-- Photos -->
+        <div class="card p-5">
+          <h3 class="text-sm font-bold mb-4 flex items-center gap-2"><i class="fas fa-camera text-brand-600"></i>Evidence Photos</h3>
+          <div class="grid grid-cols-3 sm:grid-cols-5 gap-3">
+            <div class="aspect-square rounded-xl bg-ink-100 flex items-center justify-center text-ink-500"><i class="fas fa-image text-xl"></i></div>
+            <div class="aspect-square rounded-xl bg-ink-100 flex items-center justify-center text-ink-500"><i class="fas fa-image text-xl"></i></div>
+            <div class="aspect-square rounded-xl border-2 border-dashed border-ink-300 flex flex-col items-center justify-center text-ink-500 cursor-pointer hover:bg-ink-50"><i class="fas fa-cloud-arrow-up text-xl"></i><span class="text-[11px] mt-1 font-semibold">Upload</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LIVE PREVIEW -->
+      <div class="space-y-4">
+        <div class="card p-5 sticky top-4">
+          <div class="flex items-center justify-between mb-3"><h3 class="text-xs font-bold uppercase text-ink-500 tracking-wider">Live Preview</h3><span class="pill pill-warning">Draft</span></div>
+          <div class="border-2 border-dashed border-ink-200 rounded-xl p-4">
+            <p class="text-[11px] text-ink-500 uppercase font-bold">Replacement Record</p>
+            <p class="font-mono text-sm mt-1">RPL-<span id="pId">NEW</span></p>
+            <hr class="my-3 border-ink-200"/>
+            <div class="text-xs space-y-1.5">
+              <div class="flex justify-between"><span class="text-ink-500">Vehicle</span><b id="pVeh">T-220</b></div>
+              <div class="flex justify-between"><span class="text-ink-500">Position</span><b id="pPos">RL</b></div>
+              <div class="flex justify-between"><span class="text-ink-500">Old tyre</span><b id="pOld">TYR-00482</b></div>
+              <div class="flex justify-between"><span class="text-ink-500">New tyre</span><b id="pNew">TYR-00591</b></div>
+              <div class="flex justify-between"><span class="text-ink-500">Reason</span><b id="pRsn">Worn out</b></div>
+              <div class="flex justify-between"><span class="text-ink-500">Disposition</span><b id="pDsp" class="capitalize">retread</b></div>
+            </div>
+            <hr class="my-3 border-ink-200"/>
+            <div class="text-xs space-y-1.5">
+              <div class="flex justify-between"><span>New tyre</span><span id="lT">$635</span></div>
+              <div class="flex justify-between"><span>Labour</span><span id="lL">$22</span></div>
+              <div class="flex justify-between"><span>Disposal</span><span id="lD">$6</span></div>
+              <div class="flex justify-between"><span>Other</span><span id="lO">$0</span></div>
+              <div class="flex justify-between border-t border-ink-200 pt-2 mt-1"><b>Total</b><b class="text-brand-700" id="pTot">$663</b></div>
+            </div>
+          </div>
+          <div class="mt-3 text-[11px] text-ink-500"><i class="fas fa-circle-info"></i> Old tyre will be moved to <b id="pDest">Retread Vendor queue</b>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  function $(id){return document.getElementById(id);}
+  function recalc(){
+    const t=+$('cTyre').value||0,l=+$('cLab').value||0,d=+$('cDis').value||0,o=+$('cOth').value||0;
+    $('lT').textContent='$'+t;$('lL').textContent='$'+l;$('lD').textContent='$'+d;$('lO').textContent='$'+o;
+    $('pTot').textContent='$'+(t+l+d+o);
+  }
+  document.querySelectorAll('#reasons .reason-card').forEach(c=>c.addEventListener('click',()=>{
+    document.querySelectorAll('#reasons .reason-card').forEach(x=>x.classList.remove('sel'));
+    c.classList.add('sel');$('pRsn').textContent=c.dataset.r;
+  }));
+  ['vehicle','position','oldId','newId','disp'].forEach(id=>$(id).addEventListener('input',()=>{
+    $('pVeh').textContent=$('vehicle').value.split(' · ')[0];
+    $('pPos').textContent=$('position').value.split(' — ')[0];
+    $('pOld').textContent=$('oldId').value;
+    $('pNew').textContent=$('newId').value;
+    const d=$('disp').value;$('pDsp').textContent=d;
+    $('pDest').textContent={retread:'Retread Vendor queue',scrap:'Scrap-yard register',warranty:'Warranty claim queue',resell:'Used-tyre resale stock'}[d];
+  }));
+</script>
+</body>
+</html>
