@@ -31,6 +31,8 @@ function renderSidebar(active){
       <a href="tyres-inspection.html" class="sub-link ${active==='inspection'?'active':''}"><i class="fas fa-clipboard-check w-4"></i>Inspections</a>
       <a href="tyres-rotation.html" class="sub-link ${active==='rotation'?'active':''}"><i class="fas fa-rotate w-4"></i>Rotation & Replace</a>
       <a href="tyre-detail.html" class="sub-link ${active==='detail'?'active':''}"><i class="fas fa-magnifying-glass-chart w-4"></i>Tyre Lifecycle</a>
+      <a href="tyres-warranty.html" class="sub-link ${active==='warranty'?'active':''}"><i class="fas fa-shield-halved w-4"></i>Warranty Claims</a>
+      <a href="tyre-scrap-yard.html" class="sub-link ${active==='scrap'?'active':''}"><i class="fas fa-recycle w-4"></i>Scrap Yard</a>
     </div>
   </nav>`;
   document.getElementById('sidebar').innerHTML = html;
