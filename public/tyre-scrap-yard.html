@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tyre Scrap Yard — FleetCtrl</title>
+  <meta name="description" content="Retired tyres with disposition (scrap, retread, warranty), grouped by vendor with monthly volumes and credit-note status." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <script>
+    tailwind.config = { theme: { extend: {
+      colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},
+      ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}}
+    } } }
+  </script>
+  <style>
+    body{font-family:'Inter',system-ui,sans-serif;background:#F1F5F9;margin:0;}
+    .sidebar{width:240px;min-height:100vh;background:#0F172A;position:fixed;top:0;left:0;z-index:40;display:flex;flex-direction:column;overflow-y:auto;}
+    .nav-link{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;text-decoration:none;}
+    .nav-link:hover{background:#1E293B;color:#fff;} .nav-link.active{background:#1D4ED8;color:#fff;}
+    .nav-section{font-size:.65rem;font-weight:700;letter-spacing:.1em;color:#475569;text-transform:uppercase;padding:.9rem 1rem .25rem;}
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;padding:.55rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.85rem;font-weight:500;width:100%;border:0;background:transparent;cursor:pointer;}
+    .dropdown-btn:hover,.dropdown-btn.open{background:#1E293B;color:#fff;}
+    .dropdown-items{display:none;padding-left:.5rem;} .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.6rem;padding:.4rem .9rem;border-radius:.5rem;color:#64748B;font-size:.78rem;text-decoration:none;}
+    .sub-link:hover{background:#1E293B;color:#CBD5E1;} .sub-link.active{color:#60A5FA;background:#1E293B;}
+    .main{margin-left:240px;} @media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;}}
+    .pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:600;padding:.2rem .55rem;border-radius:999px;}
+    .pill-success{background:#D1FAE5;color:#065F46;}.pill-primary{background:#DBEAFE;color:#1D4ED8;}
+    .pill-warning{background:#FEF3C7;color:#92400E;}.pill-danger{background:#FEE2E2;color:#991B1B;}
+    .pill-muted{background:#F1F5F9;color:#475569;}.pill-purple{background:#EDE9FE;color:#5B21B6;}
+    .card{background:#fff;border-radius:1rem;box-shadow:0 1px 2px rgba(15,23,42,.04),0 4px 12px rgba(15,23,42,.05);}
+    .row-hover:hover{background:#F8FAFC;}
+    .bar{display:inline-block;width:14px;background:linear-gradient(180deg,#3B82F6,#1D4ED8);border-radius:3px 3px 0 0;}
+    .scrap-tile{transition:all .15s;cursor:pointer;}
+    .scrap-tile:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(15,23,42,.08);}
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+  <header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+    <div>
+      <div class="text-[11px] text-ink-500 font-medium"><a href="tyres.html" class="hover:text-brand-600">Tyres</a> / <span class="text-ink-900">Scrap Yard</span></div>
+      <h1 class="text-lg font-bold text-ink-900">Tyre Scrap Yard & Disposition</h1>
+    </div>
+    <div class="flex items-center gap-2">
+      <select class="px-3 py-2 text-xs border border-ink-200 rounded-lg"><option>Last 6 months</option><option>YTD 2026</option><option>Last 12 months</option></select>
+      <button class="px-3 py-2 text-xs font-semibold text-ink-700 bg-ink-100 rounded-lg hover:bg-ink-200"><i class="fas fa-file-export mr-1"></i>Export</button>
+      <button class="px-3 py-2 text-xs font-semibold text-white bg-brand-600 rounded-lg hover:bg-brand-700"><i class="fas fa-plus mr-1"></i>Retire Tyre</button>
+    </div>
+  </header>
+
+  <div class="p-6 space-y-5">
+    <!-- KPIs -->
+    <section class="grid grid-cols-2 md:grid-cols-6 gap-3">
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Retired YTD</div><div class="text-xl font-bold text-ink-900">186</div><div class="text-[10px] text-ink-500">Across 4 yards</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Scrapped</div><div class="text-xl font-bold text-red-600">94</div><div class="text-[10px] text-ink-500">50.5%</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Retread</div><div class="text-xl font-bold text-amber-600">58</div><div class="text-[10px] text-ink-500">31.2% · saves $42K</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Warranty Return</div><div class="text-xl font-bold text-emerald-600">28</div><div class="text-[10px] text-ink-500">15.1%</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Pending Pickup</div><div class="text-xl font-bold text-brand-600">22</div><div class="text-[10px] text-ink-500">Awaiting vendor</div></div>
+      <div class="card p-3"><div class="text-[10px] text-ink-500 uppercase font-semibold">Credit Notes</div><div class="text-xl font-bold text-ink-900">$38.6K</div><div class="text-[10px] text-emerald-600">$31.2K reconciled</div></div>
+    </section>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <!-- DISPOSITION DONUT -->
+      <section class="card p-5">
+        <h2 class="text-sm font-bold text-ink-900 mb-4">Disposition Mix</h2>
+        <div class="flex items-center justify-center mb-4">
+          <svg width="180" height="180" viewBox="0 0 42 42">
+            <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#FEE2E2" stroke-width="6"></circle>
+            <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#EF4444" stroke-width="6" stroke-dasharray="50.5 49.5" stroke-dashoffset="25" transform="rotate(-90 21 21)"></circle>
+            <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#F59E0B" stroke-width="6" stroke-dasharray="31.2 68.8" stroke-dashoffset="-25.5" transform="rotate(-90 21 21)"></circle>
+            <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#10B981" stroke-width="6" stroke-dasharray="15.1 84.9" stroke-dashoffset="-56.7" transform="rotate(-90 21 21)"></circle>
+            <text x="21" y="20" text-anchor="middle" font-size="6" font-weight="bold" fill="#0F172A">186</text>
+            <text x="21" y="26" text-anchor="middle" font-size="2.5" fill="#64748B">Retired</text>
+          </svg>
+        </div>
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-3 h-3 bg-red-500 rounded"></span>Scrap</div><span class="font-bold text-ink-900">94 · 50.5%</span></div>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-3 h-3 bg-amber-500 rounded"></span>Retread</div><span class="font-bold text-ink-900">58 · 31.2%</span></div>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-3 h-3 bg-emerald-500 rounded"></span>Warranty</div><span class="font-bold text-ink-900">28 · 15.1%</span></div>
+          <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span class="w-3 h-3 bg-ink-300 rounded"></span>Pending</div><span class="font-bold text-ink-900">6 · 3.2%</span></div>
+        </div>
+      </section>
+
+      <!-- MONTHLY VOLUME -->
+      <section class="card p-5 lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-bold text-ink-900">Monthly Retirement Volume</h2>
+          <div class="flex gap-3 text-[11px]">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 bg-red-500 rounded"></span>Scrap</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 bg-amber-500 rounded"></span>Retread</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 bg-emerald-500 rounded"></span>Warranty</span>
+          </div>
+        </div>
+        <div class="flex items-end justify-between gap-3 h-48 px-2">
+          <!-- Stacked bars -->
+          <div class="flex flex-col items-center gap-1 flex-1"><div class="flex flex-col items-center justify-end h-full"><div style="width:28px;height:24px;background:#10B981;border-radius:0;"></div><div style="width:28px;height:32px;background:#F59E0B;"></div><div style="width:28px;height:48px;background:#EF4444;border-radius:3px 3px 0 0;"></div></div><div class="text-[10px] text-ink-500">Nov</div></div>
+          <div class="flex flex-col items-center gap-1 flex-1"><div class="flex flex-col items-center justify-end h-full"><div style="width:28px;height:18px;background:#10B981;"></div><div style="width:28px;height:38px;background:#F59E0B;"></div><div style="width:28px;height:55px;background:#EF4444;border-radius:3px 3px 0 0;"></div></div><div class="text-[10px] text-ink-500">Dec</div></div>
+          <div class="flex flex-col items-center gap-1 flex-1"><div class="flex flex-col items-center justify-end h-full"><div style="width:28px;height:30px;background:#10B981;"></div><div style="width:28px;height:42px;background:#F59E0B;"></div><div style="width:28px;height:62px;background:#EF4444;border-radius:3px 3px 0 0;"></div></div><div class="text-[10px] text-ink-500">Jan</div></div>
+          <div class="flex flex-col items-center gap-1 flex-1"><div class="flex flex-col items-center justify-end h-full"><div style="width:28px;height:22px;background:#10B981;"></div><div style="width:28px;height:36px;background:#F59E0B;"></div><div style="width:28px;height:58px;background:#EF4444;border-radius:3px 3px 0 0;"></div></div><div class="text-[10px] text-ink-500">Feb</div></div>
+          <div class="flex flex-col items-center gap-1 flex-1"><div class="flex flex-col items-center justify-end h-full"><div style="width:28px;height:34px;background:#10B981;"></div><div style="width:28px;height:48px;background:#F59E0B;"></div><div style="width:28px;height:70px;background:#EF4444;border-radius:3px 3px 0 0;"></div></div><div class="text-[10px] text-ink-500">Mar</div></div>
+          <div class="flex flex-col items-center gap-1 flex-1"><div class="flex flex-col items-center justify-end h-full"><div style="width:28px;height:28px;background:#10B981;"></div><div style="width:28px;height:44px;background:#F59E0B;"></div><div style="width:28px;height:65px;background:#EF4444;border-radius:3px 3px 0 0;"></div></div><div class="text-[10px] text-ink-500">Apr</div></div>
+        </div>
+        <div class="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-ink-200 text-xs">
+          <div><div class="text-ink-500 text-[10px] uppercase">Avg / month</div><div class="font-bold text-ink-900">31 tyres</div></div>
+          <div><div class="text-ink-500 text-[10px] uppercase">Peak month</div><div class="font-bold text-ink-900">Mar — 45</div></div>
+          <div><div class="text-ink-500 text-[10px] uppercase">Trend</div><div class="font-bold text-emerald-600"><i class="fas fa-arrow-up"></i> +18% vs H2</div></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- VENDOR GROUPING -->
+    <section class="space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-bold text-ink-900">Disposition by Vendor</h2>
+        <div class="text-[11px] text-ink-500">Click vendor to expand consignment list</div>
+      </div>
+
+      <!-- Vendor 1 -->
+      <div class="card overflow-hidden">
+        <div class="p-4 flex items-center justify-between border-b border-ink-100">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fas fa-recycle"></i></div>
+            <div>
+              <div class="font-bold text-ink-900 text-sm">Continental Retread Center</div>
+              <div class="text-[11px] text-ink-500">Retread vendor · Nairobi · Contract #CRC-2024-08</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-xs">
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Sent</div><div class="font-bold text-ink-900">58</div></div>
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Returned</div><div class="font-bold text-emerald-600">52</div></div>
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Credit</div><div class="font-bold text-ink-900">$18,420</div></div>
+            <span class="pill pill-success"><i class="fas fa-check"></i> CN Reconciled</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead class="bg-ink-50"><tr class="text-[10px] uppercase text-ink-500 text-left"><th class="px-4 py-2">Consignment</th><th class="px-4 py-2">Date</th><th class="px-4 py-2">Qty</th><th class="px-4 py-2">Disposition</th><th class="px-4 py-2">Credit Note</th><th class="px-4 py-2">Status</th></tr></thead>
+            <tbody class="divide-y divide-ink-100">
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-018</td><td class="px-4 py-2 text-ink-700">15 Apr</td><td class="px-4 py-2">12</td><td class="px-4 py-2"><span class="pill pill-warning">Retread</span></td><td class="px-4 py-2 text-ink-900">CN-4421 · $3,840</td><td class="px-4 py-2"><span class="pill pill-success">Posted</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-014</td><td class="px-4 py-2 text-ink-700">02 Apr</td><td class="px-4 py-2">15</td><td class="px-4 py-2"><span class="pill pill-warning">Retread</span></td><td class="px-4 py-2 text-ink-900">CN-4398 · $4,720</td><td class="px-4 py-2"><span class="pill pill-success">Posted</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-009</td><td class="px-4 py-2 text-ink-700">18 Mar</td><td class="px-4 py-2">18</td><td class="px-4 py-2"><span class="pill pill-warning">Retread</span></td><td class="px-4 py-2 text-ink-900">CN-4360 · $5,640</td><td class="px-4 py-2"><span class="pill pill-success">Posted</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-005</td><td class="px-4 py-2 text-ink-700">28 Feb</td><td class="px-4 py-2">13</td><td class="px-4 py-2"><span class="pill pill-warning">Retread</span></td><td class="px-4 py-2 text-amber-600">Awaiting</td><td class="px-4 py-2"><span class="pill pill-warning">Pending CN</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vendor 2 -->
+      <div class="card overflow-hidden">
+        <div class="p-4 flex items-center justify-between border-b border-ink-100">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center"><i class="fas fa-trash"></i></div>
+            <div>
+              <div class="font-bold text-ink-900 text-sm">EcoRubber Disposal Ltd</div>
+              <div class="text-[11px] text-ink-500">Scrap recycler · Mombasa · ISO 14001 certified</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-xs">
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Sent</div><div class="font-bold text-ink-900">94</div></div>
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Disposed</div><div class="font-bold text-emerald-600">88</div></div>
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Credit</div><div class="font-bold text-ink-900">$2,860</div></div>
+            <span class="pill pill-success"><i class="fas fa-check"></i> CN Reconciled</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead class="bg-ink-50"><tr class="text-[10px] uppercase text-ink-500 text-left"><th class="px-4 py-2">Consignment</th><th class="px-4 py-2">Date</th><th class="px-4 py-2">Qty</th><th class="px-4 py-2">Disposition</th><th class="px-4 py-2">Credit Note</th><th class="px-4 py-2">Status</th></tr></thead>
+            <tbody class="divide-y divide-ink-100">
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-019</td><td class="px-4 py-2 text-ink-700">17 Apr</td><td class="px-4 py-2">22</td><td class="px-4 py-2"><span class="pill pill-danger">Scrap</span></td><td class="px-4 py-2 text-ink-900">CN-EC-228 · $660</td><td class="px-4 py-2"><span class="pill pill-success">Posted</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-013</td><td class="px-4 py-2 text-ink-700">30 Mar</td><td class="px-4 py-2">28</td><td class="px-4 py-2"><span class="pill pill-danger">Scrap</span></td><td class="px-4 py-2 text-ink-900">CN-EC-219 · $840</td><td class="px-4 py-2"><span class="pill pill-success">Posted</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-008</td><td class="px-4 py-2 text-ink-700">12 Mar</td><td class="px-4 py-2">24</td><td class="px-4 py-2"><span class="pill pill-danger">Scrap</span></td><td class="px-4 py-2 text-ink-900">CN-EC-211 · $720</td><td class="px-4 py-2"><span class="pill pill-success">Posted</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-021</td><td class="px-4 py-2 text-ink-700">19 Apr</td><td class="px-4 py-2">14</td><td class="px-4 py-2"><span class="pill pill-danger">Scrap</span></td><td class="px-4 py-2 text-ink-500">Awaiting pickup</td><td class="px-4 py-2"><span class="pill pill-primary">Scheduled</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vendor 3 -->
+      <div class="card overflow-hidden">
+        <div class="p-4 flex items-center justify-between border-b border-ink-100">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fas fa-handshake"></i></div>
+            <div>
+              <div class="font-bold text-ink-900 text-sm">Michelin Warranty Returns</div>
+              <div class="text-[11px] text-ink-500">OEM warranty · Direct supplier returns</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-xs">
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Sent</div><div class="font-bold text-ink-900">18</div></div>
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Approved</div><div class="font-bold text-emerald-600">16</div></div>
+            <div class="text-center"><div class="text-[10px] text-ink-500 uppercase">Credit</div><div class="font-bold text-ink-900">$11,840</div></div>
+            <span class="pill pill-warning"><i class="fas fa-clock"></i> 2 disputes open</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead class="bg-ink-50"><tr class="text-[10px] uppercase text-ink-500 text-left"><th class="px-4 py-2">Consignment</th><th class="px-4 py-2">Date</th><th class="px-4 py-2">Qty</th><th class="px-4 py-2">Disposition</th><th class="px-4 py-2">Credit Note</th><th class="px-4 py-2">Status</th></tr></thead>
+            <tbody class="divide-y divide-ink-100">
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-017</td><td class="px-4 py-2 text-ink-700">14 Apr</td><td class="px-4 py-2">5</td><td class="px-4 py-2"><span class="pill pill-success">Warranty</span></td><td class="px-4 py-2 text-ink-900">CN-MIC-088 · $3,200</td><td class="px-4 py-2"><span class="pill pill-success">Posted</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-011</td><td class="px-4 py-2 text-ink-700">22 Mar</td><td class="px-4 py-2">7</td><td class="px-4 py-2"><span class="pill pill-success">Warranty</span></td><td class="px-4 py-2 text-ink-900">CN-MIC-082 · $4,480</td><td class="px-4 py-2"><span class="pill pill-success">Posted</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-007</td><td class="px-4 py-2 text-ink-700">05 Mar</td><td class="px-4 py-2">4</td><td class="px-4 py-2"><span class="pill pill-success">Warranty</span></td><td class="px-4 py-2 text-amber-600">Disputed</td><td class="px-4 py-2"><span class="pill pill-warning">Inspection</span></td></tr>
+              <tr class="row-hover"><td class="px-4 py-2 font-semibold text-brand-600">CON-2026-002</td><td class="px-4 py-2 text-ink-700">10 Feb</td><td class="px-4 py-2">2</td><td class="px-4 py-2"><span class="pill pill-success">Warranty</span></td><td class="px-4 py-2 text-red-600">Rejected</td><td class="px-4 py-2"><span class="pill pill-danger">Closed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCRAP YARD INVENTORY GRID -->
+    <section class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-sm font-bold text-ink-900">On-site Scrap Yard Inventory</h2>
+          <p class="text-[11px] text-ink-500">Tyres physically held awaiting vendor pickup</p>
+        </div>
+        <div class="text-[11px] text-ink-500">Total on yard: <span class="font-bold text-ink-900">22 tyres · ~1.8 tonnes</span></div>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+        <div class="scrap-tile p-3 rounded-xl border border-red-200 bg-red-50 text-center"><i class="fas fa-circle-dot text-2xl text-red-600"></i><div class="text-[10px] text-ink-500 uppercase mt-2">Bay A1</div><div class="text-sm font-bold text-ink-900">8 scrap</div><div class="text-[10px] text-ink-500">EcoRubber pickup 22 Apr</div></div>
+        <div class="scrap-tile p-3 rounded-xl border border-amber-200 bg-amber-50 text-center"><i class="fas fa-recycle text-2xl text-amber-600"></i><div class="text-[10px] text-ink-500 uppercase mt-2">Bay A2</div><div class="text-sm font-bold text-ink-900">6 retread</div><div class="text-[10px] text-ink-500">CRC pickup 24 Apr</div></div>
+        <div class="scrap-tile p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-center"><i class="fas fa-shield-halved text-2xl text-emerald-600"></i><div class="text-[10px] text-ink-500 uppercase mt-2">Bay B1</div><div class="text-sm font-bold text-ink-900">3 warranty</div><div class="text-[10px] text-ink-500">Michelin courier</div></div>
+        <div class="scrap-tile p-3 rounded-xl border border-red-200 bg-red-50 text-center"><i class="fas fa-circle-dot text-2xl text-red-600"></i><div class="text-[10px] text-ink-500 uppercase mt-2">Bay B2</div><div class="text-sm font-bold text-ink-900">3 scrap</div><div class="text-[10px] text-ink-500">Awaiting schedule</div></div>
+        <div class="scrap-tile p-3 rounded-xl border border-ink-200 bg-ink-50 text-center"><i class="fas fa-question text-2xl text-ink-400"></i><div class="text-[10px] text-ink-500 uppercase mt-2">Bay C1</div><div class="text-sm font-bold text-ink-900">2 unsorted</div><div class="text-[10px] text-amber-600">Needs triage</div></div>
+        <div class="scrap-tile p-3 rounded-xl border border-dashed border-ink-200 text-center text-ink-500"><i class="fas fa-plus text-2xl"></i><div class="text-xs mt-2">Add Bay</div></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="tyres-sidebar.js"></script>
+<script>renderSidebar('scrap');</script>
+</body>
+</html>
