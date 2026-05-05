@@ -209,6 +209,26 @@
       </div>
     </section>
 
+    <!-- INTERACTIVE TIMELINE -->
+    <section class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-sm font-bold text-ink-900">Claim Activity Timeline</h2>
+          <p class="text-[11px] text-ink-500">Document uploads, inspections, approvals, and credit-note updates by date</p>
+        </div>
+        <div class="flex gap-2">
+          <select id="tlFilter" onchange="renderTL()" class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg">
+            <option value="">All claims</option>
+            <option>WC-2026-0124</option><option>WC-2026-0123</option><option>WC-2026-0122</option><option>WC-2026-0118</option>
+          </select>
+          <select id="tlType" onchange="renderTL()" class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg">
+            <option value="">All events</option><option>document</option><option>inspection</option><option>approval</option><option>credit-note</option>
+          </select>
+        </div>
+      </div>
+      <div id="timeline" style="padding-left:1.75rem;position:relative;"></div>
+    </section>
+
     <!-- CREDIT NOTE TRACKER -->
     <section class="card p-5">
       <div class="flex items-center justify-between mb-3">
