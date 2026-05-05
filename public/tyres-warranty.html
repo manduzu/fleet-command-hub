@@ -209,6 +209,26 @@
       </div>
     </section>
 
+    <!-- INTERACTIVE TIMELINE -->
+    <section class="card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h2 class="text-sm font-bold text-ink-900">Claim Activity Timeline</h2>
+          <p class="text-[11px] text-ink-500">Document uploads, inspections, approvals, and credit-note updates by date</p>
+        </div>
+        <div class="flex gap-2">
+          <select id="tlFilter" onchange="renderTL()" class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg">
+            <option value="">All claims</option>
+            <option>WC-2026-0124</option><option>WC-2026-0123</option><option>WC-2026-0122</option><option>WC-2026-0118</option>
+          </select>
+          <select id="tlType" onchange="renderTL()" class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg">
+            <option value="">All events</option><option>document</option><option>inspection</option><option>approval</option><option>credit-note</option>
+          </select>
+        </div>
+      </div>
+      <div id="timeline" style="padding-left:1.75rem;position:relative;"></div>
+    </section>
+
     <!-- CREDIT NOTE TRACKER -->
     <section class="card p-5">
       <div class="flex items-center justify-between mb-3">
@@ -289,8 +309,8 @@
   ];
   const body = document.getElementById('claimsBody');
   body.innerHTML = claims.map(c=>`
-    <tr class="row-hover">
-      <td class="px-4 py-3"><a href="#" class="text-brand-600 font-semibold text-xs">${c.id}</a></td>
+    <tr class="row-hover" onclick="window.location='claim-detail.html?ref=${c.id}'" style="cursor:pointer;">
+      <td class="px-4 py-3"><a href="claim-detail.html?ref=${c.id}" class="text-brand-600 font-semibold text-xs">${c.id}</a></td>
       <td class="px-4 py-3"><div class="text-xs font-semibold text-ink-900">${c.tyre}</div><div class="text-[10px] text-ink-500">${c.vehicle}</div></td>
       <td class="px-4 py-3 text-xs text-ink-700">${c.supplier}</td>
       <td class="px-4 py-3 text-xs text-ink-700">${c.defect}</td>
@@ -299,8 +319,40 @@
       <td class="px-4 py-3 text-xs font-semibold text-ink-900">${c.amt}</td>
       <td class="px-4 py-3 text-xs ${c.refund.startsWith('$') && c.refund!=='$0'?'text-emerald-600 font-semibold':c.refund==='$0'?'text-red-600 font-semibold':'text-amber-600'}">${c.refund}</td>
       <td class="px-4 py-3"><span class="doc-chip"><i class="fas fa-paperclip"></i>${c.docs}</span></td>
-      <td class="px-4 py-3 text-right"><button class="text-ink-400 hover:text-ink-900"><i class="fas fa-ellipsis-vertical"></i></button></td>
+      <td class="px-4 py-3 text-right"><a href="claim-detail.html?ref=${c.id}" class="text-brand-600 hover:text-brand-700"><i class="fas fa-arrow-right"></i></a></td>
     </tr>`).join('');
+
+  // Timeline events
+  const events=[
+    {date:'2026-04-29',claim:'WC-2026-0118',type:'credit-note',title:'Credit note CN-2026-013 posted',desc:'Bridgestone EA · $610 credited to PI-2026-049',color:'#10B981'},
+    {date:'2026-04-26',claim:'WC-2026-0118',type:'approval',title:'Finance approval — refund issued',desc:'Approved by R. Mwende',color:'#3B82F6'},
+    {date:'2026-04-22',claim:'WC-2026-0124',type:'inspection',title:'Supplier inspection scheduled',desc:'Michelin field rep visiting Workshop A',color:'#F59E0B'},
+    {date:'2026-04-20',claim:'WC-2026-0124',type:'document',title:'3 photos + inspection report uploaded',desc:'Sidewall blow-out evidence · 4.2 MB',color:'#3B82F6'},
+    {date:'2026-04-18',claim:'WC-2026-0124',type:'document',title:'Claim filed and dispatched',desc:'Auto-emailed to warranty@michelin.com',color:'#64748B'},
+    {date:'2026-04-17',claim:'WC-2026-0123',type:'approval',title:'Supplier approved claim',desc:'Bridgestone — pending credit note',color:'#10B981'},
+    {date:'2026-04-15',claim:'WC-2026-0123',type:'inspection',title:'Internal QA inspection complete',desc:'Tread separation confirmed at 38% wear',color:'#F59E0B'},
+    {date:'2026-04-12',claim:'WC-2026-0123',type:'document',title:'Tread depth report uploaded',desc:'2.1 mm vs 14 mm spec',color:'#3B82F6'},
+    {date:'2026-04-10',claim:'WC-2026-0122',type:'document',title:'Claim filed',desc:'Continental HDR2 · bead wire failure',color:'#64748B'},
+  ];
+  const ticon={document:'fa-cloud-arrow-up',inspection:'fa-magnifying-glass',approval:'fa-check',['credit-note']:'fa-receipt'};
+  function renderTL(){
+    const f=document.getElementById('tlFilter').value, t=document.getElementById('tlType').value;
+    const list=events.filter(e=>(!f||e.claim===f)&&(!t||e.type===t));
+    document.getElementById('timeline').innerHTML='<div style="position:absolute;left:.7rem;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#3B82F6,#E2E8F0);"></div>'+
+    list.map(e=>`
+      <div style="position:relative;padding:0 0 1.1rem 0;">
+        <div style="position:absolute;left:-1.4rem;top:.2rem;width:1.4rem;height:1.4rem;border-radius:999px;background:${e.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;box-shadow:0 0 0 3px #fff;"><i class="fas ${ticon[e.type]}"></i></div>
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="text-xs font-bold text-ink-900">${e.title}</div>
+            <div class="text-[11px] text-ink-500">${e.desc}</div>
+            <a href="claim-detail.html?ref=${e.claim}" class="text-[11px] text-brand-600 font-semibold hover:underline">${e.claim} →</a>
+          </div>
+          <div class="text-[10px] text-ink-500 whitespace-nowrap">${e.date}</div>
+        </div>
+      </div>`).join('');
+  }
+  renderTL();
 
   function openModal(){document.getElementById('claimModal').classList.remove('hidden');}
   function closeModal(){document.getElementById('claimModal').classList.add('hidden');}

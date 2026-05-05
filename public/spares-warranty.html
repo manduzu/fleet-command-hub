@@ -1,0 +1,103 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Spares Warranty Claims — FleetCtrl</title>
+<meta name="description" content="Track warranty claims on spare parts and inventory items with timeline, refunds and credit notes."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/>
+<style>.stage{flex:1;text-align:center;padding:.75rem .5rem;border-radius:.6rem;background:#F8FAFC;border:1px solid #E2E8F0;}.stage.active{background:linear-gradient(135deg,#DBEAFE,#EFF6FF);border-color:#93C5FD;}.stage-arrow{display:flex;align-items:center;color:#CBD5E1;}</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Warranty / <span class="text-ink-900">Spares Claims</span></div>
+    <h1 class="text-lg font-bold">Spares Warranty Claims</h1></div>
+  <div class="flex gap-2">
+    <a href="credit-notes.html" class="btn btn-ghost"><i class="fas fa-receipt"></i>Credit Notes</a>
+    <button class="btn btn-primary"><i class="fas fa-plus"></i>New Claim</button>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-6 gap-3">
+    <div class="card p-3"><div class="kpi-label">Open Claims</div><div class="text-xl font-bold text-brand-600">17</div></div>
+    <div class="card p-3"><div class="kpi-label">Approved YTD</div><div class="text-xl font-bold text-emerald-600">42</div></div>
+    <div class="card p-3"><div class="kpi-label">Refunded</div><div class="text-xl font-bold">$28,140</div></div>
+    <div class="card p-3"><div class="kpi-label">Pending Refund</div><div class="text-xl font-bold text-amber-600">$5,820</div></div>
+    <div class="card p-3"><div class="kpi-label">Rejection Rate</div><div class="text-xl font-bold text-red-600">11.2%</div></div>
+    <div class="card p-3"><div class="kpi-label">Avg Cycle</div><div class="text-xl font-bold">11d</div></div>
+  </section>
+
+  <section class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Claim Status Pipeline</h2>
+    <div class="flex items-stretch gap-2">
+      <div class="stage active"><div class="text-[10px] uppercase font-bold text-ink-500">Drafted</div><div class="text-2xl font-bold mt-1">4</div></div>
+      <div class="stage-arrow"><i class="fas fa-chevron-right"></i></div>
+      <div class="stage active"><div class="text-[10px] uppercase font-bold text-ink-500">Submitted</div><div class="text-2xl font-bold text-brand-600 mt-1">5</div></div>
+      <div class="stage-arrow"><i class="fas fa-chevron-right"></i></div>
+      <div class="stage active"><div class="text-[10px] uppercase font-bold text-ink-500">Inspection</div><div class="text-2xl font-bold text-amber-600 mt-1">3</div></div>
+      <div class="stage-arrow"><i class="fas fa-chevron-right"></i></div>
+      <div class="stage active"><div class="text-[10px] uppercase font-bold text-ink-500">Approved</div><div class="text-2xl font-bold text-emerald-600 mt-1">3</div></div>
+      <div class="stage-arrow"><i class="fas fa-chevron-right"></i></div>
+      <div class="stage active"><div class="text-[10px] uppercase font-bold text-ink-500">Refunded</div><div class="text-2xl font-bold mt-1">2</div></div>
+    </div>
+  </section>
+
+  <section class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Active Claims</h2>
+    <table class="tbl" id="ct">
+      <thead><tr><th>Claim #</th><th>Item</th><th>Vehicle / JC</th><th>Supplier</th><th>Defect</th><th>Filed</th><th>Stage</th><th>Amount</th><th>Refund</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section class="card p-5">
+    <div class="flex items-center justify-between mb-4">
+      <div><h2 class="text-sm font-bold">Claim Activity Timeline</h2><p class="text-[11px] text-ink-500">Documents, inspections, approvals & credit-note updates</p></div>
+      <div class="flex gap-2">
+        <select id="tlF" onchange="renderTL()" class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg"><option value="">All claims</option><option>SWC-2026-008</option><option>SWC-2026-007</option><option>SWC-2026-006</option></select>
+        <select id="tlT" onchange="renderTL()" class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg"><option value="">All events</option><option>document</option><option>inspection</option><option>approval</option><option>credit-note</option></select>
+      </div>
+    </div>
+    <div id="tl" style="padding-left:1.75rem;position:relative;"></div>
+  </section>
+
+  <section class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Credit Note & Refund Tracker</h2>
+    <div class="grid grid-cols-3 gap-3">
+      <div class="p-4 rounded-xl border border-emerald-200 bg-emerald-50"><div class="text-[11px] font-bold text-emerald-700 uppercase">Refunded</div><div class="text-2xl font-bold text-emerald-700 mt-1">$28,140</div><div class="text-[11px] text-emerald-700">42 claims</div></div>
+      <div class="p-4 rounded-xl border border-amber-200 bg-amber-50"><div class="text-[11px] font-bold text-amber-700 uppercase">Awaiting CN</div><div class="text-2xl font-bold text-amber-700 mt-1">$5,820</div><div class="text-[11px] text-amber-700">6 claims</div></div>
+      <div class="p-4 rounded-xl border border-red-200 bg-red-50"><div class="text-[11px] font-bold text-red-700 uppercase">Disputed</div><div class="text-2xl font-bold text-red-700 mt-1">$1,420</div><div class="text-[11px] text-red-700">2 claims</div></div>
+    </div>
+  </section>
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('swar');
+const claims=[
+ {id:'SWC-2026-008',item:'SP-1004 Wheel Hub Bearing',veh:'KCB-204X / JC-2026-091',sup:'Bosch Auto',def:'Premature failure 3K km',filed:'05 May',stage:'Submitted',amt:640,ref:'—',cls:'pill-primary'},
+ {id:'SWC-2026-007',item:'SP-1003 Engine Oil 15W-40 (Batch L42)',veh:'Multiple / Various',sup:'Total Lubricants',def:'Off-spec viscosity',filed:'02 May',stage:'Inspection',amt:310,ref:'—',cls:'pill-warning'},
+ {id:'SWC-2026-006',item:'SP-1006 Diesel Filter',veh:'KDA-118Y / JC-2026-082',sup:'Sandvik Filters',def:'Cracked housing',filed:'28 Apr',stage:'Approved',amt:180,ref:'Pending CN',cls:'pill-success'},
+ {id:'SWC-2026-005',item:'SP-2210 Mann Filter HU 925/4x',veh:'KBZ-721A',sup:'Mann Filter',def:'Wrong threading',filed:'24 Apr',stage:'Disputed',amt:95,ref:'—',cls:'pill-danger'},
+ {id:'SWC-2026-004',item:'SP-1001 Brake Pad Set',veh:'KCN-902B / JC-2026-074',sup:'Bosch Auto',def:'Rapid wear 800 km',filed:'18 Apr',stage:'Refunded',amt:420,ref:'$420',cls:'pill-muted'},
+];
+const pmap={'pill-primary':'Submitted','pill-warning':'Inspection','pill-success':'Approved','pill-danger':'Disputed','pill-muted':'Refunded'};
+document.querySelector('#ct tbody').innerHTML=claims.map(c=>`<tr onclick="location='claim-detail.html?ref=${c.id}'" style="cursor:pointer"><td><a href="claim-detail.html?ref=${c.id}" class="text-brand-600 font-semibold">${c.id}</a></td><td>${c.item}</td><td>${c.veh}</td><td>${c.sup}</td><td>${c.def}</td><td>${c.filed}</td><td><span class="pill ${c.cls}">${c.stage}</span></td><td class="font-semibold">$${c.amt}</td><td class="${c.ref.startsWith('$')?'text-emerald-600 font-semibold':'text-amber-600'}">${c.ref}</td><td><a href="claim-detail.html?ref=${c.id}" class="text-brand-600"><i class="fas fa-arrow-right"></i></a></td></tr>`).join('');
+
+const events=[
+ {date:'2026-05-05',claim:'SWC-2026-008',type:'document',title:'Claim filed with photos',desc:'Wheel hub bearing failure evidence (3 photos, lab report)',color:'#64748B'},
+ {date:'2026-05-04',claim:'SWC-2026-007',type:'inspection',title:'Lab viscosity test scheduled',desc:'Sample sent to SGS Mombasa',color:'#F59E0B'},
+ {date:'2026-05-02',claim:'SWC-2026-007',type:'document',title:'Batch L42 dispatch records uploaded',desc:'5 affected vehicles documented',color:'#3B82F6'},
+ {date:'2026-04-30',claim:'SWC-2026-006',type:'approval',title:'Supplier approved claim',desc:'Sandvik — credit note pending',color:'#10B981'},
+ {date:'2026-04-28',claim:'SWC-2026-006',type:'document',title:'Cracked housing photos uploaded',desc:'Manufacturing defect confirmed',color:'#3B82F6'},
+ {date:'2026-04-25',claim:'SWC-2026-004',type:'credit-note',title:'CN-2026-007 posted',desc:'Bosch Auto · $420 credited to PI-2026-031',color:'#10B981'},
+];
+const ic={document:'fa-cloud-arrow-up',inspection:'fa-magnifying-glass',approval:'fa-check',['credit-note']:'fa-receipt'};
+function renderTL(){
+  const f=tlF.value,t=tlT.value;
+  const list=events.filter(e=>(!f||e.claim===f)&&(!t||e.type===t));
+  document.getElementById('tl').innerHTML='<div style="position:absolute;left:.7rem;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#3B82F6,#E2E8F0);"></div>'+
+  list.map(e=>`<div style="position:relative;padding:0 0 1.1rem 0;"><div style="position:absolute;left:-1.4rem;top:.2rem;width:1.4rem;height:1.4rem;border-radius:999px;background:${e.color};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;box-shadow:0 0 0 3px #fff;"><i class="fas ${ic[e.type]}"></i></div><div class="flex items-start justify-between gap-3"><div><div class="text-xs font-bold">${e.title}</div><div class="text-[11px] text-ink-500">${e.desc}</div><a href="claim-detail.html?ref=${e.claim}" class="text-[11px] text-brand-600 font-semibold hover:underline">${e.claim} →</a></div><div class="text-[10px] text-ink-500 whitespace-nowrap">${e.date}</div></div></div>`).join('');
+}
+renderTL();
+</script>
+</body></html>

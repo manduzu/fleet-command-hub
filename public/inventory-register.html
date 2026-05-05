@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Inventory Register — FleetCtrl</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB',700:'#1D4ED8'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Stores / Inventory / <span class="text-ink-900">Register</span></div>
+    <h1 class="text-lg font-bold">Inventory Register Archive</h1></div>
+  <div class="flex gap-2">
+    <button onclick="exportCSV()" class="btn btn-ghost"><i class="fas fa-file-csv"></i>Export CSV</button>
+    <a href="store-command-center.html" class="btn btn-primary"><i class="fas fa-warehouse"></i>Command Center</a>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="card p-4"><div class="kpi-label">Total SKUs</div><div class="text-2xl font-bold">12,430</div></div>
+    <div class="card p-4"><div class="kpi-label">Stock Value</div><div class="text-2xl font-bold">$1.84M</div></div>
+    <div class="card p-4"><div class="kpi-label">Active</div><div class="text-2xl font-bold text-emerald-600">11,820</div></div>
+    <div class="card p-4"><div class="kpi-label">Low / Reorder</div><div class="text-2xl font-bold text-amber-600">47</div></div>
+    <div class="card p-4"><div class="kpi-label">Obsolete</div><div class="text-2xl font-bold text-red-600">163</div></div>
+  </section>
+  <section class="card p-5">
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input placeholder="Search SKU, name, supplier..." class="max-w-xs"/>
+      <select class="max-w-[160px]"><option>All Categories</option><option>Tyres</option><option>Filters</option><option>Lubricants</option><option>Brake</option><option>Electrical</option></select>
+      <select class="max-w-[160px]"><option>All Warehouses</option><option>Main Depot</option><option>Workshop A</option><option>Workshop B</option></select>
+      <select class="max-w-[160px]"><option>All Status</option><option>Active</option><option>Low</option><option>Critical</option><option>Obsolete</option></select>
+    </div>
+    <table class="tbl" id="regTbl">
+      <thead><tr><th>SKU</th><th>Description</th><th>Category</th><th>UoM</th><th>On Hand</th><th>Reorder</th><th>Avg Cost</th><th>Value</th><th>Status</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('reg');
+const data=[
+ ['SP-1001','Brake Pad Set – Volvo FH','Brake','set',24,10,42.5,1020,'Active'],
+ ['SP-1002','Air Filter – Scania R','Filters','pcs',6,15,18.4,110.4,'Low'],
+ ['SP-1003','Engine Oil 15W-40','Lubricants','L',420,200,4.2,1764,'Active'],
+ ['SP-1004','Wheel Hub Bearing','Drivetrain','pcs',2,8,86,172,'Critical'],
+ ['SP-1005','Headlamp Assembly','Electrical','pcs',9,5,124,1116,'Active'],
+ ['TY-2201','315/80R22.5 Bridgestone M729','Tyres','pcs',32,20,485,15520,'Active'],
+ ['TY-2202','295/80R22.5 Michelin XZE','Tyres','pcs',8,12,512,4096,'Low'],
+ ['SP-1006','Diesel Filter Element','Filters','pcs',45,25,12.8,576,'Active'],
+ ['SP-1007','Clutch Plate – Iveco','Drivetrain','pcs',1,4,310,310,'Critical'],
+ ['SP-1008','Coolant Concentrate','Lubricants','L',180,150,6.4,1152,'Active'],
+ ['SP-1009','U-Bolt 22mm','Suspension','pcs',0,30,8.2,0,'Critical'],
+ ['SP-1010','Side Mirror Glass','Body','pcs',14,6,38,532,'Active'],
+];
+const pill={Active:'pill-success',Low:'pill-warning',Critical:'pill-danger',Obsolete:'pill-muted'};
+document.querySelector('#regTbl tbody').innerHTML=data.map(r=>`<tr><td class="text-brand-600 font-semibold">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>$${r[6]}</td><td>$${r[7].toLocaleString()}</td><td><span class="pill ${pill[r[8]]}">${r[8]}</span></td></tr>`).join('');
+function exportCSV(){const h=['SKU','Description','Category','UoM','OnHand','Reorder','AvgCost','Value','Status'];const rows=[h,...data].map(r=>r.join(',')).join('\n');const b=new Blob([rows],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='inventory-register.csv';a.click();}
+</script>
+</body></html>

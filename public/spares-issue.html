@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Spares Issue — FleetCtrl</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Workshop / <span class="text-ink-900">Spares Issue</span></div>
+    <h1 class="text-lg font-bold">Issue Spares to Workshop</h1></div>
+  <button class="btn btn-primary"><i class="fas fa-truck-arrow-right"></i>Issue Selected</button>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="card p-4"><div class="kpi-label">Approved – Awaiting Issue</div><div class="text-2xl font-bold text-amber-600">7</div></div>
+    <div class="card p-4"><div class="kpi-label">Issued Today</div><div class="text-2xl font-bold text-emerald-600">14</div></div>
+    <div class="card p-4"><div class="kpi-label">Issue Value Today</div><div class="text-2xl font-bold">$2,840</div></div>
+    <div class="card p-4"><div class="kpi-label">Returns</div><div class="text-2xl font-bold">2</div></div>
+    <div class="card p-4"><div class="kpi-label">Avg Pick Time</div><div class="text-2xl font-bold">12m</div></div>
+  </section>
+  <section class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Pending Issues</h2>
+    <table class="tbl">
+      <thead><tr><th><input type="checkbox"/></th><th>Issue #</th><th>Req</th><th>Job Card</th><th>Vehicle</th><th>Items</th><th>Value</th><th>Bin Locations</th><th>Receiver</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><input type="checkbox"/></td><td class="text-brand-600 font-semibold">ISS-2026-303</td><td>REQ-2026-116</td><td>JC-2026-089</td><td>KBZ-721A</td><td>3</td><td>$410</td><td>A-12, B-04, C-19</td><td>S. Akinyi</td><td><button class="btn btn-success"><i class="fas fa-check"></i>Issue</button></td></tr>
+        <tr><td><input type="checkbox"/></td><td class="text-brand-600 font-semibold">ISS-2026-302</td><td>REQ-2026-114</td><td>JC-2026-087</td><td>KCT-441C</td><td>9</td><td>$720</td><td>D-02, E-08, …</td><td>J. Mwangi</td><td><button class="btn btn-success"><i class="fas fa-check"></i>Issue</button></td></tr>
+        <tr><td><input type="checkbox"/></td><td class="text-brand-600 font-semibold">ISS-2026-301</td><td>REQ-2026-112</td><td>JC-2026-085</td><td>KCH-668D</td><td>5</td><td>$284</td><td>B-11, F-22</td><td>D. Onyango</td><td><button class="btn btn-success"><i class="fas fa-check"></i>Issue</button></td></tr>
+      </tbody>
+    </table>
+  </section>
+  <section class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Recently Issued</h2>
+    <table class="tbl">
+      <thead><tr><th>Issue #</th><th>Job Card</th><th>Vehicle</th><th>Items</th><th>Value</th><th>Issued By</th><th>Time</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="text-brand-600 font-semibold">ISS-2026-300</td><td>JC-2026-088</td><td>KCN-902B</td><td>4</td><td>$1,940</td><td>Storekeeper N. Wafula</td><td>2h ago</td><td><span class="pill pill-success">Issued</span></td></tr>
+        <tr><td class="text-brand-600 font-semibold">ISS-2026-299</td><td>JC-2026-086</td><td>KDC-001E</td><td>2</td><td>$98</td><td>N. Wafula</td><td>3h ago</td><td><span class="pill pill-success">Issued</span></td></tr>
+        <tr><td class="text-brand-600 font-semibold">ISS-2026-298</td><td>JC-2026-084</td><td>KBA-554F</td><td>1</td><td>$310</td><td>N. Wafula</td><td>4h ago</td><td><span class="pill pill-primary">Returned (1)</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('iss');</script>
+</body></html>

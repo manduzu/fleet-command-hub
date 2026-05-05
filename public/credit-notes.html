@@ -1,0 +1,61 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Credit Notes — FleetCtrl</title>
+<meta name="description" content="Track posted, pending and disputed credit notes with invoice references and CSV export."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Stores / Procurement / <span class="text-ink-900">Credit Notes</span></div>
+    <h1 class="text-lg font-bold">Supplier Credit Notes</h1></div>
+  <div class="flex gap-2">
+    <button onclick="exportCSV()" class="btn btn-ghost"><i class="fas fa-file-csv"></i>Export CSV</button>
+    <button class="btn btn-primary"><i class="fas fa-plus"></i>New Credit Note</button>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="card p-4"><div class="kpi-label">Posted YTD</div><div class="text-2xl font-bold text-emerald-600">$92,840</div><div class="text-[11px] text-ink-500">87 notes</div></div>
+    <div class="card p-4"><div class="kpi-label">Pending</div><div class="text-2xl font-bold text-amber-600">$14,560</div><div class="text-[11px] text-ink-500">9 notes</div></div>
+    <div class="card p-4"><div class="kpi-label">Disputed</div><div class="text-2xl font-bold text-red-600">$6,210</div><div class="text-[11px] text-ink-500">3 notes</div></div>
+    <div class="card p-4"><div class="kpi-label">Tyre Claims</div><div class="text-2xl font-bold">62</div></div>
+    <div class="card p-4"><div class="kpi-label">Spares Claims</div><div class="text-2xl font-bold">37</div></div>
+  </section>
+  <section class="card p-5">
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input placeholder="Search CN ref, supplier, invoice..." class="max-w-xs"/>
+      <select class="max-w-[160px]" id="fStatus" onchange="render()"><option value="">All Status</option><option>Posted</option><option>Pending</option><option>Disputed</option></select>
+      <select class="max-w-[160px]" id="fType" onchange="render()"><option value="">All Types</option><option>Tyre</option><option>Spares</option></select>
+      <input type="date" class="max-w-[160px]"/>
+    </div>
+    <table class="tbl" id="cn">
+      <thead><tr><th>CN Ref</th><th>Supplier</th><th>Type</th><th>Invoice Ref</th><th>Claim Ref</th><th>Amount</th><th>Issue Date</th><th>Posted</th><th>Status</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('cn');
+const data=[
+ ['CN-2026-014','Michelin','Tyre','PI-2026-052','TWC-2026-021',2400,'2026-04-22','2026-04-29','Posted'],
+ ['CN-2026-013','Bridgestone EA','Tyre','PI-2026-049','TWC-2026-019',1850,'2026-04-19','2026-04-25','Posted'],
+ ['CN-2026-012','Bosch Auto','Spares','PI-2026-046','SWC-2026-008',640,'2026-04-15','','Pending'],
+ ['CN-2026-011','Total Lubricants','Spares','PI-2026-043','SWC-2026-007',310,'2026-04-12','2026-04-20','Posted'],
+ ['CN-2026-010','Continental','Tyre','PI-2026-040','TWC-2026-016',2120,'2026-04-08','','Disputed'],
+ ['CN-2026-009','Sandvik Filters','Spares','PI-2026-038','SWC-2026-006',180,'2026-04-04','2026-04-12','Posted'],
+ ['CN-2026-008','Apollo Tyres','Tyre','PI-2026-035','TWC-2026-013',1420,'2026-03-29','','Pending'],
+ ['CN-2026-007','Mann Filter','Spares','PI-2026-031','SWC-2026-005',95,'2026-03-25','','Disputed'],
+];
+const pill={Posted:'pill-success',Pending:'pill-warning',Disputed:'pill-danger'};
+function render(){
+  const s=fStatus.value, t=fType.value;
+  const rows=data.filter(r=>(!s||r[8]===s)&&(!t||r[2]===t));
+  document.querySelector('#cn tbody').innerHTML=rows.map(r=>`<tr><td class="text-brand-600 font-semibold"><a href="claim-detail.html?ref=${r[4]}">${r[0]}</a></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td class="font-semibold">$${r[5].toLocaleString()}</td><td>${r[6]}</td><td>${r[7]||'—'}</td><td><span class="pill ${pill[r[8]]}">${r[8]}</span></td><td><a class="text-brand-600" href="claim-detail.html?ref=${r[4]}"><i class="fas fa-eye"></i></a></td></tr>`).join('');
+}
+render();
+function exportCSV(){const rows=[['CN','Supplier','Type','Invoice','Claim','Amount','IssueDate','Posted','Status'],...data].map(r=>r.join(',')).join('\n');const b=new Blob([rows],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='credit-notes.csv';a.click();}
+</script>
+</body></html>

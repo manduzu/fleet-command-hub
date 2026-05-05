@@ -104,6 +104,7 @@
         <button class="tab-btn" data-tab="photos">Photos</button>
         <button class="tab-btn" data-tab="cost">Cost Ledger</button>
         <button class="tab-btn" data-tab="retire">Retirement</button>
+        <button class="tab-btn" data-tab="warranty">Warranty Claims</button>
       </div>
 
       <div id="lifecycle" class="tab-pane active p-5">
@@ -231,7 +232,26 @@
             <div><div class="text-[10px] text-ink-500 uppercase">Decision by</div><div class="font-semibold text-ink-900">Workshop manager</div></div>
             <div><div class="text-[10px] text-ink-500 uppercase">Target date</div><div class="font-semibold text-ink-900">30 May 2025</div></div>
           </div>
+      </div>
+
+      <div id="warranty" class="tab-pane p-5" style="display:none;">
+        <div class="flex items-center justify-between mb-3">
+          <div><h3 class="text-sm font-bold">Warranty Claim History</h3><p class="text-[11px] text-ink-500">All claims linked to this tyre and their outcomes</p></div>
+          <a href="tyres-warranty.html" class="text-xs text-brand-600 font-semibold">Open warranty manager →</a>
         </div>
+        <table style="width:100%;border-collapse:collapse;font-size:.8rem;">
+          <thead><tr style="background:#F8FAFC;text-align:left;"><th style="padding:.6rem;font-size:.7rem;text-transform:uppercase;color:#64748B;">Claim #</th><th style="padding:.6rem;font-size:.7rem;text-transform:uppercase;color:#64748B;">Filed</th><th style="padding:.6rem;font-size:.7rem;text-transform:uppercase;color:#64748B;">Defect</th><th style="padding:.6rem;font-size:.7rem;text-transform:uppercase;color:#64748B;">Stage</th><th style="padding:.6rem;font-size:.7rem;text-transform:uppercase;color:#64748B;">Amount</th><th style="padding:.6rem;font-size:.7rem;text-transform:uppercase;color:#64748B;">Refund</th><th></th></tr></thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #F1F5F9;"><td style="padding:.6rem;"><a href="claim-detail.html?ref=WC-2026-0124" style="color:#2563EB;font-weight:600;">WC-2026-0124</a></td><td style="padding:.6rem;">18 Apr 2026</td><td style="padding:.6rem;">Sidewall blow-out</td><td style="padding:.6rem;"><span class="pill pill-warning">Inspection</span></td><td style="padding:.6rem;font-weight:600;">$640</td><td style="padding:.6rem;color:#D97706;">—</td><td style="padding:.6rem;"><a href="claim-detail.html?ref=WC-2026-0124" style="color:#2563EB;"><i class="fas fa-arrow-right"></i></a></td></tr>
+            <tr style="border-bottom:1px solid #F1F5F9;"><td style="padding:.6rem;"><a href="claim-detail.html?ref=WC-2025-0088" style="color:#2563EB;font-weight:600;">WC-2025-0088</a></td><td style="padding:.6rem;">02 Nov 2025</td><td style="padding:.6rem;">Premature wear</td><td style="padding:.6rem;"><span class="pill pill-muted">Refunded</span></td><td style="padding:.6rem;font-weight:600;">$210</td><td style="padding:.6rem;color:#059669;font-weight:600;">$210</td><td style="padding:.6rem;"><a href="claim-detail.html?ref=WC-2025-0088" style="color:#2563EB;"><i class="fas fa-arrow-right"></i></a></td></tr>
+          </tbody>
+        </table>
+        <div class="mt-4 grid grid-cols-3 gap-3">
+          <div class="p-3 rounded-lg border border-ink-200"><div class="text-[10px] uppercase text-ink-500 font-semibold">Total Claimed</div><div class="text-lg font-bold">$850</div></div>
+          <div class="p-3 rounded-lg border border-ink-200"><div class="text-[10px] uppercase text-ink-500 font-semibold">Refunded</div><div class="text-lg font-bold text-emerald-600">$210</div></div>
+          <div class="p-3 rounded-lg border border-ink-200"><div class="text-[10px] uppercase text-ink-500 font-semibold">Open Exposure</div><div class="text-lg font-bold text-amber-600">$640</div></div>
+        </div>
+      </div>
       </div>
     </section>
   </div>

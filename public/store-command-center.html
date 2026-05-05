@@ -1,0 +1,79 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Stores Command Center — FleetCtrl</title>
+<meta name="description" content="Live stores command center: stock-in pipeline, KPIs, alerts, and procurement throughput."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Stores / <span class="text-ink-900">Command Center</span></div>
+  <h1 class="text-lg font-bold">Stores Command Center</h1></div>
+  <div class="flex gap-2">
+    <a href="lpo-create.html" class="btn btn-ghost"><i class="fas fa-plus"></i>New LPO</a>
+    <a href="grn-create.html" class="btn btn-primary"><i class="fas fa-truck-ramp-box"></i>Receive Goods</a>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+
+<section class="grid grid-cols-2 md:grid-cols-6 gap-3">
+  <div class="card p-4"><div class="kpi-label">Open LPOs</div><div class="text-2xl font-bold text-brand-600">38</div><div class="text-[11px] text-ink-500">$248K committed</div></div>
+  <div class="card p-4"><div class="kpi-label">GRNs This Week</div><div class="text-2xl font-bold">22</div><div class="text-[11px] text-emerald-600">+18% WoW</div></div>
+  <div class="card p-4"><div class="kpi-label">Awaiting Invoice</div><div class="text-2xl font-bold text-amber-600">14</div><div class="text-[11px] text-ink-500">$72K</div></div>
+  <div class="card p-4"><div class="kpi-label">Stock Value</div><div class="text-2xl font-bold">$1.84M</div><div class="text-[11px] text-ink-500">12,430 SKUs</div></div>
+  <div class="card p-4"><div class="kpi-label">Low-Stock SKUs</div><div class="text-2xl font-bold text-red-600">47</div><div class="text-[11px] text-ink-500">12 critical</div></div>
+  <div class="card p-4"><div class="kpi-label">Open Job Cards</div><div class="text-2xl font-bold">31</div><div class="text-[11px] text-ink-500">9 awaiting parts</div></div>
+</section>
+
+<section class="card p-5">
+  <div class="flex justify-between items-center mb-4">
+    <div><h2 class="text-sm font-bold">Stock-In Pipeline</h2><p class="text-[11px] text-ink-500">From requisition to GRN posting</p></div>
+    <a href="lpo-archive.html" class="text-xs text-brand-600 font-semibold">View archive →</a>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="p-4 rounded-lg bg-gradient-to-br from-slate-50 to-white border border-ink-200"><div class="text-[10px] uppercase font-bold text-ink-500">Requisitions</div><div class="text-2xl font-bold mt-1">17</div><div class="text-[11px] text-ink-500">$22.4K</div></div>
+    <div class="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-white border border-blue-200"><div class="text-[10px] uppercase font-bold text-blue-600">LPO Issued</div><div class="text-2xl font-bold mt-1">38</div><div class="text-[11px] text-ink-500">$248K</div></div>
+    <div class="p-4 rounded-lg bg-gradient-to-br from-amber-50 to-white border border-amber-200"><div class="text-[10px] uppercase font-bold text-amber-600">In Transit</div><div class="text-2xl font-bold mt-1">12</div><div class="text-[11px] text-ink-500">$84K</div></div>
+    <div class="p-4 rounded-lg bg-gradient-to-br from-emerald-50 to-white border border-emerald-200"><div class="text-[10px] uppercase font-bold text-emerald-600">Received (GRN)</div><div class="text-2xl font-bold mt-1">22</div><div class="text-[11px] text-ink-500">$112K</div></div>
+    <div class="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-white border border-purple-200"><div class="text-[10px] uppercase font-bold text-purple-600">Invoice Posted</div><div class="text-2xl font-bold mt-1">19</div><div class="text-[11px] text-ink-500">$96K</div></div>
+  </div>
+</section>
+
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="card p-5 lg:col-span-2">
+    <h2 class="text-sm font-bold mb-3">Recent Stock-In Activity</h2>
+    <table class="tbl">
+      <thead><tr><th>Reference</th><th>Type</th><th>Supplier</th><th>Value</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody>
+        <tr><td class="text-brand-600 font-semibold"><a href="grn-view.html">GRN-2026-088</a></td><td>GRN</td><td>Bridgestone EA</td><td>$8,420</td><td><span class="pill pill-success">Received</span></td><td>Today</td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="lpo-view.html">LPO-2026-142</a></td><td>LPO</td><td>Bosch Auto</td><td>$3,210</td><td><span class="pill pill-primary">Sent</span></td><td>Today</td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="purchase-invoice-view.html">PI-2026-066</a></td><td>Invoice</td><td>Total Lubricants</td><td>$5,680</td><td><span class="pill pill-warning">Matching</span></td><td>Yesterday</td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="grn-view.html">GRN-2026-087</a></td><td>GRN</td><td>Sandvik Filters</td><td>$1,860</td><td><span class="pill pill-success">Received</span></td><td>Yesterday</td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="credit-notes.html">CN-2026-014</a></td><td>Credit Note</td><td>Michelin</td><td>$2,400</td><td><span class="pill pill-purple">Posted</span></td><td>2d ago</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Critical Alerts</h2>
+    <ul class="space-y-3">
+      <li class="flex gap-3 items-start"><div class="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center"><i class="fas fa-triangle-exclamation"></i></div><div><div class="text-sm font-semibold">12 SKUs below reorder</div><div class="text-[11px] text-ink-500">Brake pads, air filters, oil seals</div></div></li>
+      <li class="flex gap-3 items-start"><div class="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fas fa-clock"></i></div><div><div class="text-sm font-semibold">5 LPOs overdue >7d</div><div class="text-[11px] text-ink-500">Follow up with suppliers</div></div></li>
+      <li class="flex gap-3 items-start"><div class="w-8 h-8 rounded-lg bg-blue-100 text-brand-600 flex items-center justify-center"><i class="fas fa-file-invoice"></i></div><div><div class="text-sm font-semibold">9 invoices awaiting 3-way match</div><div class="text-[11px] text-ink-500">$28.4K pending posting</div></div></li>
+      <li class="flex gap-3 items-start"><div class="w-8 h-8 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fas fa-shield-halved"></i></div><div><div class="text-sm font-semibold">3 warranty claims need docs</div><div class="text-[11px] text-ink-500">Suppliers chasing photos</div></div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+  <a href="jobcards.html" class="card p-4 hover:shadow-lg transition"><div class="w-10 h-10 rounded-lg bg-blue-100 text-brand-600 flex items-center justify-center mb-2"><i class="fas fa-clipboard-list"></i></div><div class="font-semibold text-sm">Job Cards</div><div class="text-[11px] text-ink-500">Workshop demand</div></a>
+  <a href="spare-requisitions.html" class="card p-4 hover:shadow-lg transition"><div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2"><i class="fas fa-cart-plus"></i></div><div class="font-semibold text-sm">Spare Requisitions</div><div class="text-[11px] text-ink-500">From mechanics</div></a>
+  <a href="spares-approval.html" class="card p-4 hover:shadow-lg transition"><div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center mb-2"><i class="fas fa-thumbs-up"></i></div><div class="font-semibold text-sm">Approvals</div><div class="text-[11px] text-ink-500">8 pending</div></a>
+  <a href="spares-issue.html" class="card p-4 hover:shadow-lg transition"><div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center mb-2"><i class="fas fa-truck-arrow-right"></i></div><div class="font-semibold text-sm">Issue Spares</div><div class="text-[11px] text-ink-500">Stock out</div></a>
+</section>
+
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('cmd');</script>
+</body></html>

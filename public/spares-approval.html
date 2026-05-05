@@ -1,0 +1,86 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Spares Approval — FleetCtrl</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Workshop / <span class="text-ink-900">Spares Approval</span></div>
+    <h1 class="text-lg font-bold">Spares Approval Queue</h1></div>
+  <div class="flex gap-2"><button class="btn btn-success"><i class="fas fa-check-double"></i>Approve Selected</button>
+  <button class="btn btn-danger"><i class="fas fa-xmark"></i>Reject Selected</button></div>
+</header>
+<div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="lg:col-span-2 space-y-4">
+    <div class="card p-5">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <div class="flex items-center gap-2"><span class="pill pill-danger">Urgent</span><span class="text-xs text-ink-500">REQ-2026-118 · JC-2026-091</span></div>
+          <h2 class="text-base font-bold mt-1">KCB-204X · Volvo FH · Brake Judder Repair</h2>
+          <p class="text-[12px] text-ink-500">Requested by P. Otieno · 2h ago · Workshop A</p>
+        </div>
+        <div class="text-right"><div class="text-[11px] text-ink-500">Estimated</div><div class="text-lg font-bold text-brand-600">$182.00</div></div>
+      </div>
+      <table class="tbl mb-3">
+        <thead><tr><th>SKU</th><th>Item</th><th>Qty</th><th>On Hand</th><th>Cost</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>SP-1001</td><td>Brake Pad Set – Volvo FH</td><td>2</td><td>24</td><td>$42.50</td><td>$85.00</td></tr>
+          <tr><td>SP-1004</td><td>Wheel Hub Bearing</td><td>1</td><td>2 <span class="pill pill-danger">Critical</span></td><td>$86.00</td><td>$86.00</td></tr>
+          <tr><td>SP-1003</td><td>Brake Cleaner Spray</td><td>1</td><td>40</td><td>$11.00</td><td>$11.00</td></tr>
+        </tbody>
+      </table>
+      <div class="flex gap-2"><button class="btn btn-success"><i class="fas fa-check"></i>Approve</button>
+      <button class="btn btn-ghost"><i class="fas fa-pen"></i>Modify</button>
+      <button class="btn btn-danger"><i class="fas fa-xmark"></i>Reject</button>
+      <button class="btn btn-ghost ml-auto"><i class="fas fa-comment"></i>Add Note</button></div>
+    </div>
+    <div class="card p-5">
+      <div class="flex justify-between items-start mb-3">
+        <div>
+          <div class="flex items-center gap-2"><span class="pill pill-warning">High</span><span class="text-xs text-ink-500">REQ-2026-117 · JC-2026-090</span></div>
+          <h2 class="text-base font-bold mt-1">KDA-118Y · Scania R · 10K Service</h2>
+          <p class="text-[12px] text-ink-500">Requested by J. Mwangi · 4h ago</p>
+        </div>
+        <div class="text-right"><div class="text-[11px] text-ink-500">Estimated</div><div class="text-lg font-bold text-brand-600">$264.00</div></div>
+      </div>
+      <table class="tbl mb-3">
+        <thead><tr><th>SKU</th><th>Item</th><th>Qty</th><th>Cost</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>SP-1003</td><td>Engine Oil 15W-40</td><td>40 L</td><td>$4.20</td><td>$168.00</td></tr>
+          <tr><td>SP-1002</td><td>Air Filter</td><td>1</td><td>$18.40</td><td>$18.40</td></tr>
+          <tr><td>SP-1006</td><td>Diesel Filter</td><td>2</td><td>$12.80</td><td>$25.60</td></tr>
+          <tr><td>SP-1008</td><td>Coolant Concentrate</td><td>8 L</td><td>$6.40</td><td>$51.20</td></tr>
+        </tbody>
+      </table>
+      <div class="flex gap-2"><button class="btn btn-success"><i class="fas fa-check"></i>Approve</button>
+      <button class="btn btn-ghost"><i class="fas fa-pen"></i>Modify</button>
+      <button class="btn btn-danger"><i class="fas fa-xmark"></i>Reject</button></div>
+    </div>
+  </div>
+  <aside class="space-y-4">
+    <div class="card p-4">
+      <h3 class="text-sm font-bold mb-3">Approval Stats</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-ink-500">Pending</span><span class="font-bold">8</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">Approved Today</span><span class="font-bold text-emerald-600">14</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">Rejected Today</span><span class="font-bold text-red-600">2</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">Total Value</span><span class="font-bold">$3,840</span></div>
+      </div>
+    </div>
+    <div class="card p-4">
+      <h3 class="text-sm font-bold mb-2">Approval Policy</h3>
+      <ul class="text-[12px] text-ink-500 space-y-1 list-disc pl-4">
+        <li>≤ $500 — Foreman</li>
+        <li>$500–$2,000 — Workshop Manager</li>
+        <li>&gt; $2,000 — Fleet Director</li>
+        <li>Critical stock items flagged automatically</li>
+      </ul>
+    </div>
+  </aside>
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('appr');</script>
+</body></html>
