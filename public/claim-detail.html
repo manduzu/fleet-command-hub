@@ -1,0 +1,142 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Warranty Claim Detail — FleetCtrl</title>
+<meta name="description" content="Claim detail with metadata, supplier correspondence log, refund ledger and pipeline actions."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB',700:'#1D4ED8'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/>
+<style>.stage{flex:1;text-align:center;padding:.55rem .4rem;border-radius:.55rem;background:#F8FAFC;border:1px solid #E2E8F0;font-size:.7rem;}.stage.done{background:#D1FAE5;border-color:#A7F3D0;color:#065F46;font-weight:600;}.stage.current{background:linear-gradient(135deg,#DBEAFE,#EFF6FF);border-color:#93C5FD;color:#1D4ED8;font-weight:700;box-shadow:0 0 0 3px #DBEAFE;}.tab{padding:.6rem 1rem;font-size:.78rem;font-weight:600;color:#64748B;border-bottom:2px solid transparent;cursor:pointer;}.tab.active{color:#2563EB;border-color:#2563EB;}</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div>
+    <div class="text-[11px] text-ink-500"><a href="tyres-warranty.html" class="hover:text-brand-600">Warranty</a> / <span class="text-ink-900" id="bcRef">Claim Detail</span></div>
+    <h1 class="text-lg font-bold" id="hRef">Warranty Claim</h1>
+  </div>
+  <div class="flex gap-2">
+    <button onclick="advance(-1)" class="btn btn-ghost"><i class="fas fa-arrow-left"></i>Back stage</button>
+    <button onclick="advance(1)" class="btn btn-primary"><i class="fas fa-arrow-right"></i>Advance stage</button>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+
+  <section class="card p-5">
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div><div class="kpi-label">Claim #</div><div class="text-base font-bold" id="mRef">—</div></div>
+      <div><div class="kpi-label">Type</div><div class="text-base font-bold" id="mType">Tyre</div></div>
+      <div><div class="kpi-label">Supplier</div><div class="text-base font-bold">Michelin EA Ltd</div></div>
+      <div><div class="kpi-label">Claim Amount</div><div class="text-base font-bold text-brand-600">$640.00</div></div>
+      <div><div class="kpi-label">Filed</div><div class="text-base font-bold">18 Apr 2026</div></div>
+      <div><div class="kpi-label">Item / Asset</div><div class="text-sm font-semibold" id="mItem">TYR-04812 · Michelin XZA2</div><a id="mLink" href="tyre-detail.html" class="text-[11px] text-brand-600 hover:underline">View tyre lifecycle →</a></div>
+      <div><div class="kpi-label">Vehicle</div><div class="text-sm font-semibold">T-101 / RR Inner</div></div>
+      <div><div class="kpi-label">Defect</div><div class="text-sm font-semibold">Sidewall blow-out</div></div>
+      <div><div class="kpi-label">PO / Invoice</div><div class="text-sm font-semibold">PI-2026-052</div></div>
+      <div><div class="kpi-label">Owner</div><div class="text-sm font-semibold">R. Mwende</div></div>
+    </div>
+  </section>
+
+  <section class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Pipeline Stage</h2>
+    <div class="flex items-stretch gap-1">
+      <div class="stage done" data-s="0">Drafted</div>
+      <div class="stage done" data-s="1">Submitted</div>
+      <div class="stage current" data-s="2">Inspection</div>
+      <div class="stage" data-s="3">Approved</div>
+      <div class="stage" data-s="4">Credit Note</div>
+      <div class="stage" data-s="5">Refunded</div>
+    </div>
+    <div class="mt-3 text-[11px] text-ink-500">Use Advance / Back to update the workflow. Each stage change is auto-logged.</div>
+  </section>
+
+  <div class="flex border-b border-ink-200" id="tabs">
+    <div class="tab active" data-t="timeline">Timeline</div>
+    <div class="tab" data-t="docs">Documents</div>
+    <div class="tab" data-t="corr">Correspondence</div>
+    <div class="tab" data-t="ledger">Refund Ledger</div>
+    <div class="tab" data-t="related">Related</div>
+  </div>
+
+  <section id="p-timeline" class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Activity Timeline</h2>
+    <div style="padding-left:1.75rem;position:relative;" id="tl"></div>
+  </section>
+
+  <section id="p-docs" class="card p-5 hidden">
+    <h2 class="text-sm font-bold mb-3">Supporting Documents</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div class="p-3 border border-ink-200 rounded-lg"><i class="fas fa-file-image text-2xl text-brand-600"></i><div class="text-xs font-semibold mt-2">sidewall-1.jpg</div><div class="text-[10px] text-ink-500">2.1 MB · 18 Apr</div></div>
+      <div class="p-3 border border-ink-200 rounded-lg"><i class="fas fa-file-image text-2xl text-brand-600"></i><div class="text-xs font-semibold mt-2">sidewall-2.jpg</div><div class="text-[10px] text-ink-500">1.8 MB · 18 Apr</div></div>
+      <div class="p-3 border border-ink-200 rounded-lg"><i class="fas fa-file-pdf text-2xl text-red-600"></i><div class="text-xs font-semibold mt-2">inspection-report.pdf</div><div class="text-[10px] text-ink-500">320 KB · 20 Apr</div></div>
+      <div class="p-3 border border-ink-200 rounded-lg"><i class="fas fa-file-invoice text-2xl text-emerald-600"></i><div class="text-xs font-semibold mt-2">PI-2026-052.pdf</div><div class="text-[10px] text-ink-500">120 KB · 18 Apr</div></div>
+      <div class="p-3 border-2 border-dashed border-ink-200 rounded-lg flex items-center justify-center text-ink-500 hover:bg-ink-50 cursor-pointer"><div class="text-center text-xs"><i class="fas fa-plus mb-1"></i><div>Upload</div></div></div>
+    </div>
+  </section>
+
+  <section id="p-corr" class="card p-5 hidden">
+    <h2 class="text-sm font-bold mb-3">Supplier Correspondence Log</h2>
+    <div class="space-y-3">
+      <div class="p-3 border border-ink-200 rounded-lg"><div class="flex justify-between text-xs"><span class="font-semibold">Michelin Warranty Desk</span><span class="text-ink-500">22 Apr · 14:02</span></div><div class="text-sm text-ink-700 mt-1">Inspection scheduled with field rep on 25 Apr at Workshop A. Please retain tyre on-site.</div></div>
+      <div class="p-3 border border-ink-200 rounded-lg bg-blue-50"><div class="flex justify-between text-xs"><span class="font-semibold text-brand-600">You — R. Mwende</span><span class="text-ink-500">20 Apr · 09:14</span></div><div class="text-sm text-ink-700 mt-1">Uploading inspection report and additional photos. Tyre serial confirmed as TYR-04812.</div></div>
+      <div class="p-3 border border-ink-200 rounded-lg"><div class="flex justify-between text-xs"><span class="font-semibold">Michelin Warranty Desk</span><span class="text-ink-500">19 Apr · 11:30</span></div><div class="text-sm text-ink-700 mt-1">Claim received. Please share inspection report and original purchase invoice within 5 days.</div></div>
+      <textarea rows="3" placeholder="Reply to supplier..." class="mt-3"></textarea>
+      <button class="btn btn-primary"><i class="fas fa-paper-plane"></i>Send</button>
+    </div>
+  </section>
+
+  <section id="p-ledger" class="card p-5 hidden">
+    <h2 class="text-sm font-bold mb-3">Refund Ledger</h2>
+    <table class="tbl">
+      <thead><tr><th>Date</th><th>Reference</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>2026-04-18</td><td>WC-2026-0124</td><td>Claim filed — Michelin</td><td>$640.00</td><td>—</td><td class="font-semibold">$640.00</td><td><span class="pill pill-warning">Open</span></td></tr>
+        <tr><td>2026-04-29</td><td>CN-2026-014</td><td>Credit note received</td><td>—</td><td>$640.00</td><td class="font-semibold">$0.00</td><td><span class="pill pill-success">Settled</span></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="p-related" class="card p-5 hidden">
+    <h2 class="text-sm font-bold mb-3">Related Records</h2>
+    <ul class="space-y-2 text-sm">
+      <li><i class="fas fa-circle-notch text-brand-600 mr-2"></i><a class="text-brand-600 hover:underline" href="tyre-detail.html?id=TYR-04812">Tyre TYR-04812 — full lifecycle</a></li>
+      <li><i class="fas fa-truck-ramp-box text-brand-600 mr-2"></i><a class="text-brand-600 hover:underline" href="grn-view.html">GRN-2025-302 — original receipt</a></li>
+      <li><i class="fas fa-file-invoice-dollar text-brand-600 mr-2"></i><a class="text-brand-600 hover:underline" href="purchase-invoice-view.html">PI-2026-052 — purchase invoice</a></li>
+      <li><i class="fas fa-receipt text-brand-600 mr-2"></i><a class="text-brand-600 hover:underline" href="credit-notes.html">CN-2026-014 — credit note</a></li>
+      <li><i class="fas fa-clipboard-list text-brand-600 mr-2"></i><a class="text-brand-600 hover:underline" href="jobcards.html">JC-2026-076 — fitment job card</a></li>
+    </ul>
+  </section>
+</div></main>
+<script src="store-sidebar.js"></script><script>
+const params=new URLSearchParams(location.search);
+const ref=params.get('ref')||'WC-2026-0124';
+const isSpare=ref.startsWith('SWC');
+renderStoreSidebar(isSpare?'swar':'twar');
+document.getElementById('hRef').textContent='Claim '+ref;
+document.getElementById('bcRef').textContent=ref;
+document.getElementById('mRef').textContent=ref;
+document.getElementById('mType').textContent=isSpare?'Spares':'Tyre';
+if(isSpare){document.getElementById('mItem').textContent='SP-1004 Wheel Hub Bearing';document.getElementById('mLink').textContent='View part →';document.getElementById('mLink').href='inventory-register.html';}
+
+const events=[
+ {d:'2026-04-29',t:'credit-note',title:'CN-2026-014 posted',desc:'Refund settled',c:'#10B981',i:'fa-receipt'},
+ {d:'2026-04-26',t:'approval',title:'Supplier approved claim',desc:'Michelin warranty desk',c:'#10B981',i:'fa-check'},
+ {d:'2026-04-25',t:'inspection',title:'Field inspection completed',desc:'Defect verified by Michelin rep',c:'#F59E0B',i:'fa-magnifying-glass'},
+ {d:'2026-04-22',t:'doc',title:'Inspection scheduled',desc:'Email from Michelin warranty desk',c:'#3B82F6',i:'fa-envelope'},
+ {d:'2026-04-20',t:'doc',title:'Inspection report uploaded',desc:'PDF · 320 KB',c:'#3B82F6',i:'fa-cloud-arrow-up'},
+ {d:'2026-04-18',t:'doc',title:'Claim filed',desc:'2 photos + invoice attached',c:'#64748B',i:'fa-flag'},
+];
+document.getElementById('tl').innerHTML='<div style="position:absolute;left:.7rem;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,#3B82F6,#E2E8F0);"></div>'+
+events.map(e=>`<div style="position:relative;padding:0 0 1.1rem 0;"><div style="position:absolute;left:-1.4rem;top:.2rem;width:1.4rem;height:1.4rem;border-radius:999px;background:${e.c};color:#fff;display:flex;align-items:center;justify-content:center;font-size:.65rem;box-shadow:0 0 0 3px #fff;"><i class="fas ${e.i}"></i></div><div class="flex justify-between"><div><div class="text-xs font-bold">${e.title}</div><div class="text-[11px] text-ink-500">${e.desc}</div></div><div class="text-[10px] text-ink-500">${e.d}</div></div></div>`).join('');
+
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
+  ['timeline','docs','corr','ledger','related'].forEach(k=>document.getElementById('p-'+k).classList.add('hidden'));
+  document.getElementById('p-'+t.dataset.t).classList.remove('hidden');
+}));
+
+let stage=2;
+function advance(d){const stages=document.querySelectorAll('[data-s]');stage=Math.max(0,Math.min(5,stage+d));stages.forEach((s,i)=>{s.classList.remove('done','current');if(i<stage)s.classList.add('done');else if(i===stage)s.classList.add('current');});}
+</script>
+</body></html>
