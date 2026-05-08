@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Voucher Detail — FleetCtrl</title>
+<meta name="description" content="Petty cash voucher detail with approval pipeline, audit trail and posting actions."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500"><a href="petty-cash-vouchers.html">Vouchers</a> / <span class="text-ink-900" id="vid">PCV-2026-189</span></div>
+    <h1 class="text-lg font-bold">Voucher Details</h1></div>
+  <div class="flex gap-2">
+    <button class="btn btn-ghost"><i class="fas fa-print"></i>Print</button>
+    <button class="btn btn-danger"><i class="fas fa-xmark"></i>Reject</button>
+    <button class="btn btn-success"><i class="fas fa-check"></i>Approve</button>
+  </div>
+</header>
+<div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="lg:col-span-2 space-y-5">
+    <section class="card p-5">
+      <div class="flex justify-between mb-3"><h2 class="font-bold">Summary</h2><span class="pill pill-warning">Pending L1</span></div>
+      <div class="grid grid-cols-3 gap-4 text-sm">
+        <div><div class="kpi-label">Date</div><div class="font-semibold">2026-05-08</div></div>
+        <div><div class="kpi-label">Float</div><div class="font-semibold text-brand-600">PCF-001 · Mary Otieno</div></div>
+        <div><div class="kpi-label">Payee</div><div class="font-semibold">D. Otieno</div></div>
+        <div><div class="kpi-label">Vehicle</div><div class="font-semibold">KBZ-401A</div></div>
+        <div><div class="kpi-label">Trip</div><div class="font-semibold">TRP-2026-118</div></div>
+        <div><div class="kpi-label">Total</div><div class="font-bold text-brand-600">$280.00</div></div>
+      </div>
+    </section>
+    <section class="card p-5">
+      <h2 class="font-bold mb-3">Expense Lines</h2>
+      <table class="tbl"><thead><tr><th>Category</th><th>Description</th><th>GL</th><th>Qty</th><th>Unit</th><th>Amount</th></tr></thead>
+      <tbody>
+        <tr><td>Fuel</td><td>Diesel — Truck KBZ-401A</td><td class="text-ink-500">5210</td><td>1</td><td>$241.38</td><td class="font-semibold">$241.38</td></tr>
+        <tr><td colspan="5" class="text-right text-ink-500">VAT (16%)</td><td class="font-semibold">$38.62</td></tr>
+        <tr><td colspan="5" class="text-right font-bold">Total</td><td class="font-bold text-brand-600">$280.00</td></tr>
+      </tbody></table>
+    </section>
+    <section class="card p-5">
+      <h2 class="font-bold mb-3">Receipts</h2>
+      <div class="grid grid-cols-3 gap-3">
+        <div class="border border-ink-200 rounded-lg p-6 text-center text-ink-500"><i class="fas fa-file-image text-3xl text-brand-600"></i><div class="mt-2 text-xs font-semibold">RCP-7821.jpg</div></div>
+      </div>
+    </section>
+    <section class="card p-5">
+      <h2 class="font-bold mb-3">Audit Trail</h2>
+      <table class="tbl"><thead><tr><th>When</th><th>Actor</th><th>Action</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>2026-05-08 09:15</td><td>M. Otieno</td><td><span class="pill pill-primary">Created</span></td><td>Submitted for approval</td></tr>
+        <tr><td>2026-05-08 09:16</td><td>System</td><td><span class="pill pill-muted">Routed</span></td><td>Assigned L1: J. Kariuki</td></tr>
+      </tbody></table>
+    </section>
+  </div>
+  <aside class="space-y-5">
+    <section class="card p-5">
+      <h3 class="font-bold mb-3 text-sm uppercase text-ink-500">Approval Pipeline</h3>
+      <div class="tl">
+        <div class="tl-item done"><div class="font-semibold text-sm">Submitted</div><div class="text-xs text-ink-500">M. Otieno · 09:15</div></div>
+        <div class="tl-item warn"><div class="font-semibold text-sm">L1 — Supervisor</div><div class="text-xs text-ink-500">Awaiting J. Kariuki</div></div>
+        <div class="tl-item"><div class="font-semibold text-sm">L2 — Finance</div><div class="text-xs text-ink-500">Pending</div></div>
+        <div class="tl-item"><div class="font-semibold text-sm">Posted to GL</div><div class="text-xs text-ink-500">Pending</div></div>
+      </div>
+    </section>
+    <section class="card p-5">
+      <h3 class="font-bold mb-3 text-sm uppercase text-ink-500">Float Impact</h3>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-ink-500">Before</span><span class="font-semibold">$2,420</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">This voucher</span><span class="font-semibold text-red-600">-$280</span></div>
+        <div class="flex justify-between pt-2 border-t border-ink-200"><span class="text-ink-500">After</span><span class="font-bold text-emerald-600">$2,140</span></div>
+        <div class="mt-2"><div class="h-2 rounded-full bg-ink-200"><div class="h-full rounded-full bg-amber-500" style="width:57%"></div></div><div class="text-[11px] text-ink-500 mt-1">57% utilized</div></div>
+      </div>
+    </section>
+  </aside>
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('pcVou');
+const id=new URLSearchParams(location.search).get('id');if(id)document.getElementById('vid').textContent=id;
+</script></body></html>

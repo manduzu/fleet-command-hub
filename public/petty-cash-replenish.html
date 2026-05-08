@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Float Replenishment — FleetCtrl</title>
+<meta name="description" content="Replenish petty cash floats from bank with approval workflow and audit trail."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Finance / Petty Cash / <span class="text-ink-900">Replenishment</span></div>
+    <h1 class="text-lg font-bold">Float Replenishment</h1></div>
+  <button class="btn btn-primary"><i class="fas fa-plus"></i>New Request</button>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="card p-4"><div class="kpi-label">Open Requests</div><div class="text-2xl font-bold text-amber-600">3</div></div>
+    <div class="card p-4"><div class="kpi-label">Approved (this wk)</div><div class="text-2xl font-bold text-emerald-600">$8,700</div></div>
+    <div class="card p-4"><div class="kpi-label">Disbursed YTD</div><div class="text-2xl font-bold">$94,250</div></div>
+    <div class="card p-4"><div class="kpi-label">Avg Cycle Time</div><div class="text-2xl font-bold">1.4d</div></div>
+  </section>
+
+  <section class="card p-5">
+    <h2 class="font-bold mb-4">Floats Needing Replenishment</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div class="border border-red-200 bg-red-50 rounded-xl p-4">
+        <div class="flex justify-between mb-2"><div class="font-bold">PCF-003 · Aisha Hassan</div><span class="pill pill-danger">86%</span></div>
+        <div class="text-sm text-ink-500">Workshop Athi · Balance $820 / $6,000</div>
+        <div class="h-2 rounded-full bg-white mt-3"><div class="h-full rounded-full bg-red-500" style="width:86%"></div></div>
+        <button class="btn btn-primary mt-3 w-full justify-center">Request $5,180</button>
+      </div>
+      <div class="border border-amber-200 bg-amber-50 rounded-xl p-4">
+        <div class="flex justify-between mb-2"><div class="font-bold">PCF-005 · Grace Wanjiru</div><span class="pill pill-warning">58%</span></div>
+        <div class="text-sm text-ink-500">Eldoret Hub · Balance $2,500 / $6,000</div>
+        <div class="h-2 rounded-full bg-white mt-3"><div class="h-full rounded-full bg-amber-500" style="width:58%"></div></div>
+        <button class="btn btn-primary mt-3 w-full justify-center">Request $3,500</button>
+      </div>
+      <div class="border border-amber-200 bg-amber-50 rounded-xl p-4">
+        <div class="flex justify-between mb-2"><div class="font-bold">PCF-001 · Mary Otieno</div><span class="pill pill-warning">57%</span></div>
+        <div class="text-sm text-ink-500">HQ Nairobi · Balance $2,140 / $5,000</div>
+        <div class="h-2 rounded-full bg-white mt-3"><div class="h-full rounded-full bg-amber-500" style="width:57%"></div></div>
+        <button class="btn btn-primary mt-3 w-full justify-center">Request $2,860</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card p-5">
+    <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Replenishment Requests</h2>
+      <div class="flex gap-2"><select class="max-w-[160px]"><option>All Status</option><option>Pending</option><option>Approved</option><option>Disbursed</option></select></div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Req #</th><th>Date</th><th>Float</th><th>Custodian</th><th>Amount</th><th>Source Account</th><th>Method</th><th>Approver</th><th>Status</th><th></th></tr></thead>
+      <tbody id="r"></tbody>
+    </table>
+  </section>
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('pcRep');
+const data=[
+ ['PCR-2026-021','2026-05-08','PCF-003','Aisha Hassan',5180,'KCB Main · 0123','Mobile','—','Pending'],
+ ['PCR-2026-020','2026-05-08','PCF-001','Mary Otieno',2860,'KCB Main · 0123','Cash','—','Pending'],
+ ['PCR-2026-019','2026-05-07','PCF-005','Grace Wanjiru',3500,'Equity · 8842','Bank Tx','J. Mbugua','Approved'],
+ ['PCR-2026-018','2026-05-05','PCF-002','Joseph Kamau',2200,'KCB Main · 0123','Mobile','J. Mbugua','Disbursed'],
+ ['PCR-2026-017','2026-05-02','PCF-004','Peter Mwangi',1500,'Equity · 8842','Cash','J. Mbugua','Disbursed'],
+];
+const pill={Pending:'pill-warning',Approved:'pill-primary',Disbursed:'pill-success'};
+document.getElementById('r').innerHTML=data.map(r=>`<tr><td class="font-semibold text-brand-600">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="font-semibold">$${r[4].toLocaleString()}</td><td class="text-ink-500">${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td><span class="pill ${pill[r[8]]}">${r[8]}</span></td><td><a class="text-brand-600" href="#"><i class="fas fa-eye"></i></a></td></tr>`).join('');
+</script></body></html>

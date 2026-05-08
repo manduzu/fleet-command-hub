@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Petty Cash Command Center — FleetCtrl</title>
+<meta name="description" content="Real-time petty cash dashboard: floats, vouchers, replenishments and reconciliation status."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Finance / Petty Cash / <span class="text-ink-900">Command Center</span></div>
+    <h1 class="text-lg font-bold">Petty Cash Command Center</h1></div>
+  <div class="flex gap-2">
+    <a href="petty-cash-voucher-create.html" class="btn btn-ghost"><i class="fas fa-receipt"></i>New Voucher</a>
+    <a href="petty-cash-replenish.html" class="btn btn-primary"><i class="fas fa-money-bill-transfer"></i>Replenish Float</a>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="card p-4"><div class="kpi-label">Total Float</div><div class="text-2xl font-bold">$24,500</div><div class="text-[11px] text-emerald-600">+$3,200 this wk</div></div>
+    <div class="card p-4"><div class="kpi-label">Cash on Hand</div><div class="text-2xl font-bold text-emerald-600">$11,840</div><div class="text-[11px] text-ink-500">48% of float</div></div>
+    <div class="card p-4"><div class="kpi-label">Spent MTD</div><div class="text-2xl font-bold text-amber-600">$12,660</div><div class="text-[11px] text-ink-500">142 vouchers</div></div>
+    <div class="card p-4"><div class="kpi-label">Pending Approval</div><div class="text-2xl font-bold text-red-600">9</div><div class="text-[11px] text-ink-500">$1,840</div></div>
+    <div class="card p-4"><div class="kpi-label">Reconciled</div><div class="text-2xl font-bold">94%</div><div class="text-[11px] text-emerald-600">Last: 2d ago</div></div>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="card p-5 lg:col-span-2">
+      <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Active Floats by Custodian</h2><a class="text-xs text-brand-600" href="petty-cash-floats.html">View all →</a></div>
+      <table class="tbl">
+        <thead><tr><th>Float #</th><th>Custodian</th><th>Branch</th><th>Limit</th><th>Balance</th><th>Utilization</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="font-semibold text-brand-600">PCF-001</td><td>Mary Otieno</td><td>HQ Nairobi</td><td>$5,000</td><td>$2,140</td><td><div class="w-32 h-1.5 rounded-full bg-ink-200"><div class="h-full rounded-full bg-amber-500" style="width:57%"></div></div></td><td><span class="pill pill-warning">57%</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">PCF-002</td><td>Joseph Kamau</td><td>Mombasa Yard</td><td>$4,000</td><td>$3,400</td><td><div class="w-32 h-1.5 rounded-full bg-ink-200"><div class="h-full rounded-full bg-emerald-500" style="width:15%"></div></div></td><td><span class="pill pill-success">15%</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">PCF-003</td><td>Aisha Hassan</td><td>Workshop Athi</td><td>$6,000</td><td>$820</td><td><div class="w-32 h-1.5 rounded-full bg-ink-200"><div class="h-full rounded-full bg-red-500" style="width:86%"></div></div></td><td><span class="pill pill-danger">86%</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">PCF-004</td><td>Peter Mwangi</td><td>Kisumu Depot</td><td>$3,500</td><td>$2,980</td><td><div class="w-32 h-1.5 rounded-full bg-ink-200"><div class="h-full rounded-full bg-emerald-500" style="width:15%"></div></div></td><td><span class="pill pill-success">15%</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">PCF-005</td><td>Grace Wanjiru</td><td>Eldoret Hub</td><td>$6,000</td><td>$2,500</td><td><div class="w-32 h-1.5 rounded-full bg-ink-200"><div class="h-full rounded-full bg-amber-500" style="width:58%"></div></div></td><td><span class="pill pill-warning">58%</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">Spend by Category (MTD)</h2>
+      <div class="space-y-3">
+        <div><div class="flex justify-between text-xs mb-1"><span>Fuel & Tolls</span><span class="font-semibold">$4,210</span></div><div class="h-2 rounded-full bg-ink-200"><div class="h-full rounded-full bg-brand-600" style="width:78%"></div></div></div>
+        <div><div class="flex justify-between text-xs mb-1"><span>Workshop Consumables</span><span class="font-semibold">$2,860</span></div><div class="h-2 rounded-full bg-ink-200"><div class="h-full rounded-full bg-emerald-500" style="width:54%"></div></div></div>
+        <div><div class="flex justify-between text-xs mb-1"><span>Driver Allowances</span><span class="font-semibold">$2,140</span></div><div class="h-2 rounded-full bg-ink-200"><div class="h-full rounded-full bg-amber-500" style="width:40%"></div></div></div>
+        <div><div class="flex justify-between text-xs mb-1"><span>Office Supplies</span><span class="font-semibold">$1,580</span></div><div class="h-2 rounded-full bg-ink-200"><div class="h-full rounded-full bg-purple-500" style="width:30%"></div></div></div>
+        <div><div class="flex justify-between text-xs mb-1"><span>Permits & Fees</span><span class="font-semibold">$1,170</span></div><div class="h-2 rounded-full bg-ink-200"><div class="h-full rounded-full bg-red-500" style="width:22%"></div></div></div>
+        <div><div class="flex justify-between text-xs mb-1"><span>Other</span><span class="font-semibold">$700</span></div><div class="h-2 rounded-full bg-ink-200"><div class="h-full rounded-full bg-slate-500" style="width:13%"></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div class="card p-5">
+      <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Pending Approvals</h2><a class="text-xs text-brand-600" href="petty-cash-vouchers.html?status=Pending">All →</a></div>
+      <table class="tbl">
+        <thead><tr><th>Voucher</th><th>Payee</th><th>Category</th><th>Amount</th><th></th></tr></thead>
+        <tbody>
+          <tr><td class="text-brand-600 font-semibold">PCV-2026-189</td><td>D. Otieno</td><td>Fuel</td><td>$280</td><td><span class="pill pill-warning">L1</span></td></tr>
+          <tr><td class="text-brand-600 font-semibold">PCV-2026-188</td><td>K. Mutiso</td><td>Tolls</td><td>$45</td><td><span class="pill pill-warning">L1</span></td></tr>
+          <tr><td class="text-brand-600 font-semibold">PCV-2026-187</td><td>Workshop</td><td>Consumables</td><td>$320</td><td><span class="pill pill-primary">L2</span></td></tr>
+          <tr><td class="text-brand-600 font-semibold">PCV-2026-186</td><td>P. Mwangi</td><td>Allowance</td><td>$150</td><td><span class="pill pill-warning">L1</span></td></tr>
+          <tr><td class="text-brand-600 font-semibold">PCV-2026-185</td><td>NTSA</td><td>Permits</td><td>$420</td><td><span class="pill pill-primary">L2</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">Recent Activity</h2>
+      <div class="tl">
+        <div class="tl-item done"><div class="text-xs text-ink-500">Today 10:42</div><div class="font-semibold text-sm">PCF-003 replenished $4,500</div><div class="text-xs text-ink-500">Approved by Finance Manager</div></div>
+        <div class="tl-item"><div class="text-xs text-ink-500">Today 09:15</div><div class="font-semibold text-sm">PCV-2026-189 submitted</div><div class="text-xs text-ink-500">Mary Otieno · Fuel · $280</div></div>
+        <div class="tl-item warn"><div class="text-xs text-ink-500">Yesterday</div><div class="font-semibold text-sm">PCF-003 utilization 86%</div><div class="text-xs text-ink-500">Replenishment recommended</div></div>
+        <div class="tl-item done"><div class="text-xs text-ink-500">2d ago</div><div class="font-semibold text-sm">Reconciliation closed — Apr W3</div><div class="text-xs text-ink-500">Variance $0.00</div></div>
+        <div class="tl-item"><div class="text-xs text-ink-500">3d ago</div><div class="font-semibold text-sm">12 vouchers posted to GL</div><div class="text-xs text-ink-500">Total $1,840</div></div>
+      </div>
+    </div>
+  </section>
+</div></main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('pcDash');</script>
+</body></html>

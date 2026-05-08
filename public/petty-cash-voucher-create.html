@@ -1,0 +1,108 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>New Petty Cash Voucher — FleetCtrl</title>
+<meta name="description" content="Create a petty cash voucher with live preview, multi-line expenses and receipt upload."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500"><a href="petty-cash-vouchers.html">Vouchers</a> / <span class="text-ink-900">New</span></div>
+    <h1 class="text-lg font-bold">New Petty Cash Voucher</h1></div>
+  <div class="flex gap-2">
+    <button class="btn btn-ghost"><i class="fas fa-floppy-disk"></i>Save Draft</button>
+    <button class="btn btn-primary"><i class="fas fa-paper-plane"></i>Submit for Approval</button>
+  </div>
+</header>
+<div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="lg:col-span-2 space-y-5">
+    <section class="card p-5">
+      <h2 class="font-bold mb-4">Voucher Details</h2>
+      <div class="grid grid-cols-2 gap-3">
+        <div><label>Voucher #</label><input value="PCV-2026-190" readonly/></div>
+        <div><label>Date</label><input type="date" id="d" value="2026-05-08"/></div>
+        <div><label>Float Account</label><select id="fl" onchange="upd()"><option>PCF-001 — Mary Otieno (HQ)</option><option>PCF-002 — Joseph Kamau (Mombasa)</option><option>PCF-003 — Aisha Hassan (Workshop)</option></select></div>
+        <div><label>Payee</label><input id="py" placeholder="Person or vendor name" oninput="upd()"/></div>
+        <div><label>Linked Vehicle (optional)</label><select><option>—</option><option>KBZ-401A</option><option>T-540</option><option>KCJ-228B</option></select></div>
+        <div><label>Linked Trip / Job Card</label><input placeholder="TRP-2026-### or JC-####"/></div>
+      </div>
+    </section>
+
+    <section class="card p-5">
+      <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Expense Lines</h2><button onclick="addLine()" class="btn btn-ghost"><i class="fas fa-plus"></i>Add Line</button></div>
+      <table class="tbl"><thead><tr><th>Category</th><th>Description</th><th>GL Account</th><th>Qty</th><th>Unit</th><th>Amount</th><th></th></tr></thead><tbody id="lines"></tbody></table>
+      <div class="flex justify-end mt-3 text-sm"><div class="space-y-1 w-72">
+        <div class="flex justify-between"><span class="text-ink-500">Subtotal</span><span id="sub" class="font-semibold">$0.00</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">VAT (16%)</span><span id="vat" class="font-semibold">$0.00</span></div>
+        <div class="flex justify-between text-base pt-2 border-t border-ink-200"><span class="font-bold">Total</span><span id="tot" class="font-bold text-brand-600">$0.00</span></div>
+      </div></div>
+    </section>
+
+    <section class="card p-5">
+      <h2 class="font-bold mb-4">Receipts & Attachments</h2>
+      <div class="border-2 border-dashed border-ink-200 rounded-xl p-8 text-center text-ink-500">
+        <i class="fas fa-cloud-arrow-up text-3xl mb-2"></i>
+        <div class="text-sm">Drag receipts here or <span class="text-brand-600 font-semibold">browse</span></div>
+        <div class="text-[11px] mt-1">PDF, JPG, PNG · max 5 MB</div>
+      </div>
+      <div class="grid grid-cols-3 gap-3 mt-4">
+        <div class="border border-ink-200 rounded-lg p-3 text-xs flex items-center gap-2"><i class="fas fa-file-image text-brand-600"></i><div class="flex-1"><div class="font-semibold">RCP-7821.jpg</div><div class="text-ink-500">142 KB</div></div><i class="fas fa-xmark text-ink-500"></i></div>
+      </div>
+    </section>
+  </div>
+
+  <aside class="space-y-5">
+    <section class="card p-5">
+      <h3 class="font-bold mb-3 text-sm uppercase text-ink-500">Live Preview</h3>
+      <div class="border border-ink-200 rounded-xl p-4 space-y-2 text-sm">
+        <div class="flex justify-between"><span class="text-ink-500">Voucher</span><span class="font-bold">PCV-2026-190</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">Date</span><span id="pd">2026-05-08</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">Float</span><span id="pf" class="font-semibold">PCF-001</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">Payee</span><span id="pp">—</span></div>
+        <div class="flex justify-between pt-2 border-t border-ink-200"><span class="text-ink-500">Total</span><span id="pt" class="font-bold text-brand-600">$0.00</span></div>
+        <div class="flex justify-between"><span class="text-ink-500">Float bal after</span><span id="pb" class="font-semibold text-emerald-600">$2,140</span></div>
+      </div>
+    </section>
+    <section class="card p-5">
+      <h3 class="font-bold mb-3 text-sm uppercase text-ink-500">Approval Workflow</h3>
+      <div class="tl">
+        <div class="tl-item done"><div class="font-semibold text-sm">Submitted</div><div class="text-xs text-ink-500">You · just now</div></div>
+        <div class="tl-item"><div class="font-semibold text-sm">L1 — Supervisor</div><div class="text-xs text-ink-500">Awaiting J. Kariuki</div></div>
+        <div class="tl-item"><div class="font-semibold text-sm">L2 — Finance</div><div class="text-xs text-ink-500">Pending</div></div>
+        <div class="tl-item"><div class="font-semibold text-sm">Posted to GL</div><div class="text-xs text-ink-500">Pending</div></div>
+      </div>
+    </section>
+    <section class="card p-5 bg-amber-50">
+      <div class="flex gap-2 text-amber-800 text-xs"><i class="fas fa-circle-info mt-0.5"></i><div><b>Policy:</b> Vouchers above $300 require L2 Finance approval. Receipts mandatory above $20.</div></div>
+    </section>
+  </aside>
+</div></main>
+
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('pcVou');
+const cats=['Fuel','Tolls','Allowance','Consumables','Permits','Office','Other'];
+const gls={Fuel:'5210 Fuel',Tolls:'5215 Tolls',Allowance:'5301 Driver Allow',Consumables:'5410 Workshop Consum',Permits:'5520 Permits',Office:'6110 Office Supplies',Other:'6900 Misc'};
+let lines=[{c:'Fuel',d:'Diesel top-up',q:1,u:280}];
+function addLine(){lines.push({c:'Fuel',d:'',q:1,u:0});render();}
+function del(i){lines.splice(i,1);render();}
+function upd(){document.getElementById('pf').textContent=fl.value.split(' — ')[0];document.getElementById('pp').textContent=py.value||'—';document.getElementById('pd').textContent=d.value;}
+function render(){
+  document.getElementById('lines').innerHTML=lines.map((l,i)=>`<tr>
+   <td><select onchange="lines[${i}].c=this.value;render()">${cats.map(c=>`<option ${c===l.c?'selected':''}>${c}</option>`).join('')}</select></td>
+   <td><input value="${l.d}" oninput="lines[${i}].d=this.value"/></td>
+   <td class="text-ink-500 text-xs">${gls[l.c]}</td>
+   <td><input type="number" value="${l.q}" oninput="lines[${i}].q=+this.value;render()" class="w-16"/></td>
+   <td><input type="number" value="${l.u}" oninput="lines[${i}].u=+this.value;render()" class="w-24"/></td>
+   <td class="font-semibold">$${(l.q*l.u).toFixed(2)}</td>
+   <td><button onclick="del(${i})" class="text-red-600"><i class="fas fa-trash"></i></button></td></tr>`).join('');
+  const sub=lines.reduce((s,l)=>s+l.q*l.u,0);const vat=sub*0.16;const tot=sub+vat;
+  document.getElementById('sub').textContent='$'+sub.toFixed(2);
+  document.getElementById('vat').textContent='$'+vat.toFixed(2);
+  document.getElementById('tot').textContent='$'+tot.toFixed(2);
+  document.getElementById('pt').textContent='$'+tot.toFixed(2);
+  document.getElementById('pb').textContent='$'+(2140-tot).toFixed(2);
+}
+render();upd();
+</script></body></html>

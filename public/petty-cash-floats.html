@@ -1,0 +1,64 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Petty Cash Floats — FleetCtrl</title>
+<meta name="description" content="Manage petty cash floats per custodian and branch."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Finance / Petty Cash / <span class="text-ink-900">Floats</span></div>
+    <h1 class="text-lg font-bold">Floats & Custodians</h1></div>
+  <button onclick="document.getElementById('dr').classList.add('open')" class="btn btn-primary"><i class="fas fa-plus"></i>Open New Float</button>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <div class="card p-4"><div class="kpi-label">Active Floats</div><div class="text-2xl font-bold">5</div></div>
+    <div class="card p-4"><div class="kpi-label">Custodians</div><div class="text-2xl font-bold">5</div></div>
+    <div class="card p-4"><div class="kpi-label">Allocated</div><div class="text-2xl font-bold">$24,500</div></div>
+    <div class="card p-4"><div class="kpi-label">Available</div><div class="text-2xl font-bold text-emerald-600">$11,840</div></div>
+  </section>
+  <section class="card p-5">
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input class="max-w-xs" placeholder="Search float, custodian, branch..."/>
+      <select class="max-w-[160px]"><option>All Branches</option><option>HQ Nairobi</option><option>Mombasa</option><option>Kisumu</option></select>
+      <select class="max-w-[160px]"><option>All Status</option><option>Active</option><option>Suspended</option><option>Closed</option></select>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>Float #</th><th>Custodian</th><th>Role</th><th>Branch</th><th>Limit</th><th>Balance</th><th>Utilization</th><th>Last Replenish</th><th>Status</th><th></th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </section>
+</div></main>
+
+<div class="drawer" id="dr"><div class="drawer-bg" onclick="this.parentElement.classList.remove('open')"></div>
+<div class="drawer-panel p-6">
+  <div class="flex items-center justify-between mb-4"><h2 class="font-bold text-lg">Open New Float</h2><button onclick="document.getElementById('dr').classList.remove('open')" class="btn btn-ghost"><i class="fas fa-xmark"></i></button></div>
+  <div class="grid grid-cols-2 gap-3">
+    <div><label>Custodian</label><input placeholder="Full name"/></div>
+    <div><label>Employee ID</label><input placeholder="EMP-####"/></div>
+    <div><label>Branch</label><select><option>HQ Nairobi</option><option>Mombasa</option><option>Kisumu</option><option>Eldoret</option></select></div>
+    <div><label>Currency</label><select><option>USD</option><option>KES</option></select></div>
+    <div><label>Float Limit</label><input type="number" placeholder="5000"/></div>
+    <div><label>Replenish Threshold %</label><input type="number" placeholder="20"/></div>
+    <div class="col-span-2"><label>Approval Workflow</label><select><option>L1: Supervisor → L2: Finance</option><option>L1: Finance only</option><option>L1: Supervisor → L2: Finance → L3: CFO</option></select></div>
+    <div class="col-span-2"><label>Notes</label><textarea rows="3"></textarea></div>
+  </div>
+  <div class="flex justify-end gap-2 mt-4"><button class="btn btn-ghost" onclick="document.getElementById('dr').classList.remove('open')">Cancel</button><button class="btn btn-primary"><i class="fas fa-check"></i>Open Float</button></div>
+</div></div>
+
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('pcFloat');
+const data=[
+ ['PCF-001','Mary Otieno','Office Admin','HQ Nairobi',5000,2140,57,'2026-04-22','Active'],
+ ['PCF-002','Joseph Kamau','Yard Supervisor','Mombasa',4000,3400,15,'2026-05-01','Active'],
+ ['PCF-003','Aisha Hassan','Workshop Foreman','Athi River',6000,820,86,'2026-04-12','Active'],
+ ['PCF-004','Peter Mwangi','Depot Manager','Kisumu',3500,2980,15,'2026-04-30','Active'],
+ ['PCF-005','Grace Wanjiru','HR Officer','Eldoret',6000,2500,58,'2026-04-25','Active'],
+];
+const color=u=>u>=80?'bg-red-500':u>=50?'bg-amber-500':'bg-emerald-500';
+const pillC=u=>u>=80?'pill-danger':u>=50?'pill-warning':'pill-success';
+document.getElementById('rows').innerHTML=data.map(r=>`<tr><td class="font-semibold text-brand-600">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>$${r[4].toLocaleString()}</td><td class="font-semibold">$${r[5].toLocaleString()}</td><td><div class="flex items-center gap-2"><div class="w-28 h-1.5 rounded-full bg-ink-200"><div class="h-full rounded-full ${color(r[6])}" style="width:${r[6]}%"></div></div><span class="text-xs">${r[6]}%</span></div></td><td>${r[7]}</td><td><span class="pill ${pillC(r[6])}">${r[8]}</span></td><td><a class="text-brand-600" href="petty-cash-vouchers.html?float=${r[0]}"><i class="fas fa-eye"></i></a></td></tr>`).join('');
+</script></body></html>
