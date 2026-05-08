@@ -55,5 +55,17 @@ function renderStoreSidebar(active){
 
     <div class="nav-section">Tyres</div>
     <a href="tyres.html" class="nav-link"><i class="fas fa-circle-notch w-4"></i>Tyre Management</a>
+
+    <div class="nav-section">Finance</div>
+    <button class="dropdown-btn open" onclick="this.classList.toggle('open');document.getElementById('pcDD').classList.toggle('open');">
+      <i class="fas fa-sack-dollar w-4"></i><span class="flex-1 text-left">Petty Cash</span><i class="fas fa-chevron-down text-[10px]"></i>
+    </button>
+    <div class="dropdown-items open" id="pcDD">
+      <a href="petty-cash-dashboard.html" class="sub-link ${A('pcDash')}"><i class="fas fa-gauge-high w-4"></i>Command Center</a>
+      <a href="petty-cash-floats.html" class="sub-link ${A('pcFloat')}"><i class="fas fa-wallet w-4"></i>Floats & Custodians</a>
+      <a href="petty-cash-vouchers.html" class="sub-link ${A('pcVou')}"><i class="fas fa-receipt w-4"></i>Vouchers</a>
+      <a href="petty-cash-replenish.html" class="sub-link ${A('pcRep')}"><i class="fas fa-money-bill-transfer w-4"></i>Replenishment</a>
+      <a href="petty-cash-reconciliation.html" class="sub-link ${A('pcRec')}"><i class="fas fa-scale-balanced w-4"></i>Reconciliation</a>
+    </div>
   </nav>`;
 }
