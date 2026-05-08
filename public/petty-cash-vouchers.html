@@ -1,0 +1,65 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Petty Cash Vouchers — FleetCtrl</title>
+<meta name="description" content="Petty cash voucher register: review, approve, reject and post to ledger."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Finance / Petty Cash / <span class="text-ink-900">Vouchers</span></div>
+    <h1 class="text-lg font-bold">Voucher Register</h1></div>
+  <div class="flex gap-2">
+    <button onclick="exportCSV()" class="btn btn-ghost"><i class="fas fa-file-csv"></i>Export</button>
+    <a href="petty-cash-voucher-create.html" class="btn btn-primary"><i class="fas fa-plus"></i>New Voucher</a>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="card p-4"><div class="kpi-label">Total MTD</div><div class="text-2xl font-bold">$12,660</div></div>
+    <div class="card p-4"><div class="kpi-label">Approved</div><div class="text-2xl font-bold text-emerald-600">128</div></div>
+    <div class="card p-4"><div class="kpi-label">Pending</div><div class="text-2xl font-bold text-amber-600">9</div></div>
+    <div class="card p-4"><div class="kpi-label">Rejected</div><div class="text-2xl font-bold text-red-600">5</div></div>
+    <div class="card p-4"><div class="kpi-label">Posted to GL</div><div class="text-2xl font-bold">112</div></div>
+  </section>
+  <section class="card p-5">
+    <div class="flex flex-wrap gap-2 mb-4">
+      <input class="max-w-xs" placeholder="Search PCV, payee, category..."/>
+      <select id="fS" class="max-w-[160px]" onchange="render()"><option value="">All Status</option><option>Pending</option><option>Approved</option><option>Posted</option><option>Rejected</option></select>
+      <select id="fC" class="max-w-[160px]" onchange="render()"><option value="">All Categories</option><option>Fuel</option><option>Tolls</option><option>Allowance</option><option>Consumables</option><option>Permits</option><option>Office</option></select>
+      <select class="max-w-[160px]"><option>All Floats</option><option>PCF-001</option><option>PCF-002</option><option>PCF-003</option></select>
+      <input type="date" class="max-w-[160px]"/>
+    </div>
+    <table class="tbl" id="t">
+      <thead><tr><th>PCV #</th><th>Date</th><th>Float</th><th>Payee</th><th>Category</th><th>Description</th><th>Amount</th><th>Receipt</th><th>Status</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</div></main>
+
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('pcVou');
+const data=[
+ ['PCV-2026-189','2026-05-08','PCF-001','D. Otieno','Fuel','Diesel — Truck KBZ-401A',280,'RCP-7821','Pending'],
+ ['PCV-2026-188','2026-05-08','PCF-001','K. Mutiso','Tolls','Mombasa Rd toll',45,'RCP-7820','Pending'],
+ ['PCV-2026-187','2026-05-07','PCF-003','Workshop','Consumables','Rags, brake cleaner',320,'RCP-7819','Pending'],
+ ['PCV-2026-186','2026-05-07','PCF-002','P. Mwangi','Allowance','Driver subsistence',150,'RCP-7818','Pending'],
+ ['PCV-2026-185','2026-05-07','PCF-001','NTSA','Permits','Inspection sticker',420,'RCP-7817','Pending'],
+ ['PCV-2026-184','2026-05-06','PCF-005','Stationer','Office','Toner cartridges',180,'RCP-7816','Approved'],
+ ['PCV-2026-183','2026-05-06','PCF-003','Workshop','Consumables','Welding rods',240,'RCP-7815','Approved'],
+ ['PCV-2026-182','2026-05-05','PCF-002','M. Juma','Fuel','Top-up T-540',310,'RCP-7814','Posted'],
+ ['PCV-2026-181','2026-05-05','PCF-001','Courier','Office','DHL parcel',95,'RCP-7813','Posted'],
+ ['PCV-2026-180','2026-05-04','PCF-004','J. Owino','Allowance','Long-haul allowance',220,'RCP-7812','Posted'],
+ ['PCV-2026-179','2026-05-03','PCF-003','Hardware','Consumables','Bolts and nuts',60,'—','Rejected'],
+];
+const pill={Pending:'pill-warning',Approved:'pill-primary',Posted:'pill-success',Rejected:'pill-danger'};
+function render(){
+  const s=fS.value,c=fC.value;
+  const rows=data.filter(r=>(!s||r[8]===s)&&(!c||r[4]===c));
+  document.querySelector('#t tbody').innerHTML=rows.map(r=>`<tr><td class="font-semibold text-brand-600"><a href="petty-cash-voucher-view.html?id=${r[0]}">${r[0]}</a></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td class="text-ink-500">${r[5]}</td><td class="font-semibold">$${r[6]}</td><td>${r[7]==='—'?'<span class="text-red-600">No</span>':'<i class="fas fa-paperclip text-ink-500"></i> '+r[7]}</td><td><span class="pill ${pill[r[8]]}">${r[8]}</span></td><td><a class="text-brand-600" href="petty-cash-voucher-view.html?id=${r[0]}"><i class="fas fa-eye"></i></a></td></tr>`).join('');
+}
+render();
+function exportCSV(){const rows=[['PCV','Date','Float','Payee','Category','Description','Amount','Receipt','Status'],...data].map(r=>r.join(',')).join('\n');const b=new Blob([rows],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='petty-cash-vouchers.csv';a.click();}
+</script></body></html>
