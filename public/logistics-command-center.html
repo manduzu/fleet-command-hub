@@ -114,30 +114,20 @@
   </div>
 
   <div class="card p-5">
-    <div class="flex justify-between items-center mb-3"><h2 class="text-sm font-bold">Ops Queue</h2><span class="pill pill-danger">12 actions</span></div>
-    <div class="space-y-2">
-      <div class="p-3 rounded-lg border border-red-200 bg-red-50">
-        <div class="flex justify-between"><div class="text-xs font-bold text-red-700">Trip TR-2026-441 delayed</div><span class="text-[10px] text-ink-500">5m</span></div>
-        <div class="text-[11px] text-ink-700">Truck T-108 stopped 42min near Voi · ETA slip 1h 20m</div>
-        <div class="flex gap-2 mt-2"><button class="btn btn-primary text-[11px] py-1">Contact driver</button><button class="btn btn-ghost text-[11px] py-1">Reassign</button></div>
-      </div>
-      <div class="p-3 rounded-lg border border-amber-200 bg-amber-50">
-        <div class="flex justify-between"><div class="text-xs font-bold text-amber-700">Geofence breach · KCA 412Y</div><span class="text-[10px] text-ink-500">12m</span></div>
-        <div class="text-[11px] text-ink-700">Off-route by 8.4 km · driver J. Mwangi</div>
-      </div>
-      <div class="p-3 rounded-lg border border-amber-200 bg-amber-50">
-        <div class="flex justify-between"><div class="text-xs font-bold text-amber-700">Low fuel · Truck T-204</div><span class="text-[10px] text-ink-500">22m</span></div>
-        <div class="text-[11px] text-ink-700">Tank 11% · 84 km to nearest depot</div>
-      </div>
-      <div class="p-3 rounded-lg border border-blue-200 bg-blue-50">
-        <div class="flex justify-between"><div class="text-xs font-bold text-blue-700">Service due · T-115</div><span class="text-[10px] text-ink-500">1h</span></div>
-        <div class="text-[11px] text-ink-700">5,000 km PM overdue by 320 km</div>
-      </div>
-      <div class="p-3 rounded-lg border border-ink-200">
-        <div class="flex justify-between"><div class="text-xs font-bold">Pending dispatch · Order ORD-7821</div><span class="text-[10px] text-ink-500">2h</span></div>
-        <div class="text-[11px] text-ink-700">Awaiting truck assignment · 12 t cargo</div>
-      </div>
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-sm font-bold">Ops Queue & Alerts</h2>
+      <span class="pill pill-danger" id="opsCount">12 actions</span>
     </div>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <input id="opsSearch" type="text" placeholder="Search vehicle, trip, driver..." class="col-span-2 text-xs border border-ink-200 rounded-lg px-2 py-1.5"/>
+      <select id="opsSeverity" class="text-xs border border-ink-200 rounded-lg px-2 py-1.5 bg-white">
+        <option value="">All severities</option><option value="critical">Critical</option><option value="warning">Warning</option><option value="info">Info</option>
+      </select>
+      <select id="opsWindow" class="text-xs border border-ink-200 rounded-lg px-2 py-1.5 bg-white">
+        <option value="">Any time</option><option value="15">Last 15 min</option><option value="60">Last 1 hour</option><option value="240">Last 4 hours</option><option value="1440">Last 24 hours</option>
+      </select>
+    </div>
+    <div id="opsQueue" class="space-y-2 max-h-[360px] overflow-y-auto"></div>
     <a href="orders.html" class="block text-center mt-3 text-xs text-brand-600 font-semibold">View all alerts →</a>
   </div>
 </section>
