@@ -28,9 +28,30 @@
     </h1>
   </div>
   <div class="flex gap-2 items-center">
+    <div class="flex items-center gap-2 px-2 py-1 border border-ink-200 rounded-lg bg-ink-50" title="Auto-refresh live data">
+      <label class="flex items-center gap-1.5 cursor-pointer">
+        <input type="checkbox" id="autoRefreshToggle" class="accent-brand-600" checked>
+        <span class="text-[11px] font-semibold text-ink-700"><i class="fas fa-rotate text-brand-600 mr-1"></i>Auto</span>
+      </label>
+      <select id="refreshInterval" class="text-[11px] bg-white border border-ink-200 rounded px-1.5 py-0.5">
+        <option value="10">10s</option><option value="15" selected>15s</option><option value="30">30s</option><option value="60">1m</option><option value="300">5m</option>
+      </select>
+      <span id="refreshCountdown" class="text-[10px] text-ink-500 font-mono w-8 text-right">15s</span>
+    </div>
     <select class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg bg-white">
       <option>Today</option><option>This Week</option><option>This Month</option><option>QTD</option>
     </select>
+    <div class="relative">
+      <button onclick="document.getElementById('exportMenu').classList.toggle('hidden')" class="btn btn-ghost"><i class="fas fa-file-export"></i>Export</button>
+      <div id="exportMenu" class="hidden absolute right-0 top-full mt-1 w-52 bg-white border border-ink-200 rounded-lg shadow-lg z-50 py-1">
+        <button onclick="exportCSV('trips')" class="w-full text-left px-3 py-2 text-xs hover:bg-ink-50 flex items-center gap-2"><i class="fas fa-route text-brand-600 w-4"></i>Trips (Active)</button>
+        <button onclick="exportCSV('incidents')" class="w-full text-left px-3 py-2 text-xs hover:bg-ink-50 flex items-center gap-2"><i class="fas fa-triangle-exclamation text-amber-600 w-4"></i>Incidents (Ops Queue)</button>
+        <button onclick="exportCSV('finance')" class="w-full text-left px-3 py-2 text-xs hover:bg-ink-50 flex items-center gap-2"><i class="fas fa-coins text-emerald-600 w-4"></i>Finance KPIs</button>
+        <div class="border-t border-ink-100 my-1"></div>
+        <button onclick="exportCSV('all')" class="w-full text-left px-3 py-2 text-xs hover:bg-ink-50 flex items-center gap-2 font-semibold"><i class="fas fa-download text-ink-700 w-4"></i>Export All</button>
+      </div>
+    </div>
+    <button onclick="openDispatchModal()" class="btn btn-ghost"><i class="fas fa-paper-plane"></i>Dispatch</button>
     <a href="create-trip.html" class="btn btn-ghost"><i class="fas fa-route"></i>New Trip</a>
     <a href="tracking.html" class="btn btn-primary"><i class="fas fa-location-dot"></i>Live Tracking</a>
   </div>
@@ -93,30 +114,20 @@
   </div>
 
   <div class="card p-5">
-    <div class="flex justify-between items-center mb-3"><h2 class="text-sm font-bold">Ops Queue</h2><span class="pill pill-danger">12 actions</span></div>
-    <div class="space-y-2">
-      <div class="p-3 rounded-lg border border-red-200 bg-red-50">
-        <div class="flex justify-between"><div class="text-xs font-bold text-red-700">Trip TR-2026-441 delayed</div><span class="text-[10px] text-ink-500">5m</span></div>
-        <div class="text-[11px] text-ink-700">Truck T-108 stopped 42min near Voi · ETA slip 1h 20m</div>
-        <div class="flex gap-2 mt-2"><button class="btn btn-primary text-[11px] py-1">Contact driver</button><button class="btn btn-ghost text-[11px] py-1">Reassign</button></div>
-      </div>
-      <div class="p-3 rounded-lg border border-amber-200 bg-amber-50">
-        <div class="flex justify-between"><div class="text-xs font-bold text-amber-700">Geofence breach · KCA 412Y</div><span class="text-[10px] text-ink-500">12m</span></div>
-        <div class="text-[11px] text-ink-700">Off-route by 8.4 km · driver J. Mwangi</div>
-      </div>
-      <div class="p-3 rounded-lg border border-amber-200 bg-amber-50">
-        <div class="flex justify-between"><div class="text-xs font-bold text-amber-700">Low fuel · Truck T-204</div><span class="text-[10px] text-ink-500">22m</span></div>
-        <div class="text-[11px] text-ink-700">Tank 11% · 84 km to nearest depot</div>
-      </div>
-      <div class="p-3 rounded-lg border border-blue-200 bg-blue-50">
-        <div class="flex justify-between"><div class="text-xs font-bold text-blue-700">Service due · T-115</div><span class="text-[10px] text-ink-500">1h</span></div>
-        <div class="text-[11px] text-ink-700">5,000 km PM overdue by 320 km</div>
-      </div>
-      <div class="p-3 rounded-lg border border-ink-200">
-        <div class="flex justify-between"><div class="text-xs font-bold">Pending dispatch · Order ORD-7821</div><span class="text-[10px] text-ink-500">2h</span></div>
-        <div class="text-[11px] text-ink-700">Awaiting truck assignment · 12 t cargo</div>
-      </div>
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-sm font-bold">Ops Queue & Alerts</h2>
+      <span class="pill pill-danger" id="opsCount">12 actions</span>
     </div>
+    <div class="grid grid-cols-2 gap-2 mb-3">
+      <input id="opsSearch" type="text" placeholder="Search vehicle, trip, driver..." class="col-span-2 text-xs border border-ink-200 rounded-lg px-2 py-1.5"/>
+      <select id="opsSeverity" class="text-xs border border-ink-200 rounded-lg px-2 py-1.5 bg-white">
+        <option value="">All severities</option><option value="critical">Critical</option><option value="warning">Warning</option><option value="info">Info</option>
+      </select>
+      <select id="opsWindow" class="text-xs border border-ink-200 rounded-lg px-2 py-1.5 bg-white">
+        <option value="">Any time</option><option value="15">Last 15 min</option><option value="60">Last 1 hour</option><option value="240">Last 4 hours</option><option value="1440">Last 24 hours</option>
+      </select>
+    </div>
+    <div id="opsQueue" class="space-y-2 max-h-[360px] overflow-y-auto"></div>
     <a href="orders.html" class="block text-center mt-3 text-xs text-brand-600 font-semibold">View all alerts →</a>
   </div>
 </section>
@@ -204,17 +215,13 @@
 <!-- Active trips table + driver leaderboard -->
 <section class="grid grid-cols-1 xl:grid-cols-3 gap-5">
   <div class="card p-5 xl:col-span-2">
-    <div class="flex justify-between items-center mb-3"><h2 class="text-sm font-bold">Active Trips</h2><a href="tracking.html" class="text-xs text-brand-600 font-semibold">Live tracking →</a></div>
+    <div class="flex justify-between items-center mb-3">
+      <h2 class="text-sm font-bold">Active Trips <span class="text-[10px] font-normal text-ink-500">(click row for details)</span></h2>
+      <a href="tracking.html" class="text-xs text-brand-600 font-semibold">Live tracking →</a>
+    </div>
     <table class="tbl">
       <thead><tr><th>Trip</th><th>Vehicle</th><th>Driver</th><th>Route</th><th>Progress</th><th>ETA</th><th>Status</th></tr></thead>
-      <tbody>
-        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-441</a></td><td>T-108 / KCA 412Y</td><td>J. Mwangi</td><td>Mombasa → Nairobi</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full" style="width:62%"></div></div></td><td>+1h 20m</td><td><span class="pill pill-danger">Delayed</span></td></tr>
-        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-440</a></td><td>T-204 / KDA 781P</td><td>S. Otieno</td><td>Nairobi → Eldoret</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:84%"></div></div></td><td>14:20</td><td><span class="pill pill-success">On Time</span></td></tr>
-        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-439</a></td><td>T-115 / KBZ 902M</td><td>P. Wanjiru</td><td>Kisumu → Nakuru</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:48%"></div></div></td><td>16:05</td><td><span class="pill pill-success">On Time</span></td></tr>
-        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-438</a></td><td>T-101 / KAA 117X</td><td>M. Kamau</td><td>Mombasa → Kampala</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-amber-500 h-1.5 rounded-full" style="width:31%"></div></div></td><td>Tomorrow 09:00</td><td><span class="pill pill-warning">At Risk</span></td></tr>
-        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-437</a></td><td>T-220 / KDB 558Q</td><td>A. Hassan</td><td>Nairobi → Arusha</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:92%"></div></div></td><td>13:10</td><td><span class="pill pill-success">Arriving</span></td></tr>
-        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-436</a></td><td>T-309 / KDC 219R</td><td>L. Achieng</td><td>Nakuru → Mombasa</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:24%"></div></div></td><td>22:40</td><td><span class="pill pill-primary">In Transit</span></td></tr>
-      </tbody>
+      <tbody id="tripsTbody"></tbody>
     </table>
   </div>
 
@@ -284,8 +291,305 @@
   </div>
 </section>
 
+
+<!-- ============ Dispatch / Reassign Modal ============ -->
+<div id="dispatchModal" class="hidden fixed inset-0 z-[100] bg-ink-900/50 backdrop-blur-sm items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div class="px-5 py-4 border-b border-ink-200 flex justify-between items-center">
+      <div>
+        <div class="text-[10px] uppercase font-bold text-ink-500" id="dispatchKicker">Dispatch</div>
+        <h3 class="text-base font-bold">Assign Vehicle & Driver</h3>
+      </div>
+      <button onclick="closeDispatchModal()" class="w-8 h-8 rounded-lg hover:bg-ink-100"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div class="p-3 rounded-lg bg-blue-50 border border-blue-200">
+        <div class="text-[10px] uppercase font-bold text-blue-700">Target</div>
+        <div class="text-sm font-bold" id="dispatchTarget">Pending Order ORD-7821 · 12 t cargo</div>
+        <div class="text-[11px] text-ink-700" id="dispatchSub">Mombasa → Nairobi · pickup 14:00</div>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-[11px] font-bold text-ink-700 uppercase">Vehicle</span>
+          <select id="dispatchVehicle" class="w-full mt-1 text-sm border border-ink-200 rounded-lg px-2 py-2">
+            <option value="">— Select truck —</option>
+            <option>T-101 / KAA 117X · Idle (Mombasa)</option>
+            <option>T-115 / KBZ 902M · Idle (Nakuru)</option>
+            <option>T-204 / KDA 781P · Available 16:00</option>
+            <option>T-220 / KDB 558Q · Idle (Nairobi)</option>
+            <option>T-309 / KDC 219R · Idle (Mombasa)</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-[11px] font-bold text-ink-700 uppercase">Driver</span>
+          <select id="dispatchDriver" class="w-full mt-1 text-sm border border-ink-200 rounded-lg px-2 py-2">
+            <option value="">— Select driver —</option>
+            <option>S. Otieno · Score 96 · Available</option>
+            <option>P. Wanjiru · Score 94 · Available</option>
+            <option>M. Kamau · Score 91 · Available</option>
+            <option>A. Hassan · Score 90 · Available</option>
+            <option>L. Achieng · Score 86 · On-shift</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-[11px] font-bold text-ink-700 uppercase">Trailer</span>
+          <select class="w-full mt-1 text-sm border border-ink-200 rounded-lg px-2 py-2">
+            <option>— Optional —</option><option>TRL-208 (Flatbed)</option><option>TRL-311 (Reefer)</option><option>TRL-417 (Tanker)</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="text-[11px] font-bold text-ink-700 uppercase">Dispatch Time</span>
+          <input type="datetime-local" class="w-full mt-1 text-sm border border-ink-200 rounded-lg px-2 py-2"/>
+        </label>
+        <label class="col-span-2 block">
+          <span class="text-[11px] font-bold text-ink-700 uppercase">Notes to Driver</span>
+          <textarea rows="3" class="w-full mt-1 text-sm border border-ink-200 rounded-lg px-2 py-2" placeholder="Special instructions, customer contact, route preferences..."></textarea>
+        </label>
+      </div>
+      <div class="p-3 rounded-lg bg-ink-50 border border-ink-200 text-[11px] text-ink-700">
+        <i class="fas fa-circle-info text-brand-600 mr-1"></i>
+        Estimated route: 487 km · 7h 45m · Fuel cost ~$148 · Margin projection 34%
+      </div>
+    </div>
+    <div class="px-5 py-3 border-t border-ink-200 bg-ink-50 flex justify-between items-center rounded-b-xl">
+      <label class="text-[11px] flex items-center gap-1.5"><input type="checkbox" class="accent-brand-600" checked> Notify driver via SMS</label>
+      <div class="flex gap-2">
+        <button onclick="closeDispatchModal()" class="btn btn-ghost">Cancel</button>
+        <button onclick="confirmDispatch()" class="btn btn-primary"><i class="fas fa-paper-plane"></i>Dispatch Trip</button>
+      </div>
+    </div>
+  </div>
 </div>
-</main>
+
+<!-- ============ Trip Detail Drawer ============ -->
+<div id="tripDrawer" class="fixed inset-0 z-[100] hidden">
+  <div class="absolute inset-0 bg-ink-900/40" onclick="closeTripDrawer()"></div>
+  <div class="absolute right-0 top-0 h-full w-full max-w-xl bg-white shadow-2xl overflow-y-auto">
+    <div class="sticky top-0 bg-white px-5 py-4 border-b border-ink-200 flex justify-between items-center z-10">
+      <div>
+        <div class="text-[10px] uppercase font-bold text-ink-500">Trip Detail</div>
+        <h3 class="text-base font-bold" id="drawerTitle">TR-2026-441</h3>
+      </div>
+      <button onclick="closeTripDrawer()" class="w-8 h-8 rounded-lg hover:bg-ink-100"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="drawerBody" class="p-5 space-y-5"></div>
+  </div>
+</div>
+
 <script src="store-sidebar.js"></script>
 <script>renderStoreSidebar('logCmd');</script>
+
+<script>
+/* ===== Data ===== */
+const TRIPS = [
+  {id:'TR-2026-441',vehicle:'T-108 / KCA 412Y',driver:'J. Mwangi',route:'Mombasa → Nairobi',progress:62,eta:'+1h 20m',status:'Delayed',pill:'pill-danger',bar:'bg-red-500',client:'Bidco Africa',cargo:'18 t · Edible oils',value:'$12,400',distance:'487 km',driverPhone:'+254 712 345 678'},
+  {id:'TR-2026-440',vehicle:'T-204 / KDA 781P',driver:'S. Otieno',route:'Nairobi → Eldoret',progress:84,eta:'14:20',status:'On Time',pill:'pill-success',bar:'bg-emerald-500',client:'EABL',cargo:'14 t · Beverages',value:'$8,200',distance:'312 km',driverPhone:'+254 722 110 220'},
+  {id:'TR-2026-439',vehicle:'T-115 / KBZ 902M',driver:'P. Wanjiru',route:'Kisumu → Nakuru',progress:48,eta:'16:05',status:'On Time',pill:'pill-success',bar:'bg-emerald-500',client:'Unilever EA',cargo:'9 t · FMCG',value:'$5,400',distance:'186 km',driverPhone:'+254 733 441 882'},
+  {id:'TR-2026-438',vehicle:'T-101 / KAA 117X',driver:'M. Kamau',route:'Mombasa → Kampala',progress:31,eta:'Tomorrow 09:00',status:'At Risk',pill:'pill-warning',bar:'bg-amber-500',client:'Bamburi Cement',cargo:'22 t · Cement',value:'$18,900',distance:'1,184 km',driverPhone:'+254 700 998 234'},
+  {id:'TR-2026-437',vehicle:'T-220 / KDB 558Q',driver:'A. Hassan',route:'Nairobi → Arusha',progress:92,eta:'13:10',status:'Arriving',pill:'pill-success',bar:'bg-emerald-500',client:'Mabati Rolling',cargo:'16 t · Roofing',value:'$11,200',distance:'272 km',driverPhone:'+254 711 552 008'},
+  {id:'TR-2026-436',vehicle:'T-309 / KDC 219R',driver:'L. Achieng',route:'Nakuru → Mombasa',progress:24,eta:'22:40',status:'In Transit',pill:'pill-primary',bar:'bg-emerald-500',client:'Bidco Africa',cargo:'20 t · Soap',value:'$13,750',distance:'614 km',driverPhone:'+254 720 776 145'},
+];
+
+const INCIDENTS = [
+  {id:'INC-001',title:'Trip TR-2026-441 delayed',desc:'Truck T-108 stopped 42min near Voi · ETA slip 1h 20m',vehicle:'T-108',severity:'critical',mins:5,actions:true},
+  {id:'INC-002',title:'Geofence breach · KCA 412Y',desc:'Off-route by 8.4 km · driver J. Mwangi',vehicle:'T-108',severity:'warning',mins:12,actions:false},
+  {id:'INC-003',title:'Low fuel · Truck T-204',desc:'Tank 11% · 84 km to nearest depot',vehicle:'T-204',severity:'warning',mins:22,actions:false},
+  {id:'INC-004',title:'Service due · T-115',desc:'5,000 km PM overdue by 320 km',vehicle:'T-115',severity:'info',mins:60,actions:false},
+  {id:'INC-005',title:'Pending dispatch · Order ORD-7821',desc:'Awaiting truck assignment · 12 t cargo',vehicle:'—',severity:'info',mins:120,actions:false},
+  {id:'INC-006',title:'Harsh braking event · T-220',desc:'3 hard-brake events in 8 min near Athi',vehicle:'T-220',severity:'warning',mins:35,actions:false},
+  {id:'INC-007',title:'Speeding alert · T-309',desc:'118 km/h in 80 zone · Naivasha bypass',vehicle:'T-309',severity:'critical',mins:18,actions:false},
+];
+
+const FINANCE = [
+  {kpi:'Revenue MTD',value:'$1,240,000',delta:'+12.5%',target:'$1,400,000'},
+  {kpi:'Gross Margin',value:'32.4%',delta:'+1.2pp',target:'34%'},
+  {kpi:'Fuel Cost',value:'$248,000',delta:'-3.1%',target:'$260,000'},
+  {kpi:'Driver Wages',value:'$184,000',delta:'+0.8%',target:'$180,000'},
+  {kpi:'Maintenance',value:'$92,000',delta:'+8.4%',target:'$85,000'},
+  {kpi:'Tolls & Permits',value:'$38,000',delta:'+2.0%',target:'$40,000'},
+  {kpi:'Cost / KM',value:'$0.48',delta:'+$0.02',target:'$0.46'},
+  {kpi:'On-Time %',value:'94.2%',delta:'+1.4pp',target:'92%'},
+];
+
+/* ===== Render Trips ===== */
+function renderTrips(){
+  document.getElementById('tripsTbody').innerHTML = TRIPS.map(t=>`
+    <tr class="cursor-pointer hover:bg-brand-50/50" onclick="openTripDrawer('${t.id}')">
+      <td class="text-brand-600 font-semibold">${t.id}</td>
+      <td>${t.vehicle}</td><td>${t.driver}</td><td>${t.route}</td>
+      <td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="${t.bar} h-1.5 rounded-full" style="width:${t.progress}%"></div></div></td>
+      <td>${t.eta}</td><td><span class="pill ${t.pill}">${t.status}</span></td>
+    </tr>`).join('');
+}
+
+/* ===== Render Ops Queue (with filters) ===== */
+const SEV_STYLE = {critical:{box:'border-red-200 bg-red-50',title:'text-red-700',pill:'pill-danger'},warning:{box:'border-amber-200 bg-amber-50',title:'text-amber-700',pill:'pill-warning'},info:{box:'border-blue-200 bg-blue-50',title:'text-blue-700',pill:'pill-primary'}};
+function fmtMins(m){return m<60?m+'m':Math.floor(m/60)+'h '+(m%60?m%60+'m':'').trim()}
+function renderOps(){
+  const q=document.getElementById('opsSearch').value.toLowerCase();
+  const sev=document.getElementById('opsSeverity').value;
+  const win=parseInt(document.getElementById('opsWindow').value)||0;
+  const list=INCIDENTS.filter(i=>{
+    if(sev && i.severity!==sev) return false;
+    if(win && i.mins>win) return false;
+    if(q && !(i.title+i.desc+i.vehicle).toLowerCase().includes(q)) return false;
+    return true;
+  });
+  document.getElementById('opsCount').textContent=list.length+' actions';
+  document.getElementById('opsQueue').innerHTML = list.length? list.map(i=>{
+    const s=SEV_STYLE[i.severity];
+    const actions = i.severity==='critical' ? `<div class="flex gap-2 mt-2">
+      <button onclick="event.stopPropagation();alert('Calling '+'${i.vehicle}')" class="btn btn-primary text-[11px] py-1"><i class="fas fa-phone"></i>Contact</button>
+      <button onclick="event.stopPropagation();openDispatchModal('${i.id}','${i.title}','${i.desc}')" class="btn btn-ghost text-[11px] py-1"><i class="fas fa-shuffle"></i>Reassign</button>
+    </div>`:'';
+    return `<div class="p-3 rounded-lg border ${s.box}">
+      <div class="flex justify-between"><div class="text-xs font-bold ${s.title}">${i.title}</div><span class="text-[10px] text-ink-500">${fmtMins(i.mins)}</span></div>
+      <div class="text-[11px] text-ink-700 mt-0.5">${i.desc}</div>
+      <div class="flex justify-between items-center mt-1"><span class="text-[10px] text-ink-500">Vehicle: ${i.vehicle}</span><span class="pill ${s.pill} text-[10px]">${i.severity}</span></div>
+      ${actions}
+    </div>`;
+  }).join('') : `<div class="text-center text-xs text-ink-500 py-8"><i class="fas fa-check-circle text-emerald-500 text-2xl mb-2"></i><div>No alerts match filters</div></div>`;
+}
+
+/* ===== Trip Drawer ===== */
+function openTripDrawer(id){
+  const t=TRIPS.find(x=>x.id===id); if(!t) return;
+  document.getElementById('drawerTitle').textContent=t.id+' · '+t.route;
+  document.getElementById('drawerBody').innerHTML=`
+    <div class="grid grid-cols-2 gap-3">
+      <div class="p-3 rounded-lg bg-ink-50"><div class="kpi-label">Status</div><span class="pill ${t.pill}">${t.status}</span></div>
+      <div class="p-3 rounded-lg bg-ink-50"><div class="kpi-label">ETA</div><div class="text-sm font-bold">${t.eta}</div></div>
+      <div class="p-3 rounded-lg bg-ink-50"><div class="kpi-label">Vehicle</div><div class="text-sm font-bold">${t.vehicle}</div></div>
+      <div class="p-3 rounded-lg bg-ink-50"><div class="kpi-label">Driver</div><div class="text-sm font-bold">${t.driver}</div><div class="text-[10px] text-ink-500">${t.driverPhone}</div></div>
+      <div class="p-3 rounded-lg bg-ink-50"><div class="kpi-label">Client</div><div class="text-sm font-bold">${t.client}</div></div>
+      <div class="p-3 rounded-lg bg-ink-50"><div class="kpi-label">Cargo</div><div class="text-sm font-bold">${t.cargo}</div></div>
+      <div class="p-3 rounded-lg bg-ink-50"><div class="kpi-label">Distance</div><div class="text-sm font-bold">${t.distance}</div></div>
+      <div class="p-3 rounded-lg bg-ink-50"><div class="kpi-label">Trip Value</div><div class="text-sm font-bold text-emerald-600">${t.value}</div></div>
+    </div>
+
+    <div>
+      <div class="flex justify-between items-center mb-1"><div class="text-xs font-bold">Progress</div><div class="text-[11px] text-ink-500">${t.progress}%</div></div>
+      <div class="w-full bg-ink-100 rounded-full h-2"><div class="${t.bar} h-2 rounded-full" style="width:${t.progress}%"></div></div>
+    </div>
+
+    <div>
+      <div class="text-xs font-bold mb-2">Quick Actions</div>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="alert('Calling '+'${t.driver}')" class="btn btn-ghost text-[11px]"><i class="fas fa-phone"></i>Call Driver</button>
+        <button onclick="openDispatchModal('${t.id}','Reassign '+'${t.id}','${t.route}')" class="btn btn-ghost text-[11px]"><i class="fas fa-shuffle"></i>Reassign</button>
+        <button class="btn btn-ghost text-[11px]"><i class="fas fa-comment-sms"></i>Send SMS</button>
+        <button class="btn btn-ghost text-[11px]"><i class="fas fa-location-dot"></i>Live Position</button>
+        <button class="btn btn-ghost text-[11px]"><i class="fas fa-flag"></i>Mark Issue</button>
+        <button class="btn btn-primary text-[11px]"><i class="fas fa-circle-check"></i>Confirm POD</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="text-xs font-bold mb-2">Timeline</div>
+      <div class="space-y-3">
+        ${[
+          {label:'Trip created',t:'06:00',state:'done'},
+          {label:'Vehicle dispatched',t:'06:42',state:'done'},
+          {label:'Loading complete',t:'07:18',state:'done'},
+          {label:'Departed origin',t:'07:35',state:'done'},
+          {label:'Checkpoint · Voi',t:'10:12',state:t.progress>50?'done':'active'},
+          {label:'In transit',t:'now',state:t.progress<100?'active':'done'},
+          {label:'Arrival at destination',t:t.eta,state:'pending'},
+          {label:'POD signed',t:'—',state:'pending'},
+        ].map((s,i,a)=>`<div class="flex items-start gap-3">
+          <div class="flex flex-col items-center">
+            <div class="w-3 h-3 rounded-full ${s.state==='done'?'bg-emerald-500':s.state==='active'?'bg-brand-600 ring-4 ring-brand-100':'bg-ink-200'}"></div>
+            ${i<a.length-1?`<div class="w-0.5 h-6 ${s.state==='done'?'bg-emerald-500':'bg-ink-200'}"></div>`:''}
+          </div>
+          <div class="flex-1 pb-1"><div class="text-xs font-medium ${s.state==='pending'?'text-ink-400':''}">${s.label}</div><div class="text-[10px] text-ink-500">${s.t}</div></div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div>
+      <div class="text-xs font-bold mb-2">Documents</div>
+      <div class="space-y-1.5">
+        ${[['Trip Sheet','PDF · 124 KB'],['LPO / Booking','PDF · 88 KB'],['Loading Manifest','PDF · 212 KB'],['Insurance Cert','PDF · 96 KB'],['Driver License','JPG · 1.2 MB']].map(d=>`
+        <div class="flex items-center gap-3 p-2 rounded-lg border border-ink-200 hover:bg-ink-50">
+          <i class="fas fa-file-pdf text-red-500"></i>
+          <div class="flex-1"><div class="text-xs font-medium">${d[0]}</div><div class="text-[10px] text-ink-500">${d[1]}</div></div>
+          <button class="text-[11px] text-brand-600 font-semibold">Download</button>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="flex gap-2 pt-2 border-t border-ink-100">
+      <a href="trip-view.html" class="btn btn-ghost flex-1 justify-center"><i class="fas fa-arrow-up-right-from-square"></i>Open full trip</a>
+      <button onclick="closeTripDrawer()" class="btn btn-primary"><i class="fas fa-check"></i>Done</button>
+    </div>`;
+  document.getElementById('tripDrawer').classList.remove('hidden');
+}
+function closeTripDrawer(){document.getElementById('tripDrawer').classList.add('hidden')}
+
+/* ===== Dispatch Modal ===== */
+function openDispatchModal(id,title,sub){
+  document.getElementById('dispatchKicker').textContent = id ? 'Reassign · '+id : 'New Dispatch';
+  document.getElementById('dispatchTarget').textContent = title || 'Pending Order ORD-7821 · 12 t cargo';
+  document.getElementById('dispatchSub').textContent = sub || 'Mombasa → Nairobi · pickup 14:00';
+  const m=document.getElementById('dispatchModal'); m.classList.remove('hidden'); m.classList.add('flex');
+}
+function closeDispatchModal(){const m=document.getElementById('dispatchModal');m.classList.add('hidden');m.classList.remove('flex')}
+function confirmDispatch(){
+  const v=document.getElementById('dispatchVehicle').value, d=document.getElementById('dispatchDriver').value;
+  if(!v||!d){alert('Select both vehicle and driver');return}
+  alert('Dispatched: '+v+' · '+d); closeDispatchModal();
+}
+
+/* ===== CSV Export ===== */
+function toCSV(rows){return rows.map(r=>r.map(c=>{const s=String(c==null?'':c);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s}).join(',')).join('\n')}
+function download(name,csv){const b=new Blob([csv],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
+function exportCSV(kind){
+  document.getElementById('exportMenu').classList.add('hidden');
+  const ts=new Date().toISOString().slice(0,10);
+  if(kind==='trips'||kind==='all'){
+    const rows=[['Trip ID','Vehicle','Driver','Route','Progress %','ETA','Status','Client','Cargo','Distance','Value']];
+    TRIPS.forEach(t=>rows.push([t.id,t.vehicle,t.driver,t.route,t.progress,t.eta,t.status,t.client,t.cargo,t.distance,t.value]));
+    download(`trips-${ts}.csv`,toCSV(rows));
+  }
+  if(kind==='incidents'||kind==='all'){
+    const rows=[['Incident ID','Title','Description','Vehicle','Severity','Age (min)']];
+    INCIDENTS.forEach(i=>rows.push([i.id,i.title,i.desc,i.vehicle,i.severity,i.mins]));
+    download(`incidents-${ts}.csv`,toCSV(rows));
+  }
+  if(kind==='finance'||kind==='all'){
+    const rows=[['KPI','Value','Delta','Target']];
+    FINANCE.forEach(f=>rows.push([f.kpi,f.value,f.delta,f.target]));
+    download(`finance-kpis-${ts}.csv`,toCSV(rows));
+  }
+}
+
+/* ===== Auto-refresh ===== */
+let refreshTimer=null, countdown=15;
+function tickRefresh(){
+  const on=document.getElementById('autoRefreshToggle').checked;
+  const cd=document.getElementById('refreshCountdown');
+  if(!on){cd.textContent='off';return}
+  countdown--;
+  if(countdown<=0){
+    countdown=parseInt(document.getElementById('refreshInterval').value);
+    // Simulate refresh: jitter map dots opacity + KPIs
+    document.querySelectorAll('.map-grid .pulse').forEach(d=>{d.style.opacity='.3';setTimeout(()=>d.style.opacity='1',300)});
+    renderOps();
+    cd.classList.add('text-brand-600','font-bold');setTimeout(()=>cd.classList.remove('text-brand-600','font-bold'),500);
+  }
+  cd.textContent=countdown+'s';
+}
+function resetCountdown(){countdown=parseInt(document.getElementById('refreshInterval').value)||15}
+document.getElementById('refreshInterval').addEventListener('change',resetCountdown);
+document.getElementById('autoRefreshToggle').addEventListener('change',resetCountdown);
+
+/* ===== Wire filters & init ===== */
+['opsSearch','opsSeverity','opsWindow'].forEach(id=>document.getElementById(id).addEventListener('input',renderOps));
+document.addEventListener('click',e=>{
+  const m=document.getElementById('exportMenu');
+  if(!m.classList.contains('hidden') && !e.target.closest('#exportMenu') && !e.target.closest('button')?.textContent.includes('Export')) m.classList.add('hidden');
+});
+renderTrips(); renderOps(); resetCountdown();
+refreshTimer=setInterval(tickRefresh,1000);
+</script>
 </body></html>
