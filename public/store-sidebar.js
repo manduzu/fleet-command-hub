@@ -8,6 +8,7 @@ function renderStoreSidebar(active){
   </div>
   <nav class="px-2 py-3 flex-1 overflow-y-auto">
     <a href="dashboard.html" class="nav-link"><i class="fas fa-gauge-high w-4"></i>Dashboard</a>
+    <a href="logistics-command-center.html" class="nav-link ${A('logCmd')}"><i class="fas fa-satellite-dish w-4"></i>Logistics Command</a>
     <a href="tracking.html" class="nav-link"><i class="fas fa-location-dot w-4"></i>Live Tracking</a>
 
     <div class="nav-section">Fleet</div>

@@ -1,0 +1,291 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Logistics Command Center — FleetCtrl</title>
+<meta name="description" content="Real-time logistics & fleet operations command center: trips, vehicles, drivers, revenue, exceptions and SLA monitoring."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{50:'#EFF6FF',100:'#DBEAFE',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8'},ink:{900:'#0F172A',700:'#334155',500:'#64748B',400:'#94A3B8',200:'#E2E8F0',100:'#F1F5F9',50:'#F8FAFC'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/>
+<style>
+  .map-grid{background-image:linear-gradient(rgba(59,130,246,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.08) 1px,transparent 1px);background-size:32px 32px}
+  .pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .spark{stroke:#2563EB;fill:none;stroke-width:2}
+  .heat{display:grid;grid-template-columns:repeat(24,1fr);gap:2px}
+  .heat div{height:18px;border-radius:2px}
+  .ring-track{stroke:#E2E8F0;fill:none;stroke-width:8}
+  .ring-bar{fill:none;stroke-width:8;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center}
+</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div>
+    <div class="text-[11px] text-ink-500">Operations / <span class="text-ink-900">Logistics Command Center</span></div>
+    <h1 class="text-lg font-bold flex items-center gap-2">Logistics Command Center
+      <span class="pill pill-success"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block pulse mr-1"></span>Live</span>
+    </h1>
+  </div>
+  <div class="flex gap-2 items-center">
+    <select class="px-3 py-1.5 text-xs border border-ink-200 rounded-lg bg-white">
+      <option>Today</option><option>This Week</option><option>This Month</option><option>QTD</option>
+    </select>
+    <a href="create-trip.html" class="btn btn-ghost"><i class="fas fa-route"></i>New Trip</a>
+    <a href="tracking.html" class="btn btn-primary"><i class="fas fa-location-dot"></i>Live Tracking</a>
+  </div>
+</header>
+
+<div class="p-6 space-y-5">
+
+<!-- KPI strip -->
+<section class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-8 gap-3">
+  <div class="card p-4"><div class="kpi-label">Active Trips</div><div class="text-2xl font-bold text-brand-600">68</div><div class="text-[11px] text-ink-500">12 starting next 2h</div></div>
+  <div class="card p-4"><div class="kpi-label">On-Time %</div><div class="text-2xl font-bold text-emerald-600">94.2%</div><div class="text-[11px] text-ink-500">SLA target 92%</div></div>
+  <div class="card p-4"><div class="kpi-label">Fleet Utilization</div><div class="text-2xl font-bold">81%</div><div class="text-[11px] text-emerald-600">+4% WoW</div></div>
+  <div class="card p-4"><div class="kpi-label">Revenue MTD</div><div class="text-2xl font-bold">$1.24M</div><div class="text-[11px] text-emerald-600">+12.5%</div></div>
+  <div class="card p-4"><div class="kpi-label">Cost / KM</div><div class="text-2xl font-bold">$0.48</div><div class="text-[11px] text-red-600">+$0.02 vs target</div></div>
+  <div class="card p-4"><div class="kpi-label">Fuel L/100km</div><div class="text-2xl font-bold">8.2</div><div class="text-[11px] text-emerald-600">-0.3 WoW</div></div>
+  <div class="card p-4"><div class="kpi-label">Open Incidents</div><div class="text-2xl font-bold text-amber-600">7</div><div class="text-[11px] text-ink-500">2 critical</div></div>
+  <div class="card p-4"><div class="kpi-label">Driver Score</div><div class="text-2xl font-bold">88</div><div class="text-[11px] text-ink-500">5 below 70</div></div>
+</section>
+
+<!-- Map + ops queue -->
+<section class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+  <div class="card p-5 xl:col-span-2">
+    <div class="flex justify-between items-center mb-3">
+      <div><h2 class="text-sm font-bold">Live Fleet Map</h2><p class="text-[11px] text-ink-500">68 vehicles tracked · refresh 15s</p></div>
+      <div class="flex gap-2 text-[11px]">
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Active 54</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Idle 9</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span>Alert 5</span>
+      </div>
+    </div>
+    <div class="relative rounded-xl overflow-hidden map-grid bg-slate-50" style="height:340px">
+      <svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path d="M10,80 Q30,40 55,55 Q80,70 92,25" stroke="#2563EB" stroke-width=".4" fill="none" stroke-dasharray="2,1"/>
+        <path d="M8,25 Q35,55 65,30 Q85,15 95,50" stroke="#10B981" stroke-width=".4" fill="none" stroke-dasharray="2,1"/>
+        <path d="M15,50 Q45,75 70,60 Q88,48 95,75" stroke="#F59E0B" stroke-width=".4" fill="none" stroke-dasharray="2,1"/>
+      </svg>
+      <!-- vehicle dots -->
+      <div class="absolute" style="left:18%;top:64%"><div class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow pulse"></div></div>
+      <div class="absolute" style="left:32%;top:42%"><div class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow pulse"></div></div>
+      <div class="absolute" style="left:48%;top:55%"><div class="w-3 h-3 rounded-full bg-amber-500 border-2 border-white shadow"></div></div>
+      <div class="absolute" style="left:62%;top:32%"><div class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow pulse"></div></div>
+      <div class="absolute" style="left:74%;top:48%"><div class="w-3 h-3 rounded-full bg-red-500 border-2 border-white shadow pulse"></div></div>
+      <div class="absolute" style="left:84%;top:28%"><div class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow pulse"></div></div>
+      <div class="absolute" style="left:42%;top:74%"><div class="w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow"></div></div>
+      <div class="absolute" style="left:26%;top:24%"><div class="w-3 h-3 rounded-full bg-amber-500 border-2 border-white shadow"></div></div>
+      <!-- region badge -->
+      <div class="absolute top-3 left-3 bg-white/95 border border-ink-200 rounded-lg px-3 py-2 shadow text-xs">
+        <div class="font-bold">Mombasa → Nairobi Corridor</div>
+        <div class="text-ink-500">22 vehicles · avg speed 64 km/h</div>
+      </div>
+      <div class="absolute bottom-3 left-3 bg-white/95 border border-ink-200 rounded-lg px-3 py-2 shadow text-xs">
+        <div class="text-ink-500">Geofence breaches today</div><div class="font-bold text-red-600">3 events</div>
+      </div>
+      <div class="absolute top-3 right-3 flex flex-col gap-1">
+        <button class="w-8 h-8 bg-white rounded-lg shadow border border-ink-200 font-bold">+</button>
+        <button class="w-8 h-8 bg-white rounded-lg shadow border border-ink-200 font-bold">−</button>
+        <button class="w-8 h-8 bg-white rounded-lg shadow border border-ink-200"><i class="fas fa-layer-group text-xs"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-5">
+    <div class="flex justify-between items-center mb-3"><h2 class="text-sm font-bold">Ops Queue</h2><span class="pill pill-danger">12 actions</span></div>
+    <div class="space-y-2">
+      <div class="p-3 rounded-lg border border-red-200 bg-red-50">
+        <div class="flex justify-between"><div class="text-xs font-bold text-red-700">Trip TR-2026-441 delayed</div><span class="text-[10px] text-ink-500">5m</span></div>
+        <div class="text-[11px] text-ink-700">Truck T-108 stopped 42min near Voi · ETA slip 1h 20m</div>
+        <div class="flex gap-2 mt-2"><button class="btn btn-primary text-[11px] py-1">Contact driver</button><button class="btn btn-ghost text-[11px] py-1">Reassign</button></div>
+      </div>
+      <div class="p-3 rounded-lg border border-amber-200 bg-amber-50">
+        <div class="flex justify-between"><div class="text-xs font-bold text-amber-700">Geofence breach · KCA 412Y</div><span class="text-[10px] text-ink-500">12m</span></div>
+        <div class="text-[11px] text-ink-700">Off-route by 8.4 km · driver J. Mwangi</div>
+      </div>
+      <div class="p-3 rounded-lg border border-amber-200 bg-amber-50">
+        <div class="flex justify-between"><div class="text-xs font-bold text-amber-700">Low fuel · Truck T-204</div><span class="text-[10px] text-ink-500">22m</span></div>
+        <div class="text-[11px] text-ink-700">Tank 11% · 84 km to nearest depot</div>
+      </div>
+      <div class="p-3 rounded-lg border border-blue-200 bg-blue-50">
+        <div class="flex justify-between"><div class="text-xs font-bold text-blue-700">Service due · T-115</div><span class="text-[10px] text-ink-500">1h</span></div>
+        <div class="text-[11px] text-ink-700">5,000 km PM overdue by 320 km</div>
+      </div>
+      <div class="p-3 rounded-lg border border-ink-200">
+        <div class="flex justify-between"><div class="text-xs font-bold">Pending dispatch · Order ORD-7821</div><span class="text-[10px] text-ink-500">2h</span></div>
+        <div class="text-[11px] text-ink-700">Awaiting truck assignment · 12 t cargo</div>
+      </div>
+    </div>
+    <a href="orders.html" class="block text-center mt-3 text-xs text-brand-600 font-semibold">View all alerts →</a>
+  </div>
+</section>
+
+<!-- Trip pipeline + revenue -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="card p-5 lg:col-span-2">
+    <div class="flex justify-between items-center mb-3"><h2 class="text-sm font-bold">Trip Pipeline</h2><a href="complete-trips.html" class="text-xs text-brand-600 font-semibold">View archive →</a></div>
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <a href="draft-trips.html" class="p-4 rounded-lg bg-gradient-to-br from-slate-50 to-white border border-ink-200 hover:border-brand-500 transition"><div class="text-[10px] uppercase font-bold text-ink-500">Draft</div><div class="text-2xl font-bold mt-1">14</div><div class="text-[11px] text-ink-500">$48K planned</div></a>
+      <a href="pending-trips.html" class="p-4 rounded-lg bg-gradient-to-br from-blue-50 to-white border border-blue-200 hover:border-brand-600 transition"><div class="text-[10px] uppercase font-bold text-blue-600">Dispatched</div><div class="text-2xl font-bold mt-1">28</div><div class="text-[11px] text-ink-500">$184K</div></a>
+      <a href="tracking.html" class="p-4 rounded-lg bg-gradient-to-br from-amber-50 to-white border border-amber-200 hover:border-amber-600 transition"><div class="text-[10px] uppercase font-bold text-amber-600">In Transit</div><div class="text-2xl font-bold mt-1">40</div><div class="text-[11px] text-ink-500">$312K</div></a>
+      <a href="complete-trips.html" class="p-4 rounded-lg bg-gradient-to-br from-emerald-50 to-white border border-emerald-200 hover:border-emerald-600 transition"><div class="text-[10px] uppercase font-bold text-emerald-600">Delivered</div><div class="text-2xl font-bold mt-1">132</div><div class="text-[11px] text-ink-500">$1.02M</div></a>
+      <a href="invoices-all.html" class="p-4 rounded-lg bg-gradient-to-br from-purple-50 to-white border border-purple-200 hover:border-purple-600 transition"><div class="text-[10px] uppercase font-bold text-purple-600">Invoiced</div><div class="text-2xl font-bold mt-1">118</div><div class="text-[11px] text-ink-500">$948K</div></a>
+    </div>
+    <div class="mt-5">
+      <div class="flex justify-between items-center mb-2"><div class="text-xs font-bold">Daily Trip Volume · last 14 days</div><div class="text-[11px] text-ink-500">Avg 24/day</div></div>
+      <svg viewBox="0 0 280 70" class="w-full h-20">
+        <polyline class="spark" points="0,50 20,42 40,46 60,30 80,38 100,22 120,28 140,18 160,24 180,12 200,20 220,14 240,22 260,10"/>
+        <g fill="#2563EB">
+          <circle cx="260" cy="10" r="3"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Revenue & Margin</h2>
+    <div class="flex items-baseline gap-2"><div class="text-3xl font-bold">$1.24M</div><div class="text-xs text-emerald-600 font-semibold">+12.5%</div></div>
+    <div class="text-[11px] text-ink-500 mb-3">MTD revenue · target $1.4M</div>
+    <div class="w-full bg-ink-100 rounded-full h-2 mb-4"><div class="bg-brand-600 h-2 rounded-full" style="width:88%"></div></div>
+    <div class="space-y-2">
+      <div class="flex justify-between text-xs py-1.5 border-b border-ink-100"><span class="text-ink-500">Gross margin</span><span class="font-bold">32.4%</span></div>
+      <div class="flex justify-between text-xs py-1.5 border-b border-ink-100"><span class="text-ink-500">Fuel cost</span><span class="font-bold">$248K</span></div>
+      <div class="flex justify-between text-xs py-1.5 border-b border-ink-100"><span class="text-ink-500">Driver wages</span><span class="font-bold">$184K</span></div>
+      <div class="flex justify-between text-xs py-1.5 border-b border-ink-100"><span class="text-ink-500">Maintenance</span><span class="font-bold">$92K</span></div>
+      <div class="flex justify-between text-xs py-1.5"><span class="text-ink-500">Tolls & permits</span><span class="font-bold">$38K</span></div>
+    </div>
+    <a href="reports.html" class="block text-center mt-3 text-xs text-brand-600 font-semibold">Open finance reports →</a>
+  </div>
+</section>
+
+<!-- Fleet health rings + heatmap -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Fleet Health</h2>
+    <div class="grid grid-cols-3 gap-3 text-center">
+      <div>
+        <svg viewBox="0 0 80 80" class="w-20 h-20 mx-auto"><circle class="ring-track" cx="40" cy="40" r="32"/><circle class="ring-bar" cx="40" cy="40" r="32" stroke="#10B981" stroke-dasharray="201" stroke-dashoffset="32"/></svg>
+        <div class="text-xs font-bold mt-1">Roadworthy</div><div class="text-[11px] text-ink-500">84%</div>
+      </div>
+      <div>
+        <svg viewBox="0 0 80 80" class="w-20 h-20 mx-auto"><circle class="ring-track" cx="40" cy="40" r="32"/><circle class="ring-bar" cx="40" cy="40" r="32" stroke="#F59E0B" stroke-dasharray="201" stroke-dashoffset="120"/></svg>
+        <div class="text-xs font-bold mt-1">In Service</div><div class="text-[11px] text-ink-500">40%</div>
+      </div>
+      <div>
+        <svg viewBox="0 0 80 80" class="w-20 h-20 mx-auto"><circle class="ring-track" cx="40" cy="40" r="32"/><circle class="ring-bar" cx="40" cy="40" r="32" stroke="#EF4444" stroke-dasharray="201" stroke-dashoffset="170"/></svg>
+        <div class="text-xs font-bold mt-1">Off-Road</div><div class="text-[11px] text-ink-500">15%</div>
+      </div>
+    </div>
+    <div class="mt-4 space-y-2 text-xs">
+      <a href="breakdowns.html" class="flex justify-between py-1.5 border-b border-ink-100"><span class="text-ink-500"><i class="fas fa-triangle-exclamation text-amber-500 mr-1"></i>Breakdowns this week</span><span class="font-bold">6</span></a>
+      <a href="accidents.html" class="flex justify-between py-1.5 border-b border-ink-100"><span class="text-ink-500"><i class="fas fa-car-burst text-red-500 mr-1"></i>Accidents MTD</span><span class="font-bold">2</span></a>
+      <a href="parts.html" class="flex justify-between py-1.5"><span class="text-ink-500"><i class="fas fa-wrench text-blue-500 mr-1"></i>PM due next 7 days</span><span class="font-bold">11</span></a>
+    </div>
+  </div>
+
+  <div class="card p-5 lg:col-span-2">
+    <div class="flex justify-between items-center mb-3"><h2 class="text-sm font-bold">Dispatch Heatmap · Last 7 Days × 24h</h2><div class="text-[11px] text-ink-500">Trips dispatched</div></div>
+    <div class="space-y-1">
+      <script>document.write(['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>{
+        let cells='';for(let h=0;h<24;h++){const v=Math.floor(Math.random()*100);
+          const c=v<20?'#EFF6FF':v<40?'#BFDBFE':v<60?'#60A5FA':v<80?'#2563EB':'#1D4ED8';
+          cells+=`<div style="background:${c}" title="${d} ${h}:00 · ${v}"></div>`;}
+        return `<div class="flex items-center gap-2"><div class="w-8 text-[10px] text-ink-500">${d}</div><div class="heat flex-1">${cells}</div></div>`;
+      }).join(''));</script>
+    </div>
+    <div class="flex items-center gap-2 mt-3 text-[10px] text-ink-500"><span>Less</span>
+      <div class="flex gap-0.5"><div class="w-3 h-3 rounded-sm" style="background:#EFF6FF"></div><div class="w-3 h-3 rounded-sm" style="background:#BFDBFE"></div><div class="w-3 h-3 rounded-sm" style="background:#60A5FA"></div><div class="w-3 h-3 rounded-sm" style="background:#2563EB"></div><div class="w-3 h-3 rounded-sm" style="background:#1D4ED8"></div></div>
+      <span>More</span><span class="ml-auto">Peak window: Tue 08:00–11:00</span>
+    </div>
+  </div>
+</section>
+
+<!-- Active trips table + driver leaderboard -->
+<section class="grid grid-cols-1 xl:grid-cols-3 gap-5">
+  <div class="card p-5 xl:col-span-2">
+    <div class="flex justify-between items-center mb-3"><h2 class="text-sm font-bold">Active Trips</h2><a href="tracking.html" class="text-xs text-brand-600 font-semibold">Live tracking →</a></div>
+    <table class="tbl">
+      <thead><tr><th>Trip</th><th>Vehicle</th><th>Driver</th><th>Route</th><th>Progress</th><th>ETA</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-441</a></td><td>T-108 / KCA 412Y</td><td>J. Mwangi</td><td>Mombasa → Nairobi</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-red-500 h-1.5 rounded-full" style="width:62%"></div></div></td><td>+1h 20m</td><td><span class="pill pill-danger">Delayed</span></td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-440</a></td><td>T-204 / KDA 781P</td><td>S. Otieno</td><td>Nairobi → Eldoret</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:84%"></div></div></td><td>14:20</td><td><span class="pill pill-success">On Time</span></td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-439</a></td><td>T-115 / KBZ 902M</td><td>P. Wanjiru</td><td>Kisumu → Nakuru</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:48%"></div></div></td><td>16:05</td><td><span class="pill pill-success">On Time</span></td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-438</a></td><td>T-101 / KAA 117X</td><td>M. Kamau</td><td>Mombasa → Kampala</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-amber-500 h-1.5 rounded-full" style="width:31%"></div></div></td><td>Tomorrow 09:00</td><td><span class="pill pill-warning">At Risk</span></td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-437</a></td><td>T-220 / KDB 558Q</td><td>A. Hassan</td><td>Nairobi → Arusha</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:92%"></div></div></td><td>13:10</td><td><span class="pill pill-success">Arriving</span></td></tr>
+        <tr><td class="text-brand-600 font-semibold"><a href="trip-view.html">TR-2026-436</a></td><td>T-309 / KDC 219R</td><td>L. Achieng</td><td>Nakuru → Mombasa</td><td><div class="w-24 bg-ink-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width:24%"></div></div></td><td>22:40</td><td><span class="pill pill-primary">In Transit</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card p-5">
+    <div class="flex justify-between items-center mb-3"><h2 class="text-sm font-bold">Top Drivers</h2><a href="drivers.html" class="text-xs text-brand-600 font-semibold">All drivers →</a></div>
+    <div class="space-y-3">
+      <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">SO</div><div class="flex-1"><div class="text-xs font-bold">S. Otieno</div><div class="text-[10px] text-ink-500">42 trips · 0 incidents</div></div><div class="text-sm font-bold text-emerald-600">96</div></div>
+      <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold">PW</div><div class="flex-1"><div class="text-xs font-bold">P. Wanjiru</div><div class="text-[10px] text-ink-500">38 trips · 1 minor</div></div><div class="text-sm font-bold text-emerald-600">94</div></div>
+      <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">MK</div><div class="flex-1"><div class="text-xs font-bold">M. Kamau</div><div class="text-[10px] text-ink-500">35 trips · 1 minor</div></div><div class="text-sm font-bold text-blue-600">91</div></div>
+      <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">AH</div><div class="flex-1"><div class="text-xs font-bold">A. Hassan</div><div class="text-[10px] text-ink-500">31 trips · 0 incidents</div></div><div class="text-sm font-bold text-blue-600">90</div></div>
+      <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">JM</div><div class="flex-1"><div class="text-xs font-bold">J. Mwangi</div><div class="text-[10px] text-ink-500">28 trips · 2 incidents</div></div><div class="text-sm font-bold text-amber-600">74</div></div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-ink-100">
+      <div class="text-[10px] uppercase font-bold text-ink-500 mb-2">Compliance</div>
+      <div class="flex justify-between text-xs py-1"><span class="text-ink-500">Licenses expiring (30d)</span><span class="font-bold text-amber-600">4</span></div>
+      <div class="flex justify-between text-xs py-1"><span class="text-ink-500">Medicals overdue</span><span class="font-bold text-red-600">2</span></div>
+      <div class="flex justify-between text-xs py-1"><span class="text-ink-500">Hours-of-service breaches</span><span class="font-bold">1</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- Top routes + clients + exceptions -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Top Routes</h2>
+    <table class="tbl">
+      <thead><tr><th>Lane</th><th>Trips</th><th>Rev</th></tr></thead>
+      <tbody>
+        <tr><td>Mombasa → Nairobi</td><td>54</td><td>$412K</td></tr>
+        <tr><td>Nairobi → Kampala</td><td>28</td><td>$248K</td></tr>
+        <tr><td>Mombasa → Kigali</td><td>18</td><td>$196K</td></tr>
+        <tr><td>Nairobi → Eldoret</td><td>32</td><td>$148K</td></tr>
+        <tr><td>Nakuru → Mombasa</td><td>22</td><td>$118K</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Top Clients</h2>
+    <div class="space-y-3">
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-bold">Bidco Africa</span><span>$284K</span></div><div class="w-full bg-ink-100 rounded-full h-1.5"><div class="bg-brand-600 h-1.5 rounded-full" style="width:92%"></div></div></div>
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-bold">Unilever EA</span><span>$218K</span></div><div class="w-full bg-ink-100 rounded-full h-1.5"><div class="bg-brand-600 h-1.5 rounded-full" style="width:74%"></div></div></div>
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-bold">EABL</span><span>$182K</span></div><div class="w-full bg-ink-100 rounded-full h-1.5"><div class="bg-brand-600 h-1.5 rounded-full" style="width:62%"></div></div></div>
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-bold">Bamburi Cement</span><span>$148K</span></div><div class="w-full bg-ink-100 rounded-full h-1.5"><div class="bg-brand-600 h-1.5 rounded-full" style="width:50%"></div></div></div>
+      <div><div class="flex justify-between text-xs mb-1"><span class="font-bold">Mabati Rolling</span><span>$112K</span></div><div class="w-full bg-ink-100 rounded-full h-1.5"><div class="bg-brand-600 h-1.5 rounded-full" style="width:38%"></div></div></div>
+    </div>
+    <a href="clients-list.html" class="block text-center mt-3 text-xs text-brand-600 font-semibold">All clients →</a>
+  </div>
+  <div class="card p-5">
+    <h2 class="text-sm font-bold mb-3">Exceptions Mix</h2>
+    <div class="space-y-2">
+      <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-red-500"></div><div class="flex-1 text-xs">Late arrival</div><div class="text-xs font-bold">12</div></div>
+      <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-amber-500"></div><div class="flex-1 text-xs">Geofence breach</div><div class="text-xs font-bold">8</div></div>
+      <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-blue-500"></div><div class="flex-1 text-xs">Excess idle</div><div class="text-xs font-bold">14</div></div>
+      <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-purple-500"></div><div class="flex-1 text-xs">Harsh braking</div><div class="text-xs font-bold">9</div></div>
+      <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-pink-500"></div><div class="flex-1 text-xs">Speeding</div><div class="text-xs font-bold">6</div></div>
+      <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500"></div><div class="flex-1 text-xs">Unauthorized stop</div><div class="text-xs font-bold">4</div></div>
+    </div>
+    <div class="mt-4 pt-3 border-t border-ink-100">
+      <div class="text-[10px] uppercase font-bold text-ink-500 mb-2">Quick Links</div>
+      <div class="grid grid-cols-2 gap-2">
+        <a href="breakdowns.html" class="text-xs text-brand-600 font-semibold p-2 rounded bg-ink-50">Breakdowns</a>
+        <a href="accidents.html" class="text-xs text-brand-600 font-semibold p-2 rounded bg-ink-50">Accidents</a>
+        <a href="parking-yard.html" class="text-xs text-brand-600 font-semibold p-2 rounded bg-ink-50">Yard</a>
+        <a href="invoices-uninvoiced.html" class="text-xs text-brand-600 font-semibold p-2 rounded bg-ink-50">Uninvoiced</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+<script src="store-sidebar.js"></script>
+<script>renderStoreSidebar('logCmd');</script>
+</body></html>
