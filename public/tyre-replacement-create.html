@@ -38,26 +38,7 @@
 </head>
 <body>
 
-<aside class="sidebar">
-  <div class="px-4 py-4 flex items-center gap-2 border-b border-slate-800">
-    <div class="w-9 h-9 rounded-lg bg-brand-600 flex items-center justify-center text-white"><i class="fas fa-truck-fast"></i></div>
-    <div><div class="text-white font-bold text-sm">FleetCtrl</div><div class="text-[10px] text-slate-500 uppercase tracking-wider">ERP Suite</div></div>
-  </div>
-  <nav class="px-2 py-3 flex-1 overflow-y-auto">
-    <a href="dashboard.html" class="nav-link"><i class="fas fa-gauge-high w-4"></i>Dashboard</a>
-    <div class="nav-section">Workshop</div>
-    <a href="parts.html" class="nav-link"><i class="fas fa-gears w-4"></i>Parts</a>
-    <button class="dropdown-btn open" onclick="this.classList.toggle('open');document.getElementById('tyresDD').classList.toggle('open');"><i class="fas fa-circle-notch w-4"></i><span style="flex:1">Tyre Management</span><i class="fas fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items open" id="tyresDD">
-      <a href="tyres.html" class="sub-link"><i class="fas fa-house w-4"></i>Command Center</a>
-      <a href="tyres-archive.html" class="sub-link"><i class="fas fa-warehouse w-4"></i>Tyre Register</a>
-      <a href="tyres-fitment.html" class="sub-link"><i class="fas fa-truck-monster w-4"></i>Vehicle Fitment</a>
-      <a href="tyres-inspection.html" class="sub-link"><i class="fas fa-clipboard-check w-4"></i>Inspections</a>
-      <a href="tyres-rotation.html" class="sub-link active"><i class="fas fa-rotate w-4"></i>Rotation & Replace</a>
-      <a href="tyre-detail.html" class="sub-link"><i class="fas fa-magnifying-glass-chart w-4"></i>Tyre Lifecycle</a>
-    </div>
-  </nav>
-</aside>
+<aside class="sidebar" id="sidebar"></aside>
 
 <main class="main">
   <div class="px-6 pt-6 pb-4 bg-gradient-to-r from-brand-700 to-brand-500 text-white">
@@ -222,5 +203,6 @@
     $('pDest').textContent={retread:'Retread Vendor queue',scrap:'Scrap-yard register',warranty:'Warranty claim queue',resell:'Used-tyre resale stock'}[d];
   }));
 </script>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar("repl");</script>
 </body>
 </html>

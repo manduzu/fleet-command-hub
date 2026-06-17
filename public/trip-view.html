@@ -82,40 +82,7 @@
 <body>
 
 <!-- ========== SIDEBAR ========== -->
-<aside class="sidebar">
-  <div style="padding:1rem 1rem .75rem;border-bottom:1px solid #1E293B;display:flex;align-items:center;gap:.75rem;">
-    <div style="width:2rem;height:2rem;background:#2563EB;border-radius:.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-truck" style="color:#fff;font-size:.8rem;"></i></div>
-    <div><div style="color:#fff;font-weight:700;font-size:1rem;">FleetCtrl</div><div style="color:#64748B;font-size:.7rem;">Logistics Hub</div></div>
-  </div>
-  <nav style="padding:.75rem .5rem;flex:1;overflow-y:auto;">
-    <div class="nav-section">Main Menu</div>
-    <a href="dashboard.html" class="nav-link"><i class="fa-solid fa-gauge-high fa-fw"></i>Dashboard</a>
-    <a href="tracking.html" class="nav-link"><i class="fa-solid fa-location-dot fa-fw"></i>Tracking</a>
-    <a href="orders.html" class="nav-link"><i class="fa-solid fa-cart-shopping fa-fw"></i>Orders</a>
-    <a href="reports.html" class="nav-link"><i class="fa-solid fa-chart-bar fa-fw"></i>Reports</a>
-
-    <div class="nav-section">Logistics</div>
-    <button class="dropdown-btn open" onclick="toggleDD('logistics')"><i class="fa-solid fa-truck-fast fa-fw"></i><span style="flex:1">Logistics</span><i class="fa-solid fa-chevron-down" style="font-size:.65rem;"></i></button>
-    <div class="dropdown-items open" id="logistics">
-      <a href="create-trip.html" class="sub-link"><i class="fa-solid fa-plus fa-fw"></i>Create Trip</a>
-      <a href="draft-trips.html" class="sub-link"><i class="fa-solid fa-file-pen fa-fw"></i>Draft Trips</a>
-      <a href="pending-trips.html" class="sub-link active"><i class="fa-solid fa-clock fa-fw"></i>Pending Trips</a>
-      <a href="complete-trips.html" class="sub-link"><i class="fa-solid fa-circle-check fa-fw"></i>Complete Trips</a>
-    </div>
-
-    <div class="nav-section">Fleet</div>
-    <a href="fleet-management.html" class="nav-link"><i class="fa-solid fa-truck-moving fa-fw"></i>Fleet Management</a>
-    <a href="trucks.html" class="nav-link"><i class="fa-solid fa-truck fa-fw"></i>Trucks</a>
-    <a href="trailers.html" class="nav-link"><i class="fa-solid fa-trailer fa-fw"></i>Trailers</a>
-    <a href="drivers.html" class="nav-link"><i class="fa-solid fa-id-badge fa-fw"></i>Drivers</a>
-    <a href="tyres.html" class="nav-link"><i class="fa-solid fa-circle-dot fa-fw"></i>Tyre Management</a>
-    <a href="parts.html" class="nav-link"><i class="fa-solid fa-wrench fa-fw"></i>Parts</a>
-    <a href="parking-yard.html" class="nav-link"><i class="fa-solid fa-square-parking fa-fw"></i>Parking Yard</a>
-
-    <div class="nav-section">Clients</div>
-    <a href="client-directory.html" class="nav-link"><i class="fa-solid fa-building fa-fw"></i>Client Directory</a>
-  </nav>
-</aside>
+<aside class="sidebar" id="sidebar"></aside>
 
 <div class="main">
   <!-- Header -->
@@ -568,5 +535,6 @@ document.querySelectorAll('.tab').forEach(function(t){
   });
 });
 </script>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar("");</script>
 </body>
 </html>
