@@ -38,6 +38,7 @@ function _renderFleetSidebar(active){
     </button>
     <div class="dropdown-items ${['trucks','trailers','drivers','fmgmt','yard'].includes(active)?'open':''}" id="fleetDD">
       <a href="trucks.html" class="sub-link ${A('trucks')}"><i class="fas fa-truck w-4 fa-fw"></i>Trucks</a>
+      <a href="fleet-show.html" class="sub-link ${A('fshow')}"><i class="fas fa-circle-info w-4 fa-fw"></i>Vehicle 360°</a>
       <a href="trailers.html" class="sub-link ${A('trailers')}"><i class="fas fa-trailer w-4 fa-fw"></i>Trailers</a>
       <a href="drivers.html" class="sub-link ${A('drivers')}"><i class="fas fa-id-card w-4 fa-fw"></i>Drivers</a>
       <a href="fleet-management.html" class="sub-link ${A('fmgmt')}"><i class="fas fa-sliders w-4 fa-fw"></i>Fleet Management</a>
