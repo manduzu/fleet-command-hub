@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Truck T-101 — Vehicle 360° — FleetCtrl</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="store-theme.css" />
+  <style>
+    body { font-family: system-ui,-apple-system,sans-serif; background:#F1F5F9; color:#0F172A; }
+    .card { background:#fff; border-radius:1rem; box-shadow:0 1px 4px rgba(0,0,0,.07); border:1px solid #E2E8F0; }
+    .sidebar { width:240px; min-height:100vh; background:#0F172A; position:fixed; top:0; left:0; z-index:40; display:flex; flex-direction:column; overflow-y:auto; }
+    .nav-link { display:flex; align-items:center; gap:.75rem; padding:.6rem 1rem; border-radius:.6rem; color:#94A3B8; font-size:.875rem; font-weight:500; text-decoration:none; }
+    .nav-link:hover { background:#1E293B; color:#fff; }
+    .nav-link.active { background:#1D4ED8; color:#fff; }
+    .nav-section { font-size:.65rem; font-weight:700; letter-spacing:.1em; color:#475569; text-transform:uppercase; padding:1rem 1rem .25rem; }
+    .dropdown-btn{display:flex;align-items:center;gap:.75rem;width:100%;padding:.6rem 1rem;border-radius:.6rem;color:#94A3B8;font-size:.875rem;font-weight:500;background:transparent;border:none;cursor:pointer;text-align:left;}
+    .dropdown-btn:hover{background:#1E293B;color:#fff;} .dropdown-btn.open{color:#fff;background:#1E293B;}
+    .dropdown-items{display:none;padding-left:1.5rem;} .dropdown-items.open{display:block;}
+    .sub-link{display:flex;align-items:center;gap:.5rem;padding:.45rem .75rem;border-radius:.5rem;color:#94A3B8;font-size:.8rem;text-decoration:none;}
+    .sub-link:hover{background:#1E293B;color:#fff;} .sub-link.active{color:#60A5FA;}
+    .main { margin-left:240px; }
+    .pill { display:inline-flex; align-items:center; gap:.3rem; font-size:.7rem; font-weight:600; padding:.25rem .6rem; border-radius:999px; }
+    .pill-success{background:#D1FAE5;color:#065F46}.pill-warn{background:#FEF3C7;color:#92400E}.pill-danger{background:#FEE2E2;color:#991B1B}.pill-info{background:#DBEAFE;color:#1D4ED8}.pill-muted{background:#F1F5F9;color:#475569}
+    .tab-btn { padding:.65rem 1rem; font-size:.8rem; font-weight:600; color:#64748B; border-bottom:2px solid transparent; cursor:pointer; white-space:nowrap; }
+    .tab-btn.active { color:#1D4ED8; border-color:#1D4ED8; }
+    .tab-pane { display:none; } .tab-pane.active { display:block; }
+    table { width:100%; border-collapse:collapse; font-size:.8rem; }
+    th { text-align:left; font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:#64748B; padding:.6rem .75rem; background:#F8FAFC; border-bottom:1px solid #E2E8F0; }
+    td { padding:.7rem .75rem; border-bottom:1px solid #F1F5F9; color:#334155; }
+    tr:hover td { background:#F8FAFC; }
+    .kpi { padding:1rem; }
+    .kpi .v { font-size:1.35rem; font-weight:700; color:#0F172A; }
+    .kpi .l { font-size:.7rem; color:#64748B; text-transform:uppercase; letter-spacing:.05em; margin-top:.15rem; }
+    .spec-row { display:flex; justify-content:space-between; padding:.5rem 0; border-bottom:1px dashed #E2E8F0; font-size:.8rem; }
+    .spec-row:last-child{border-bottom:none}
+    .spec-row .k { color:#64748B; } .spec-row .v { color:#0F172A; font-weight:600; }
+    .axle { width:48px;height:18px;border-radius:4px;background:#334155;position:relative; }
+    .tyre-pos { position:absolute; width:18px; height:18px; border-radius:50%; background:#1E293B; border:2px solid #fff; cursor:pointer; }
+    .tyre-pos.good{background:#10B981} .tyre-pos.warn{background:#F59E0B} .tyre-pos.bad{background:#EF4444}
+    .timeline { position:relative; padding-left:1.25rem; }
+    .timeline::before { content:''; position:absolute; left:.35rem; top:.25rem; bottom:.25rem; width:2px; background:#E2E8F0; }
+    .tl-item { position:relative; padding-bottom:1rem; }
+    .tl-item::before { content:''; position:absolute; left:-1.05rem; top:.35rem; width:.7rem; height:.7rem; border-radius:50%; background:#3B82F6; border:2px solid #fff; box-shadow:0 0 0 2px #3B82F6; }
+    .tl-item.warn::before{background:#F59E0B;box-shadow:0 0 0 2px #F59E0B}
+    .tl-item.danger::before{background:#EF4444;box-shadow:0 0 0 2px #EF4444}
+    .tl-item.ok::before{background:#10B981;box-shadow:0 0 0 2px #10B981}
+    .donut { transform:rotate(-90deg); }
+    .donut .bg { fill:none; stroke:#E2E8F0; stroke-width:10; }
+    .donut .fg { fill:none; stroke-width:10; stroke-linecap:round; }
+    .bar { height:6px; background:#E2E8F0; border-radius:999px; overflow:hidden; }
+    .bar > span { display:block; height:100%; border-radius:999px; }
+    .qa { display:flex; align-items:center; gap:.5rem; padding:.55rem .75rem; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:.6rem; font-size:.78rem; font-weight:600; color:#334155; text-decoration:none; }
+    .qa:hover{ background:#EFF6FF; color:#1D4ED8; border-color:#BFDBFE; }
+    @media(max-width:900px){ .sidebar{display:none} .main{margin-left:0} }
+  </style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+
+<div class="main">
+  <!-- Top bar -->
+  <header style="height:4rem;background:#fff;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;padding:0 1.5rem;position:sticky;top:0;z-index:30;">
+    <a href="trucks.html" style="color:#64748B;font-size:.8rem;text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> Trucks</a>
+    <span style="color:#CBD5E1;margin:0 .6rem;">/</span>
+    <span style="font-size:.85rem;font-weight:600;color:#0F172A;">T-101 · Volvo FH16</span>
+    <div style="margin-left:auto;display:flex;gap:.5rem;align-items:center;">
+      <button class="qa"><i class="fa-solid fa-print"></i>Print 360°</button>
+      <button class="qa"><i class="fa-solid fa-file-export"></i>Export PDF</button>
+      <a href="fleet-management.html" class="qa" style="background:#1D4ED8;color:#fff;border-color:#1D4ED8;"><i class="fa-solid fa-pen"></i>Edit Vehicle</a>
+    </div>
+  </header>
+
+  <main style="padding:1.25rem 1.5rem 3rem;">
+
+    <!-- Hero -->
+    <div class="card" style="padding:1.25rem;display:grid;grid-template-columns:260px 1fr 260px;gap:1.25rem;align-items:center;margin-bottom:1rem;">
+      <!-- Truck illustration -->
+      <div style="display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:.75rem;padding:1rem;height:160px;">
+        <i class="fa-solid fa-truck-moving" style="font-size:5rem;color:#1D4ED8;"></i>
+      </div>
+      <div>
+        <div style="display:flex;gap:.5rem;align-items:center;margin-bottom:.35rem;">
+          <span class="pill pill-success"><i class="fa-solid fa-circle" style="font-size:.4rem;"></i>Active · In Transit</span>
+          <span class="pill pill-info">Volvo FH16 · 2021</span>
+          <span class="pill pill-muted">VIN YV2RT8XA9MA123456</span>
+        </div>
+        <h1 style="font-size:1.65rem;font-weight:700;margin:0;">Truck T-101</h1>
+        <p style="color:#64748B;font-size:.85rem;margin:.25rem 0 .75rem;">Plate <b style="color:#0F172A">MH 12 AD 1234</b> · Driver <a href="drivers.html" style="color:#1D4ED8;font-weight:600;">John Doe</a> · Yard <a href="parking-yard.html" style="color:#1D4ED8;font-weight:600;">Alpha</a></p>
+        <div style="display:flex;gap:.45rem;flex-wrap:wrap;">
+          <a class="qa" href="create-trip.html?vehicle=T-101"><i class="fa-solid fa-route"></i>New Trip</a>
+          <a class="qa" href="jobcards.html?vehicle=T-101"><i class="fa-solid fa-screwdriver-wrench"></i>Open Jobcard</a>
+          <a class="qa" href="breakdowns.html?vehicle=T-101"><i class="fa-solid fa-triangle-exclamation"></i>Log Breakdown</a>
+          <a class="qa" href="tracking.html?vehicle=T-101"><i class="fa-solid fa-location-dot"></i>Live Track</a>
+          <a class="qa" href="tyre-replacement-create.html?vehicle=T-101"><i class="fa-solid fa-circle-notch"></i>Replace Tyre</a>
+        </div>
+      </div>
+      <!-- Health donut -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <svg class="donut" width="130" height="130" viewBox="0 0 120 120">
+          <circle class="bg" cx="60" cy="60" r="50"/>
+          <circle class="fg" cx="60" cy="60" r="50" stroke="#10B981" stroke-dasharray="314" stroke-dashoffset="60"/>
+        </svg>
+        <div style="margin-top:-95px;text-align:center;font-weight:700;">
+          <div style="font-size:1.5rem;color:#0F172A;">81%</div>
+          <div style="font-size:.7rem;color:#64748B;text-transform:uppercase;letter-spacing:.05em">Fleet Health</div>
+        </div>
+        <div style="margin-top:50px;display:flex;gap:.4rem;">
+          <span class="pill pill-success">Roadworthy</span>
+          <span class="pill pill-warn">Service due 1,200 km</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPI strip -->
+    <div class="card" style="display:grid;grid-template-columns:repeat(6,1fr);margin-bottom:1rem;">
+      <div class="kpi" style="border-right:1px solid #E2E8F0"><div class="v">142,300 <span style="font-size:.7rem;color:#64748B">km</span></div><div class="l">Odometer</div></div>
+      <div class="kpi" style="border-right:1px solid #E2E8F0"><div class="v">3.42 <span style="font-size:.7rem;color:#64748B">km/L</span></div><div class="l">Fuel Avg (30d)</div></div>
+      <div class="kpi" style="border-right:1px solid #E2E8F0"><div class="v">94.2%</div><div class="l">On-Time SLA</div></div>
+      <div class="kpi" style="border-right:1px solid #E2E8F0"><div class="v">$ 0.42 <span style="font-size:.7rem;color:#64748B">/km</span></div><div class="l">Op Cost</div></div>
+      <div class="kpi" style="border-right:1px solid #E2E8F0"><div class="v">187</div><div class="l">Trips (YTD)</div></div>
+      <div class="kpi"><div class="v">$ 248,510</div><div class="l">Revenue (YTD)</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;gap:.25rem;overflow-x:auto;border-bottom:1px solid #E2E8F0;padding:0 .5rem;">
+        <div class="tab-btn active" data-tab="overview"><i class="fa-solid fa-gauge-high"></i> Overview</div>
+        <div class="tab-btn" data-tab="trips"><i class="fa-solid fa-route"></i> Trips</div>
+        <div class="tab-btn" data-tab="fuel"><i class="fa-solid fa-gas-pump"></i> Fuel</div>
+        <div class="tab-btn" data-tab="maint"><i class="fa-solid fa-screwdriver-wrench"></i> Maintenance</div>
+        <div class="tab-btn" data-tab="jobs"><i class="fa-solid fa-clipboard-list"></i> Jobcards & Spares</div>
+        <div class="tab-btn" data-tab="tyres"><i class="fa-solid fa-circle-notch"></i> Tyres</div>
+        <div class="tab-btn" data-tab="incidents"><i class="fa-solid fa-triangle-exclamation"></i> Breakdowns & Accidents</div>
+        <div class="tab-btn" data-tab="expenses"><i class="fa-solid fa-coins"></i> Expenses</div>
+        <div class="tab-btn" data-tab="insurance"><i class="fa-solid fa-shield-halved"></i> Insurance & Docs</div>
+        <div class="tab-btn" data-tab="driver"><i class="fa-solid fa-id-card"></i> Driver & Assignment</div>
+        <div class="tab-btn" data-tab="timeline"><i class="fa-solid fa-clock-rotate-left"></i> Lifecycle Timeline</div>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div class="tab-pane active" id="tab-overview" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:1rem;">
+          <!-- Specs -->
+          <div>
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;"><i class="fa-solid fa-clipboard-check" style="color:#1D4ED8"></i> Identity & Specs</h3>
+            <div class="card" style="padding:1rem;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1.5rem;">
+                <div class="spec-row"><span class="k">Asset ID</span><span class="v">T-101</span></div>
+                <div class="spec-row"><span class="k">Type</span><span class="v">Prime Mover 6×4</span></div>
+                <div class="spec-row"><span class="k">Make / Model</span><span class="v">Volvo FH16</span></div>
+                <div class="spec-row"><span class="k">Year</span><span class="v">2021</span></div>
+                <div class="spec-row"><span class="k">Engine</span><span class="v">D16K 750 hp</span></div>
+                <div class="spec-row"><span class="k">Transmission</span><span class="v">I-Shift 12-spd</span></div>
+                <div class="spec-row"><span class="k">GVW</span><span class="v">42,000 kg</span></div>
+                <div class="spec-row"><span class="k">Tank Capacity</span><span class="v">600 L</span></div>
+                <div class="spec-row"><span class="k">Chassis #</span><span class="v">CH-99213</span></div>
+                <div class="spec-row"><span class="k">Engine #</span><span class="v">EN-71542</span></div>
+                <div class="spec-row"><span class="k">Reg Date</span><span class="v">14 Mar 2021</span></div>
+                <div class="spec-row"><span class="k">Purchase Price</span><span class="v">$ 162,400</span></div>
+                <div class="spec-row"><span class="k">Book Value</span><span class="v">$ 118,900</span></div>
+                <div class="spec-row"><span class="k">Depreciation</span><span class="v">$ 9,800/yr</span></div>
+              </div>
+            </div>
+
+            <h3 style="font-size:.85rem;font-weight:700;margin:1rem 0 .5rem;"><i class="fa-solid fa-link" style="color:#1D4ED8"></i> Linked Assets</h3>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;">
+              <a href="trailers.html?id=TR-204" class="card" style="padding:.85rem;text-decoration:none;color:inherit;">
+                <div style="font-size:.65rem;color:#64748B;text-transform:uppercase;">Hitched Trailer</div>
+                <div style="font-weight:700;font-size:.95rem;color:#0F172A;margin-top:.15rem;"><i class="fa-solid fa-trailer" style="color:#1D4ED8"></i> TR-204</div>
+                <div style="font-size:.7rem;color:#64748B;">Flatbed · 40 ft</div>
+              </a>
+              <a href="drivers.html?id=D-12" class="card" style="padding:.85rem;text-decoration:none;color:inherit;">
+                <div style="font-size:.65rem;color:#64748B;text-transform:uppercase;">Primary Driver</div>
+                <div style="font-weight:700;font-size:.95rem;color:#0F172A;margin-top:.15rem;"><i class="fa-solid fa-user" style="color:#1D4ED8"></i> John Doe</div>
+                <div style="font-size:.7rem;color:#64748B;">Lic A-Class · Exp 2027</div>
+              </a>
+              <a href="orders.html?vehicle=T-101" class="card" style="padding:.85rem;text-decoration:none;color:inherit;">
+                <div style="font-size:.65rem;color:#64748B;text-transform:uppercase;">Active Order</div>
+                <div style="font-weight:700;font-size:.95rem;color:#0F172A;margin-top:.15rem;"><i class="fa-solid fa-cart-shopping" style="color:#1D4ED8"></i> ORD-7724</div>
+                <div style="font-size:.7rem;color:#64748B;">Acme Logistics · 28t</div>
+              </a>
+            </div>
+          </div>
+
+          <!-- Live snapshot -->
+          <div>
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;"><i class="fa-solid fa-satellite-dish" style="color:#1D4ED8"></i> Live Snapshot</h3>
+            <div class="card" style="padding:1rem;">
+              <div style="height:140px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:.6rem;display:flex;align-items:center;justify-content:center;position:relative;">
+                <i class="fa-solid fa-map-location-dot" style="font-size:3rem;color:#1D4ED8;opacity:.4"></i>
+                <div style="position:absolute;bottom:.5rem;left:.5rem;background:#fff;padding:.3rem .55rem;border-radius:.4rem;font-size:.7rem;font-weight:600;">Highway 101 · Mi 23</div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.75rem;font-size:.75rem;">
+                <div><div style="color:#64748B">Speed</div><div style="font-weight:700;color:#0F172A">65 mph</div></div>
+                <div><div style="color:#64748B">Heading</div><div style="font-weight:700;color:#0F172A">NE 42°</div></div>
+                <div><div style="color:#64748B">Engine</div><div style="font-weight:700;color:#10B981">Running</div></div>
+                <div><div style="color:#64748B">Last Ping</div><div style="font-weight:700;color:#0F172A">12s ago</div></div>
+              </div>
+              <div style="margin-top:.75rem;">
+                <div style="display:flex;justify-content:space-between;font-size:.7rem;color:#64748B;margin-bottom:.2rem;"><span>Fuel</span><span>72%</span></div>
+                <div class="bar"><span style="width:72%;background:#10B981"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:.7rem;color:#64748B;margin:.5rem 0 .2rem;"><span>AdBlue</span><span>48%</span></div>
+                <div class="bar"><span style="width:48%;background:#3B82F6"></span></div>
+                <div style="display:flex;justify-content:space-between;font-size:.7rem;color:#64748B;margin:.5rem 0 .2rem;"><span>Battery</span><span>92%</span></div>
+                <div class="bar"><span style="width:92%;background:#8B5CF6"></span></div>
+              </div>
+            </div>
+
+            <h3 style="font-size:.85rem;font-weight:700;margin:1rem 0 .5rem;"><i class="fa-solid fa-bell" style="color:#EF4444"></i> Active Alerts</h3>
+            <div class="card" style="padding:.5rem;">
+              <div style="padding:.5rem .75rem;border-left:3px solid #EF4444;background:#FEF2F2;border-radius:.4rem;margin-bottom:.4rem;">
+                <div style="font-size:.78rem;font-weight:600;color:#991B1B">Front-left tyre pressure low (82 PSI)</div>
+                <div style="font-size:.7rem;color:#64748B">2h ago · <a href="tyres-inspection.html" style="color:#1D4ED8">Inspect</a></div>
+              </div>
+              <div style="padding:.5rem .75rem;border-left:3px solid #F59E0B;background:#FFFBEB;border-radius:.4rem;">
+                <div style="font-size:.78rem;font-weight:600;color:#92400E">Service in 1,200 km (60k interval)</div>
+                <div style="font-size:.7rem;color:#64748B">Scheduled 28 Jun · <a href="jobcards.html" style="color:#1D4ED8">Plan</a></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRIPS -->
+      <div class="tab-pane" id="tab-trips" style="padding:1.25rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem;">
+          <h3 style="font-size:.9rem;font-weight:700;">Recent Trips · 187 YTD</h3>
+          <div style="display:flex;gap:.5rem;">
+            <a class="qa" href="draft-trips.html?vehicle=T-101"><i class="fa-solid fa-file-pen"></i>Drafts</a>
+            <a class="qa" href="pending-trips.html?vehicle=T-101"><i class="fa-solid fa-hourglass-half"></i>Pending</a>
+            <a class="qa" href="complete-trips.html?vehicle=T-101"><i class="fa-solid fa-flag-checkered"></i>Completed</a>
+            <a class="qa" href="create-trip.html?vehicle=T-101" style="background:#1D4ED8;color:#fff;border-color:#1D4ED8;"><i class="fa-solid fa-plus"></i>New Trip</a>
+          </div>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table>
+            <thead><tr><th>Trip #</th><th>Route</th><th>Client</th><th>Driver</th><th>Date</th><th>Distance</th><th>Revenue</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><a href="trip-view.html?id=TRP-1087" style="color:#1D4ED8;font-weight:600">TRP-1087</a></td><td>Mumbai → Pune</td><td>Acme Logistics</td><td>John Doe</td><td>21 Jun 2026</td><td>148 km</td><td>$ 1,240</td><td><span class="pill pill-info">In Transit</span></td></tr>
+              <tr><td><a href="trip-view.html?id=TRP-1082" style="color:#1D4ED8;font-weight:600">TRP-1082</a></td><td>Pune → Surat</td><td>Globex Corp</td><td>John Doe</td><td>19 Jun 2026</td><td>422 km</td><td>$ 3,180</td><td><span class="pill pill-success">Delivered</span></td></tr>
+              <tr><td><a href="trip-view.html?id=TRP-1078" style="color:#1D4ED8;font-weight:600">TRP-1078</a></td><td>Surat → Ahmedabad</td><td>Bluewave Cargo</td><td>John Doe</td><td>17 Jun 2026</td><td>271 km</td><td>$ 2,050</td><td><span class="pill pill-success">Invoiced</span></td></tr>
+              <tr><td><a href="trip-view.html?id=TRP-1074" style="color:#1D4ED8;font-weight:600">TRP-1074</a></td><td>Mumbai → Nashik</td><td>Acme Logistics</td><td>S. Iyer</td><td>14 Jun 2026</td><td>187 km</td><td>$ 1,540</td><td><span class="pill pill-warn">POD pending</span></td></tr>
+              <tr><td><a href="trip-view.html?id=TRP-1070" style="color:#1D4ED8;font-weight:600">TRP-1070</a></td><td>Nashik → Mumbai</td><td>Acme Logistics</td><td>S. Iyer</td><td>12 Jun 2026</td><td>187 km</td><td>$ 1,540</td><td><span class="pill pill-success">Invoiced</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FUEL -->
+      <div class="tab-pane" id="tab-fuel" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:1rem;">
+          <div class="card kpi"><div class="v">3.42 km/L</div><div class="l">30-day Avg</div></div>
+          <div class="card kpi"><div class="v">3.18 km/L</div><div class="l">Last Trip</div></div>
+          <div class="card kpi"><div class="v">4,220 L</div><div class="l">Litres MTD</div></div>
+          <div class="card kpi"><div class="v">$ 5,488</div><div class="l">Fuel Spend MTD</div></div>
+        </div>
+        <div class="card" style="padding:1rem;margin-bottom:1rem;">
+          <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.6rem;">Consumption (last 12 months)</h3>
+          <svg viewBox="0 0 600 160" style="width:100%;height:160px;">
+            <polyline fill="none" stroke="#3B82F6" stroke-width="2" points="10,90 60,80 110,95 160,72 210,85 260,68 310,75 360,60 410,82 460,65 510,72 560,58"/>
+            <polyline fill="rgba(59,130,246,.12)" stroke="none" points="10,90 60,80 110,95 160,72 210,85 260,68 310,75 360,60 410,82 460,65 510,72 560,58 560,160 10,160"/>
+          </svg>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table>
+            <thead><tr><th>Date</th><th>Station</th><th>Litres</th><th>Rate</th><th>Amount</th><th>Odometer</th><th>km/L</th><th>Voucher</th></tr></thead>
+            <tbody>
+              <tr><td>20 Jun</td><td>BP Highway 17</td><td>320 L</td><td>$ 1.30</td><td>$ 416.00</td><td>142,180</td><td>3.41</td><td><a href="petty-cash-voucher-view.html" style="color:#1D4ED8">PCV-882</a></td></tr>
+              <tr><td>17 Jun</td><td>Shell Pune</td><td>280 L</td><td>$ 1.28</td><td>$ 358.40</td><td>141,170</td><td>3.55</td><td><a href="petty-cash-voucher-view.html" style="color:#1D4ED8">PCV-871</a></td></tr>
+              <tr><td>13 Jun</td><td>HP Surat</td><td>410 L</td><td>$ 1.31</td><td>$ 537.10</td><td>139,945</td><td>2.98</td><td><a href="petty-cash-voucher-view.html" style="color:#1D4ED8">PCV-860</a></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MAINTENANCE -->
+      <div class="tab-pane" id="tab-maint" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+          <div class="card" style="padding:1rem;">
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.6rem;">Service Schedule</h3>
+            <div class="spec-row"><span class="k">Last Service</span><span class="v">02 May 2026 @ 138,500 km</span></div>
+            <div class="spec-row"><span class="k">Next Service</span><span class="v" style="color:#F59E0B">28 Jun 2026 @ 143,500 km</span></div>
+            <div class="spec-row"><span class="k">Service Interval</span><span class="v">5,000 km / 90 days</span></div>
+            <div class="spec-row"><span class="k">Open Jobcards</span><span class="v"><a href="jobcards.html?vehicle=T-101" style="color:#1D4ED8">2 open</a></span></div>
+            <div style="margin-top:.75rem;display:flex;justify-content:space-between;font-size:.7rem;color:#64748B;"><span>Progress to next service</span><span>3,800 / 5,000 km</span></div>
+            <div class="bar"><span style="width:76%;background:#F59E0B"></span></div>
+          </div>
+          <div class="card" style="padding:1rem;">
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.6rem;">PM Checklist Status</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;font-size:.78rem;">
+              <div><i class="fa-solid fa-check-circle" style="color:#10B981"></i> Engine Oil</div>
+              <div><i class="fa-solid fa-check-circle" style="color:#10B981"></i> Brakes</div>
+              <div><i class="fa-solid fa-check-circle" style="color:#10B981"></i> Lights</div>
+              <div><i class="fa-solid fa-triangle-exclamation" style="color:#F59E0B"></i> Air Filter (due)</div>
+              <div><i class="fa-solid fa-check-circle" style="color:#10B981"></i> Coolant</div>
+              <div><i class="fa-solid fa-triangle-exclamation" style="color:#F59E0B"></i> Tyre Rotation</div>
+              <div><i class="fa-solid fa-check-circle" style="color:#10B981"></i> Battery</div>
+              <div><i class="fa-solid fa-circle-xmark" style="color:#EF4444"></i> Wiper Blades</div>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table>
+            <thead><tr><th>Date</th><th>Jobcard</th><th>Type</th><th>Workshop</th><th>Odometer</th><th>Parts</th><th>Labour</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>02 May</td><td><a href="jobcards.html" style="color:#1D4ED8">JC-3382</a></td><td>Scheduled PM (60k)</td><td>Alpha Workshop</td><td>138,500</td><td>$ 412</td><td>$ 180</td><td>$ 592</td><td><span class="pill pill-success">Closed</span></td></tr>
+              <tr><td>18 Mar</td><td><a href="jobcards.html" style="color:#1D4ED8">JC-3298</a></td><td>Brake Pad Replace</td><td>Alpha Workshop</td><td>133,210</td><td>$ 260</td><td>$ 120</td><td>$ 380</td><td><span class="pill pill-success">Closed</span></td></tr>
+              <tr><td>02 Feb</td><td><a href="jobcards.html" style="color:#1D4ED8">JC-3221</a></td><td>Air Compressor</td><td>Bravo Workshop</td><td>129,840</td><td>$ 540</td><td>$ 240</td><td>$ 780</td><td><span class="pill pill-success">Closed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- JOBCARDS & SPARES -->
+      <div class="tab-pane" id="tab-jobs" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;">Open Jobcards</h3>
+            <div class="card" style="padding:.85rem;margin-bottom:.6rem;">
+              <div style="display:flex;justify-content:space-between;"><a href="jobcards.html" style="font-weight:700;color:#1D4ED8;">JC-3441</a><span class="pill pill-warn">In Progress</span></div>
+              <div style="font-size:.78rem;color:#334155;margin-top:.25rem;">Clutch judder + gearbox noise · opened 18 Jun</div>
+              <div style="font-size:.7rem;color:#64748B;margin-top:.25rem;">Mechanic: R. Patel · ETA 24 Jun · Est. $ 1,820</div>
+            </div>
+            <div class="card" style="padding:.85rem;">
+              <div style="display:flex;justify-content:space-between;"><a href="jobcards.html" style="font-weight:700;color:#1D4ED8;">JC-3438</a><span class="pill pill-info">Awaiting parts</span></div>
+              <div style="font-size:.78rem;color:#334155;margin-top:.25rem;">Headlamp assembly replacement · opened 16 Jun</div>
+              <div style="font-size:.7rem;color:#64748B;margin-top:.25rem;">Waiting on LPO-2284 · Est. $ 340</div>
+            </div>
+          </div>
+          <div>
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;">Spare Parts Issued (last 90 days)</h3>
+            <div class="card" style="overflow:hidden;">
+              <table>
+                <thead><tr><th>Date</th><th>Part</th><th>Qty</th><th>Req #</th><th>Cost</th></tr></thead>
+                <tbody>
+                  <tr><td>02 May</td><td>Engine Oil 15W-40 (20L)</td><td>2</td><td><a href="spare-requisitions.html" style="color:#1D4ED8">SR-882</a></td><td>$ 168</td></tr>
+                  <tr><td>02 May</td><td>Oil Filter FF-2255</td><td>1</td><td><a href="spare-requisitions.html" style="color:#1D4ED8">SR-882</a></td><td>$ 42</td></tr>
+                  <tr><td>18 Mar</td><td>Brake Pads (Front Set)</td><td>1</td><td><a href="spare-requisitions.html" style="color:#1D4ED8">SR-841</a></td><td>$ 240</td></tr>
+                  <tr><td>18 Mar</td><td>Brake Cleaner Aerosol</td><td>4</td><td><a href="spare-requisitions.html" style="color:#1D4ED8">SR-841</a></td><td>$ 36</td></tr>
+                  <tr><td>02 Feb</td><td>Air Compressor Kit</td><td>1</td><td><a href="spare-requisitions.html" style="color:#1D4ED8">SR-803</a></td><td>$ 540</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top:.6rem;display:flex;gap:.4rem;">
+              <a class="qa" href="spare-requisitions.html?vehicle=T-101"><i class="fa-solid fa-list-check"></i>All Requisitions</a>
+              <a class="qa" href="spares-warranty.html?vehicle=T-101"><i class="fa-solid fa-shield-halved"></i>Warranty Claims</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TYRES -->
+      <div class="tab-pane" id="tab-tyres" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:340px 1fr;gap:1rem;">
+          <div class="card" style="padding:1rem;">
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.75rem;">Axle Layout · 10 positions</h3>
+            <!-- Diagram -->
+            <div style="position:relative;height:280px;background:#F8FAFC;border-radius:.6rem;border:1px dashed #CBD5E1;">
+              <!-- Chassis -->
+              <div style="position:absolute;left:50%;top:20px;bottom:20px;width:34px;transform:translateX(-50%);background:#CBD5E1;border-radius:8px;"></div>
+              <!-- Axle 1 (steer) -->
+              <div style="position:absolute;left:30px;top:35px;" class="tyre-pos good" title="FL · 88%"></div>
+              <div style="position:absolute;right:30px;top:35px;" class="tyre-pos warn" title="FR · 62%"></div>
+              <!-- Axle 2 (drive) -->
+              <div style="position:absolute;left:18px;top:120px;" class="tyre-pos good" title="ML-O · 81%"></div>
+              <div style="position:absolute;left:42px;top:120px;" class="tyre-pos good" title="ML-I · 79%"></div>
+              <div style="position:absolute;right:42px;top:120px;" class="tyre-pos good" title="MR-I · 84%"></div>
+              <div style="position:absolute;right:18px;top:120px;" class="tyre-pos bad" title="MR-O · 28% (replace)"></div>
+              <!-- Axle 3 (tag) -->
+              <div style="position:absolute;left:18px;top:210px;" class="tyre-pos good" title="RL-O · 75%"></div>
+              <div style="position:absolute;left:42px;top:210px;" class="tyre-pos good" title="RL-I · 70%"></div>
+              <div style="position:absolute;right:42px;top:210px;" class="tyre-pos good" title="RR-I · 78%"></div>
+              <div style="position:absolute;right:18px;top:210px;" class="tyre-pos warn" title="RR-O · 58%"></div>
+            </div>
+            <div style="display:flex;gap:.5rem;margin-top:.6rem;font-size:.7rem;flex-wrap:wrap;">
+              <span><span class="tyre-pos good" style="position:relative;display:inline-block;width:10px;height:10px;vertical-align:middle"></span> Healthy</span>
+              <span><span class="tyre-pos warn" style="position:relative;display:inline-block;width:10px;height:10px;vertical-align:middle"></span> Worn</span>
+              <span><span class="tyre-pos bad" style="position:relative;display:inline-block;width:10px;height:10px;vertical-align:middle"></span> Replace</span>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:.5rem;">
+              <h3 style="font-size:.85rem;font-weight:700;">Tyre Register</h3>
+              <div style="display:flex;gap:.4rem;">
+                <a class="qa" href="tyres-rotation.html?vehicle=T-101"><i class="fa-solid fa-rotate"></i>Rotate</a>
+                <a class="qa" href="tyres-inspection.html?vehicle=T-101"><i class="fa-solid fa-magnifying-glass"></i>Inspect</a>
+                <a class="qa" href="tyre-replacement-create.html?vehicle=T-101" style="background:#1D4ED8;color:#fff;border-color:#1D4ED8;"><i class="fa-solid fa-plus"></i>Replace</a>
+              </div>
+            </div>
+            <div class="card" style="overflow:hidden;">
+              <table>
+                <thead><tr><th>Pos</th><th>Serial</th><th>Brand</th><th>Fitted</th><th>Mileage</th><th>Tread</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>FL</td><td><a href="tyre-detail.html?id=TY-2210" style="color:#1D4ED8">TY-2210</a></td><td>Michelin XZA2</td><td>02 Feb</td><td>42,300 km</td><td>88%</td><td><span class="pill pill-success">Good</span></td></tr>
+                  <tr><td>FR</td><td><a href="tyre-detail.html?id=TY-2211" style="color:#1D4ED8">TY-2211</a></td><td>Michelin XZA2</td><td>02 Feb</td><td>42,300 km</td><td>62%</td><td><span class="pill pill-warn">Worn</span></td></tr>
+                  <tr><td>MR-O</td><td><a href="tyre-detail.html?id=TY-1998" style="color:#1D4ED8">TY-1998</a></td><td>Bridgestone M729</td><td>14 Aug 25</td><td>78,500 km</td><td>28%</td><td><span class="pill pill-danger">Replace</span></td></tr>
+                  <tr><td>RR-O</td><td><a href="tyre-detail.html?id=TY-2102" style="color:#1D4ED8">TY-2102</a></td><td>Apollo Endurace</td><td>10 Dec 25</td><td>22,100 km</td><td>58%</td><td><span class="pill pill-warn">Worn</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="margin-top:.6rem;display:flex;gap:.4rem;">
+              <a class="qa" href="tyres-warranty.html?vehicle=T-101"><i class="fa-solid fa-shield-halved"></i>Warranty Claims (2 open)</a>
+              <a class="qa" href="tyre-scrap-yard.html?vehicle=T-101"><i class="fa-solid fa-recycle"></i>Retired Tyres (6)</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INCIDENTS -->
+      <div class="tab-pane" id="tab-incidents" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div>
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;"><i class="fa-solid fa-screwdriver-wrench" style="color:#F59E0B"></i> Breakdowns · 4 YTD</h3>
+            <div class="card" style="overflow:hidden;">
+              <table>
+                <thead><tr><th>Date</th><th>Ref</th><th>Cause</th><th>Downtime</th><th>Cost</th></tr></thead>
+                <tbody>
+                  <tr><td>03 Apr</td><td><a href="breakdowns.html" style="color:#1D4ED8">BD-118</a></td><td>Air leak</td><td>6h</td><td>$ 220</td></tr>
+                  <tr><td>22 Feb</td><td><a href="breakdowns.html" style="color:#1D4ED8">BD-102</a></td><td>Battery flat</td><td>2h</td><td>$ 95</td></tr>
+                  <tr><td>11 Jan</td><td><a href="breakdowns.html" style="color:#1D4ED8">BD-088</a></td><td>Tyre puncture</td><td>3h</td><td>$ 140</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div>
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;"><i class="fa-solid fa-car-burst" style="color:#EF4444"></i> Accidents · 1 YTD</h3>
+            <div class="card" style="overflow:hidden;">
+              <table>
+                <thead><tr><th>Date</th><th>Ref</th><th>Severity</th><th>Claim</th><th>Status</th></tr></thead>
+                <tbody>
+                  <tr><td>18 Mar</td><td><a href="accidents.html" style="color:#1D4ED8">AC-042</a></td><td><span class="pill pill-warn">Minor</span></td><td>INS-2026-018</td><td><span class="pill pill-info">Settled</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPENSES -->
+      <div class="tab-pane" id="tab-expenses" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin-bottom:1rem;">
+          <div class="card kpi"><div class="v">$ 5,488</div><div class="l">Fuel</div></div>
+          <div class="card kpi"><div class="v">$ 1,820</div><div class="l">Maintenance</div></div>
+          <div class="card kpi"><div class="v">$ 740</div><div class="l">Tyres</div></div>
+          <div class="card kpi"><div class="v">$ 420</div><div class="l">Tolls</div></div>
+          <div class="card kpi"><div class="v">$ 280</div><div class="l">Other</div></div>
+        </div>
+        <div class="card" style="padding:1rem;margin-bottom:1rem;">
+          <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.6rem;">Cost per KM trend</h3>
+          <svg viewBox="0 0 600 140" style="width:100%;height:140px;">
+            <polyline fill="none" stroke="#EF4444" stroke-width="2" points="10,80 60,72 110,76 160,68 210,60 260,65 310,55 360,50 410,58 460,48 510,42 560,38"/>
+          </svg>
+        </div>
+        <div class="card" style="overflow:hidden;">
+          <table>
+            <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Voucher</th><th>Amount</th></tr></thead>
+            <tbody>
+              <tr><td>20 Jun</td><td>Fuel</td><td>BP Highway 17 · 320 L</td><td><a href="petty-cash-voucher-view.html" style="color:#1D4ED8">PCV-882</a></td><td>$ 416.00</td></tr>
+              <tr><td>19 Jun</td><td>Toll</td><td>Mumbai-Pune Expressway</td><td><a href="petty-cash-voucher-view.html" style="color:#1D4ED8">PCV-879</a></td><td>$ 28.50</td></tr>
+              <tr><td>18 Jun</td><td>Maintenance</td><td>JC-3441 advance</td><td><a href="petty-cash-voucher-view.html" style="color:#1D4ED8">PCV-876</a></td><td>$ 420.00</td></tr>
+              <tr><td>17 Jun</td><td>Fuel</td><td>Shell Pune · 280 L</td><td><a href="petty-cash-voucher-view.html" style="color:#1D4ED8">PCV-871</a></td><td>$ 358.40</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- INSURANCE & DOCS -->
+      <div class="tab-pane" id="tab-insurance" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-bottom:1rem;">
+          <div class="card" style="padding:1rem;">
+            <div style="display:flex;justify-content:space-between;"><span style="font-size:.7rem;color:#64748B;text-transform:uppercase">Insurance</span><span class="pill pill-success">Valid</span></div>
+            <div style="font-weight:700;margin-top:.2rem;">ICICI Lombard · POL-77821</div>
+            <div style="font-size:.75rem;color:#64748B;">Comprehensive · IDV $ 120,000</div>
+            <div class="spec-row"><span class="k">Premium</span><span class="v">$ 4,820 /yr</span></div>
+            <div class="spec-row"><span class="k">Valid Till</span><span class="v">28 Feb 2027</span></div>
+            <div class="spec-row"><span class="k">NCB</span><span class="v">35%</span></div>
+            <a class="qa" href="#" style="margin-top:.5rem;"><i class="fa-solid fa-file-pdf"></i>View Policy PDF</a>
+          </div>
+          <div class="card" style="padding:1rem;">
+            <div style="display:flex;justify-content:space-between;"><span style="font-size:.7rem;color:#64748B;text-transform:uppercase">Fitness Cert</span><span class="pill pill-warn">90 days left</span></div>
+            <div style="font-weight:700;margin-top:.2rem;">RTO Mumbai · FC-44218</div>
+            <div class="spec-row"><span class="k">Issued</span><span class="v">14 Mar 2024</span></div>
+            <div class="spec-row"><span class="k">Valid Till</span><span class="v">20 Sep 2026</span></div>
+            <a class="qa" href="#" style="margin-top:.5rem;"><i class="fa-solid fa-file-pdf"></i>View Certificate</a>
+          </div>
+          <div class="card" style="padding:1rem;">
+            <div style="display:flex;justify-content:space-between;"><span style="font-size:.7rem;color:#64748B;text-transform:uppercase">Permits / Tax</span><span class="pill pill-success">All current</span></div>
+            <div class="spec-row"><span class="k">National Permit</span><span class="v">Till 31 Dec 2026</span></div>
+            <div class="spec-row"><span class="k">Road Tax</span><span class="v">Till 14 Mar 2031</span></div>
+            <div class="spec-row"><span class="k">PUC</span><span class="v">Till 22 Sep 2026</span></div>
+            <div class="spec-row"><span class="k">GPS/AIS-140</span><span class="v">Active</span></div>
+          </div>
+        </div>
+        <div class="card" style="padding:1rem;">
+          <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;"><i class="fa-solid fa-folder-open" style="color:#1D4ED8"></i> Document Vault</h3>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;">
+            <a href="#" class="qa"><i class="fa-solid fa-file-pdf" style="color:#EF4444"></i>RC Book.pdf</a>
+            <a href="#" class="qa"><i class="fa-solid fa-file-pdf" style="color:#EF4444"></i>Insurance.pdf</a>
+            <a href="#" class="qa"><i class="fa-solid fa-file-pdf" style="color:#EF4444"></i>Fitness.pdf</a>
+            <a href="#" class="qa"><i class="fa-solid fa-file-pdf" style="color:#EF4444"></i>Permit.pdf</a>
+            <a href="#" class="qa"><i class="fa-solid fa-file-pdf" style="color:#EF4444"></i>PUC.pdf</a>
+            <a href="#" class="qa"><i class="fa-solid fa-file-image" style="color:#3B82F6"></i>Front photo.jpg</a>
+            <a href="#" class="qa"><i class="fa-solid fa-file-image" style="color:#3B82F6"></i>Chassis plate.jpg</a>
+            <a href="#" class="qa"><i class="fa-solid fa-file-invoice" style="color:#10B981"></i>Purchase Invoice</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- DRIVER -->
+      <div class="tab-pane" id="tab-driver" style="padding:1.25rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="card" style="padding:1rem;">
+            <div style="display:flex;align-items:center;gap:1rem;">
+              <div style="width:64px;height:64px;border-radius:50%;background:#1D4ED8;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.4rem;">JD</div>
+              <div>
+                <div style="font-weight:700;font-size:1.05rem;">John Doe</div>
+                <div style="font-size:.75rem;color:#64748B;">Primary Driver · since 14 Mar 2021</div>
+                <div style="margin-top:.3rem;display:flex;gap:.3rem;"><span class="pill pill-success">License A · valid</span><span class="pill pill-info">Score 92</span></div>
+              </div>
+            </div>
+            <div style="margin-top:.75rem;">
+              <div class="spec-row"><span class="k">Mobile</span><span class="v">+91 98201 11234</span></div>
+              <div class="spec-row"><span class="k">License #</span><span class="v">MH-1220210011223</span></div>
+              <div class="spec-row"><span class="k">License Expires</span><span class="v">12 Aug 2027</span></div>
+              <div class="spec-row"><span class="k">Trips with this Truck</span><span class="v">142</span></div>
+              <div class="spec-row"><span class="k">Last Medical</span><span class="v">04 Mar 2026</span></div>
+            </div>
+          </div>
+          <div class="card" style="padding:1rem;">
+            <h3 style="font-size:.85rem;font-weight:700;margin-bottom:.5rem;">Assignment History</h3>
+            <table>
+              <thead><tr><th>Driver</th><th>From</th><th>To</th><th>Trips</th></tr></thead>
+              <tbody>
+                <tr><td>John Doe</td><td>14 Mar 2021</td><td>—</td><td>142</td></tr>
+                <tr><td>S. Iyer</td><td>02 Jan 2026</td><td>14 Feb 2026</td><td>18</td></tr>
+                <tr><td>R. Kumar</td><td>20 Aug 2022</td><td>30 Dec 2022</td><td>27</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIMELINE -->
+      <div class="tab-pane" id="tab-timeline" style="padding:1.25rem;">
+        <h3 style="font-size:.9rem;font-weight:700;margin-bottom:.75rem;">Vehicle Lifecycle</h3>
+        <div class="timeline">
+          <div class="tl-item ok"><div style="font-weight:700;font-size:.85rem;">Vehicle Commissioned</div><div style="font-size:.72rem;color:#64748B;">14 Mar 2021 · Purchase $ 162,400 · Volvo Mumbai</div></div>
+          <div class="tl-item ok"><div style="font-weight:700;font-size:.85rem;">First Service @ 5,000 km</div><div style="font-size:.72rem;color:#64748B;">28 Apr 2021 · JC-0042 · $ 180</div></div>
+          <div class="tl-item"><div style="font-weight:700;font-size:.85rem;">Tyre set #1 retired</div><div style="font-size:.72rem;color:#64748B;">14 Aug 2025 · 6 tyres scrapped, 2 retreaded</div></div>
+          <div class="tl-item warn"><div style="font-weight:700;font-size:.85rem;">Accident AC-042 (minor)</div><div style="font-size:.72rem;color:#64748B;">18 Mar 2026 · Settled by ICICI Lombard</div></div>
+          <div class="tl-item ok"><div style="font-weight:700;font-size:.85rem;">60k Service Completed</div><div style="font-size:.72rem;color:#64748B;">02 May 2026 · JC-3382 · $ 592</div></div>
+          <div class="tl-item warn"><div style="font-weight:700;font-size:.85rem;">Clutch judder reported</div><div style="font-size:.72rem;color:#64748B;">18 Jun 2026 · Jobcard JC-3441 opened</div></div>
+          <div class="tl-item danger"><div style="font-weight:700;font-size:.85rem;">Tyre MR-O flagged Replace</div><div style="font-size:.72rem;color:#64748B;">20 Jun 2026 · Warranty claim WC-118 raised</div></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="store-sidebar.js"></script>
+<script>
+  renderStoreSidebar('trucks');
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
