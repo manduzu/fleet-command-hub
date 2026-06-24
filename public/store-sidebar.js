@@ -18,7 +18,20 @@ function _renderFleetSidebar(active){
     <a href="logistics-command-center.html" class="nav-link ${A('logCmd')}"><i class="fas fa-satellite-dish w-4 fa-fw"></i>Logistics Command</a>
     <a href="tracking.html" class="nav-link ${A('track')}"><i class="fas fa-location-dot w-4 fa-fw"></i>Live Tracking</a>
     <a href="orders.html" class="nav-link ${A('ord')}"><i class="fas fa-cart-shopping w-4 fa-fw"></i>Orders</a>
-    <a href="reports.html" class="nav-link ${A('rep')}"><i class="fas fa-chart-bar w-4 fa-fw"></i>Reports</a>
+
+    <div class="nav-section">Reports</div>
+    <a href="reports-hub.html" class="nav-link ${A('repHub')}"><i class="fas fa-chart-pie w-4 fa-fw"></i>Reports Hub</a>
+    <button class="dropdown-btn ${['rep','repExp','repPnl','repFuel','repSpr'].includes(active)?'open':''}" onclick="this.classList.toggle('open');document.getElementById('repDD').classList.toggle('open');">
+      <i class="fas fa-chart-bar w-4 fa-fw"></i><span class="flex-1 text-left" style="flex:1;text-align:left">Analytics</span><i class="fas fa-chevron-down text-[10px]" style="font-size:10px"></i>
+    </button>
+    <div class="dropdown-items ${['rep','repExp','repPnl','repFuel','repSpr'].includes(active)?'open':''}" id="repDD">
+      <a href="reports.html" class="sub-link ${A('rep')}"><i class="fas fa-chart-bar w-4 fa-fw"></i>Operations</a>
+      <a href="reports-expenditure.html" class="sub-link ${A('repExp')}"><i class="fas fa-money-bill-trend-up w-4 fa-fw"></i>Expenditure</a>
+      <a href="reports-pnl.html" class="sub-link ${A('repPnl')}"><i class="fas fa-chart-line w-4 fa-fw"></i>Profit & Loss</a>
+      <a href="reports-fuel.html" class="sub-link ${A('repFuel')}"><i class="fas fa-gas-pump w-4 fa-fw"></i>Fuel</a>
+      <a href="reports-spares.html" class="sub-link ${A('repSpr')}"><i class="fas fa-gears w-4 fa-fw"></i>Spares</a>
+    </div>
+
 
     <div class="nav-section">Logistics</div>
     <button class="dropdown-btn ${['ctrip','cfleet','draft','pend','comp','tripv'].includes(active)?'open':''}" onclick="this.classList.toggle('open');document.getElementById('logDD').classList.toggle('open');">

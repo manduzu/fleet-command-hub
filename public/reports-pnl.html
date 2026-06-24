@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Profit & Loss Report — FleetCtrl</title>
+<meta name="description" content="Profit & Loss statement: revenue, COGS, operating expenses, EBITDA and net profit."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Analytics / Reports / <span class="text-ink-900">Profit & Loss</span></div>
+    <h1 class="text-lg font-bold">Profit & Loss Statement</h1></div>
+  <div class="flex gap-2">
+    <select class="btn btn-ghost"><option>June 2026</option><option>May 2026</option><option>Q2 2026</option><option>YTD 2026</option></select>
+    <button class="btn btn-ghost"><i class="fas fa-file-pdf"></i>PDF</button>
+    <button class="btn btn-primary"><i class="fas fa-file-excel"></i>Excel</button>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="card p-4"><div class="kpi-label">Revenue</div><div class="text-2xl font-bold text-emerald-600">$184,620</div><div class="text-[11px] text-emerald-600">+12.4%</div></div>
+    <div class="card p-4"><div class="kpi-label">Gross Profit</div><div class="text-2xl font-bold">$62,480</div><div class="text-[11px] text-ink-500">33.8% margin</div></div>
+    <div class="card p-4"><div class="kpi-label">EBITDA</div><div class="text-2xl font-bold">$32,160</div><div class="text-[11px] text-ink-500">17.4% margin</div></div>
+    <div class="card p-4"><div class="kpi-label">Net Profit</div><div class="text-2xl font-bold text-emerald-600">$24,820</div><div class="text-[11px] text-emerald-600">13.4% margin</div></div>
+    <div class="card p-4"><div class="kpi-label">vs Last Month</div><div class="text-2xl font-bold">+$3,640</div><div class="text-[11px] text-emerald-600">+17.2%</div></div>
+  </section>
+
+  <section class="card p-5">
+    <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Income Statement — Month of June 2026</h2><span class="text-[11px] text-ink-500">Figures in USD</span></div>
+    <table class="tbl">
+      <thead><tr><th>Account</th><th class="text-right">Current</th><th class="text-right">Previous</th><th class="text-right">YTD</th><th class="text-right">% Rev</th></tr></thead>
+      <tbody>
+        <tr class="bg-slate-50"><td class="font-bold uppercase text-[11px] text-ink-500" colspan="5">Revenue</td></tr>
+        <tr><td class="pl-6">Freight Revenue</td><td class="text-right">$162,400</td><td class="text-right">$144,200</td><td class="text-right">$891,200</td><td class="text-right">87.9%</td></tr>
+        <tr><td class="pl-6">Demurrage & Detention</td><td class="text-right">$12,840</td><td class="text-right">$11,200</td><td class="text-right">$68,400</td><td class="text-right">7.0%</td></tr>
+        <tr><td class="pl-6">Other Income</td><td class="text-right">$9,380</td><td class="text-right">$8,820</td><td class="text-right">$48,900</td><td class="text-right">5.1%</td></tr>
+        <tr class="font-bold border-t"><td>Total Revenue</td><td class="text-right text-emerald-600">$184,620</td><td class="text-right">$164,220</td><td class="text-right">$1,008,500</td><td class="text-right">100.0%</td></tr>
+
+        <tr class="bg-slate-50"><td class="font-bold uppercase text-[11px] text-ink-500" colspan="5">Cost of Goods Sold</td></tr>
+        <tr><td class="pl-6">Fuel & Lubricants</td><td class="text-right">$41,820</td><td class="text-right">$38,640</td><td class="text-right">$232,400</td><td class="text-right">22.7%</td></tr>
+        <tr><td class="pl-6">Driver Wages & Allowances</td><td class="text-right">$28,400</td><td class="text-right">$27,800</td><td class="text-right">$162,200</td><td class="text-right">15.4%</td></tr>
+        <tr><td class="pl-6">Tolls, Permits, Port Charges</td><td class="text-right">$14,820</td><td class="text-right">$12,640</td><td class="text-right">$82,400</td><td class="text-right">8.0%</td></tr>
+        <tr><td class="pl-6">Outsourced Haulage</td><td class="text-right">$22,180</td><td class="text-right">$18,420</td><td class="text-right">$104,800</td><td class="text-right">12.0%</td></tr>
+        <tr><td class="pl-6">Trip Variable Costs</td><td class="text-right">$14,920</td><td class="text-right">$13,180</td><td class="text-right">$82,140</td><td class="text-right">8.1%</td></tr>
+        <tr class="font-bold border-t"><td>Total COGS</td><td class="text-right text-red-600">$122,140</td><td class="text-right">$110,680</td><td class="text-right">$663,940</td><td class="text-right">66.2%</td></tr>
+
+        <tr class="font-bold bg-emerald-50"><td>Gross Profit</td><td class="text-right text-emerald-600">$62,480</td><td class="text-right">$53,540</td><td class="text-right">$344,560</td><td class="text-right">33.8%</td></tr>
+
+        <tr class="bg-slate-50"><td class="font-bold uppercase text-[11px] text-ink-500" colspan="5">Operating Expenses</td></tr>
+        <tr><td class="pl-6">Salaries & Admin Wages</td><td class="text-right">$11,200</td><td class="text-right">$11,200</td><td class="text-right">$67,200</td><td class="text-right">6.1%</td></tr>
+        <tr><td class="pl-6">Repairs & Maintenance</td><td class="text-right">$11,280</td><td class="text-right">$9,460</td><td class="text-right">$58,420</td><td class="text-right">6.1%</td></tr>
+        <tr><td class="pl-6">Spares & Consumables</td><td class="text-right">$6,840</td><td class="text-right">$5,920</td><td class="text-right">$36,200</td><td class="text-right">3.7%</td></tr>
+        <tr><td class="pl-6">Office & Utilities</td><td class="text-right">$3,420</td><td class="text-right">$3,180</td><td class="text-right">$20,400</td><td class="text-right">1.9%</td></tr>
+        <tr><td class="pl-6">Marketing & Selling</td><td class="text-right">$1,820</td><td class="text-right">$2,140</td><td class="text-right">$12,400</td><td class="text-right">1.0%</td></tr>
+        <tr class="font-bold border-t"><td>Total OpEx</td><td class="text-right text-red-600">$34,560</td><td class="text-right">$31,900</td><td class="text-right">$194,620</td><td class="text-right">18.7%</td></tr>
+
+        <tr class="font-bold bg-emerald-50"><td>EBITDA</td><td class="text-right text-emerald-600">$32,160</td><td class="text-right">$24,180</td><td class="text-right">$162,560</td><td class="text-right">17.4%</td></tr>
+
+        <tr><td class="pl-6">Depreciation</td><td class="text-right">$3,120</td><td class="text-right">$3,120</td><td class="text-right">$18,720</td><td class="text-right">1.7%</td></tr>
+        <tr><td class="pl-6">Interest Expense</td><td class="text-right">$2,640</td><td class="text-right">$2,640</td><td class="text-right">$15,840</td><td class="text-right">1.4%</td></tr>
+        <tr><td class="pl-6">Tax Provision (30%)</td><td class="text-right">$1,580</td><td class="text-right">$1,240</td><td class="text-right">$9,420</td><td class="text-right">0.9%</td></tr>
+
+        <tr class="font-bold bg-emerald-50 border-t-2 border-emerald-600"><td>Net Profit</td><td class="text-right text-emerald-600 text-base">$24,820</td><td class="text-right">$17,180</td><td class="text-right">$118,580</td><td class="text-right">13.4%</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">P&L by Branch — June 2026</h2>
+      <table class="tbl">
+        <thead><tr><th>Branch</th><th>Revenue</th><th>OpEx</th><th>Net</th><th>Margin</th></tr></thead>
+        <tbody>
+          <tr><td class="font-semibold">HQ Nairobi</td><td>$72,400</td><td>$58,200</td><td class="text-emerald-600">$14,200</td><td>19.6%</td></tr>
+          <tr><td class="font-semibold">Mombasa Yard</td><td>$54,820</td><td>$44,180</td><td class="text-emerald-600">$10,640</td><td>19.4%</td></tr>
+          <tr><td class="font-semibold">Kisumu Depot</td><td>$32,180</td><td>$28,420</td><td class="text-emerald-600">$3,760</td><td>11.7%</td></tr>
+          <tr><td class="font-semibold">Eldoret Hub</td><td>$18,420</td><td>$16,140</td><td class="text-emerald-600">$2,280</td><td>12.4%</td></tr>
+          <tr><td class="font-semibold">Workshop Athi</td><td>$6,800</td><td>$10,860</td><td class="text-red-600">-$4,060</td><td>-59.7%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">6-Month Trend</h2>
+      <table class="tbl">
+        <thead><tr><th>Month</th><th>Revenue</th><th>OpEx</th><th>Net</th><th>Margin</th></tr></thead>
+        <tbody>
+          <tr><td>Jan 2026</td><td>$158,200</td><td>$140,420</td><td>$17,780</td><td>11.2%</td></tr>
+          <tr><td>Feb 2026</td><td>$162,800</td><td>$143,180</td><td>$19,620</td><td>12.1%</td></tr>
+          <tr><td>Mar 2026</td><td>$171,400</td><td>$148,200</td><td>$23,200</td><td>13.5%</td></tr>
+          <tr><td>Apr 2026</td><td>$167,280</td><td>$146,720</td><td>$20,560</td><td>12.3%</td></tr>
+          <tr><td>May 2026</td><td>$164,220</td><td>$147,040</td><td>$17,180</td><td>10.5%</td></tr>
+          <tr class="bg-emerald-50 font-semibold"><td>Jun 2026</td><td>$184,620</td><td>$159,800</td><td class="text-emerald-600">$24,820</td><td>13.4%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('repPnl');</script>
+</body></html>

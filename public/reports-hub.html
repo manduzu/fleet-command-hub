@@ -1,0 +1,63 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Reports Hub — FleetCtrl</title>
+<meta name="description" content="Central reporting hub: expenditure, profit & loss, fuel, spares and operational analytics."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Analytics / <span class="text-ink-900">Reports Hub</span></div>
+    <h1 class="text-lg font-bold">Reports Hub</h1></div>
+  <div class="flex gap-2">
+    <button class="btn btn-ghost"><i class="fas fa-calendar"></i>This Month</button>
+    <button class="btn btn-primary"><i class="fas fa-file-export"></i>Export All</button>
+  </div>
+</header>
+<div class="p-6 space-y-6">
+  <section class="grid grid-cols-2 md:grid-cols-5 gap-3">
+    <div class="card p-4"><div class="kpi-label">Revenue MTD</div><div class="text-2xl font-bold text-emerald-600">$184.6K</div><div class="text-[11px] text-emerald-600">+12.4% vs LM</div></div>
+    <div class="card p-4"><div class="kpi-label">Expenditure</div><div class="text-2xl font-bold text-red-600">$122.1K</div><div class="text-[11px] text-ink-500">66% of rev</div></div>
+    <div class="card p-4"><div class="kpi-label">Gross Profit</div><div class="text-2xl font-bold">$62.5K</div><div class="text-[11px] text-emerald-600">34% margin</div></div>
+    <div class="card p-4"><div class="kpi-label">Fuel Cost</div><div class="text-2xl font-bold text-amber-600">$41.8K</div><div class="text-[11px] text-ink-500">3.42 km/L avg</div></div>
+    <div class="card p-4"><div class="kpi-label">Spares Cost</div><div class="text-2xl font-bold">$18.3K</div><div class="text-[11px] text-ink-500">214 issued</div></div>
+  </section>
+
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <a href="reports-expenditure.html" class="card p-5 hover:shadow-lg transition block">
+      <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-lg bg-red-100 text-red-600 flex items-center justify-center"><i class="fas fa-money-bill-trend-up"></i></div><h3 class="font-bold">Expenditure Report</h3></div>
+      <p class="text-xs text-ink-500 mb-3">All cost categories: fuel, spares, salaries, repairs, insurance, permits. Trend & variance analysis.</p>
+      <div class="text-[11px] text-brand-600">Open report →</div>
+    </a>
+    <a href="reports-pnl.html" class="card p-5 hover:shadow-lg transition block">
+      <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center"><i class="fas fa-chart-line"></i></div><h3 class="font-bold">Profit & Loss</h3></div>
+      <p class="text-xs text-ink-500 mb-3">Revenue, COGS, operating expenses, EBITDA, net profit by branch & period.</p>
+      <div class="text-[11px] text-brand-600">Open report →</div>
+    </a>
+    <a href="reports-fuel.html" class="card p-5 hover:shadow-lg transition block">
+      <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fas fa-gas-pump"></i></div><h3 class="font-bold">Fuel Report</h3></div>
+      <p class="text-xs text-ink-500 mb-3">Consumption per vehicle, km/L, fuel theft alerts, station-wise spend, driver scorecards.</p>
+      <div class="text-[11px] text-brand-600">Open report →</div>
+    </a>
+    <a href="reports-spares.html" class="card p-5 hover:shadow-lg transition block">
+      <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fas fa-gears"></i></div><h3 class="font-bold">Spares Report</h3></div>
+      <p class="text-xs text-ink-500 mb-3">Consumption by vehicle, top moving items, warranty recoveries, supplier performance.</p>
+      <div class="text-[11px] text-brand-600">Open report →</div>
+    </a>
+    <a href="reports.html" class="card p-5 hover:shadow-lg transition block">
+      <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center" style="background:#DBEAFE"><i class="fas fa-chart-bar"></i></div><h3 class="font-bold">Operations Reports</h3></div>
+      <p class="text-xs text-ink-500 mb-3">Trips, deliveries, SLA, on-time %, incidents, utilisation and driver KPIs.</p>
+      <div class="text-[11px] text-brand-600">Open report →</div>
+    </a>
+    <div class="card p-5 border-dashed border-2 border-ink-200">
+      <div class="flex items-center gap-3 mb-3"><div class="w-10 h-10 rounded-lg bg-ink-100 text-ink-500 flex items-center justify-center" style="background:#F1F5F9"><i class="fas fa-plus"></i></div><h3 class="font-bold text-ink-500">Custom Report Builder</h3></div>
+      <p class="text-xs text-ink-500">Coming soon — drag & drop KPI builder.</p>
+    </div>
+  </section>
+</div>
+</main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('repHub');</script>
+</body></html>
