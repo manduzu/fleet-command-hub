@@ -1,0 +1,105 @@
+<!doctype html><html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Fuel Report — FleetCtrl</title>
+<meta name="description" content="Fleet fuel consumption, km/L, theft alerts, station-wise spend and driver scorecards."/>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={theme:{extend:{colors:{brand:{600:'#2563EB'},ink:{900:'#0F172A',500:'#64748B',200:'#E2E8F0'}}}}}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="store-theme.css"/></head>
+<body>
+<aside class="sidebar" id="sidebar"></aside>
+<main class="main">
+<header class="bg-white border-b border-ink-200 px-6 py-3 flex items-center justify-between sticky top-0 z-30">
+  <div><div class="text-[11px] text-ink-500">Analytics / Reports / <span class="text-ink-900">Fuel</span></div>
+    <h1 class="text-lg font-bold">Fuel Report</h1></div>
+  <div class="flex gap-2">
+    <select class="btn btn-ghost"><option>This Month</option><option>Last 30 Days</option><option>YTD</option></select>
+    <select class="btn btn-ghost"><option>All Vehicles</option><option>Heavy Trucks</option><option>Light Trucks</option></select>
+    <button class="btn btn-ghost"><i class="fas fa-file-csv"></i>Export</button>
+    <button class="btn btn-primary"><i class="fas fa-bell"></i>Set Alerts</button>
+  </div>
+</header>
+<div class="p-6 space-y-5">
+  <section class="grid grid-cols-2 md:grid-cols-6 gap-3">
+    <div class="card p-4"><div class="kpi-label">Total Fuel</div><div class="text-2xl font-bold">12,240 L</div><div class="text-[11px] text-ink-500">+4.2% MoM</div></div>
+    <div class="card p-4"><div class="kpi-label">Fuel Cost</div><div class="text-2xl font-bold text-amber-600">$41,820</div><div class="text-[11px] text-red-600">+8.2%</div></div>
+    <div class="card p-4"><div class="kpi-label">Avg Price/L</div><div class="text-2xl font-bold">$3.42</div><div class="text-[11px] text-red-600">+$0.12</div></div>
+    <div class="card p-4"><div class="kpi-label">Avg km/L</div><div class="text-2xl font-bold text-emerald-600">3.42</div><div class="text-[11px] text-ink-500">target 3.50</div></div>
+    <div class="card p-4"><div class="kpi-label">Theft Alerts</div><div class="text-2xl font-bold text-red-600">7</div><div class="text-[11px] text-red-600">$1,140 loss</div></div>
+    <div class="card p-4"><div class="kpi-label">Cost / KM</div><div class="text-2xl font-bold">$0.48</div><div class="text-[11px] text-amber-600">+$0.03</div></div>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div class="card p-5 lg:col-span-2">
+      <div class="flex items-center justify-between mb-4"><h2 class="font-bold">Vehicle Fuel Performance</h2><a class="text-xs text-brand-600" href="fleet.html">All vehicles →</a></div>
+      <table class="tbl">
+        <thead><tr><th>Vehicle</th><th>Driver</th><th>KM Run</th><th>Litres</th><th>km/L</th><th>Cost</th><th>Variance</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="font-semibold text-brand-600">KCB 421A</td><td>J. Mwangi</td><td>8,420</td><td>2,180</td><td>3.86</td><td>$7,460</td><td class="text-emerald-600">+10%</td><td><span class="pill pill-success">Efficient</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">KDH 882B</td><td>P. Otieno</td><td>7,640</td><td>2,040</td><td>3.74</td><td>$6,980</td><td class="text-emerald-600">+7%</td><td><span class="pill pill-success">Efficient</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">KCM 117C</td><td>S. Kamau</td><td>6,820</td><td>2,210</td><td>3.09</td><td>$7,560</td><td class="text-red-600">-12%</td><td><span class="pill pill-danger">Below Target</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">KDG 553D</td><td>M. Wanjiru</td><td>5,420</td><td>1,580</td><td>3.43</td><td>$5,400</td><td>~</td><td><span class="pill pill-warning">On Target</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">KCK 904E</td><td>A. Hassan</td><td>4,820</td><td>1,640</td><td>2.94</td><td>$5,620</td><td class="text-red-600">-16%</td><td><span class="pill pill-danger">Investigate</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">KBT 281F</td><td>G. Maina</td><td>6,240</td><td>1,720</td><td>3.63</td><td>$5,880</td><td class="text-emerald-600">+4%</td><td><span class="pill pill-success">Efficient</span></td></tr>
+          <tr><td class="font-semibold text-brand-600">KDA 776G</td><td>L. Njeri</td><td>4,640</td><td>870</td><td>5.33</td><td>$2,920</td><td class="text-emerald-600">+52%</td><td><span class="pill pill-success">Top</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">Theft & Anomaly Alerts</h2>
+      <div class="space-y-3">
+        <div class="p-3 rounded-lg border border-red-200 bg-red-50">
+          <div class="flex justify-between"><div class="font-semibold text-sm">KCM 117C</div><span class="pill pill-danger">High</span></div>
+          <div class="text-xs text-ink-500 mt-1">Tank drop 78L between stops · 22 Jun, 03:14</div>
+        </div>
+        <div class="p-3 rounded-lg border border-red-200 bg-red-50">
+          <div class="flex justify-between"><div class="font-semibold text-sm">KCK 904E</div><span class="pill pill-danger">High</span></div>
+          <div class="text-xs text-ink-500 mt-1">Refill 145L vs trip ETA 90L · 19 Jun, 11:42</div>
+        </div>
+        <div class="p-3 rounded-lg border border-amber-200 bg-amber-50">
+          <div class="flex justify-between"><div class="font-semibold text-sm">KDH 882B</div><span class="pill pill-warning">Medium</span></div>
+          <div class="text-xs text-ink-500 mt-1">Idling 4.2h on Jun 18 (avg 1.1h)</div>
+        </div>
+        <div class="p-3 rounded-lg border border-amber-200 bg-amber-50">
+          <div class="flex justify-between"><div class="font-semibold text-sm">KBT 281F</div><span class="pill pill-warning">Medium</span></div>
+          <div class="text-xs text-ink-500 mt-1">Receipt vs sensor diff 18L · Shell Athi</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">Spend by Station</h2>
+      <table class="tbl">
+        <thead><tr><th>Station</th><th>Fills</th><th>Litres</th><th>Avg $/L</th><th>Total</th></tr></thead>
+        <tbody>
+          <tr><td>Shell Athi River</td><td>42</td><td>3,820</td><td>$3.38</td><td class="font-semibold">$12,920</td></tr>
+          <tr><td>Total Mombasa Road</td><td>38</td><td>3,140</td><td>$3.42</td><td class="font-semibold">$10,740</td></tr>
+          <tr><td>Rubis Mariakani</td><td>22</td><td>1,880</td><td>$3.45</td><td class="font-semibold">$6,486</td></tr>
+          <tr><td>OilLibya Kisumu</td><td>18</td><td>1,420</td><td>$3.48</td><td class="font-semibold">$4,940</td></tr>
+          <tr><td>Hashi Eldoret</td><td>14</td><td>980</td><td>$3.51</td><td class="font-semibold">$3,440</td></tr>
+          <tr><td>Others</td><td>21</td><td>1,000</td><td>$3.29</td><td class="font-semibold">$3,294</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card p-5">
+      <h2 class="font-bold mb-4">Driver Efficiency Scorecard</h2>
+      <table class="tbl">
+        <thead><tr><th>Driver</th><th>km/L</th><th>Idle %</th><th>Harsh Events</th><th>Score</th></tr></thead>
+        <tbody>
+          <tr><td>L. Njeri</td><td class="text-emerald-600 font-semibold">5.33</td><td>4%</td><td>0</td><td><span class="pill pill-success">A+</span></td></tr>
+          <tr><td>J. Mwangi</td><td class="text-emerald-600 font-semibold">3.86</td><td>8%</td><td>2</td><td><span class="pill pill-success">A</span></td></tr>
+          <tr><td>P. Otieno</td><td>3.74</td><td>11%</td><td>3</td><td><span class="pill pill-success">A</span></td></tr>
+          <tr><td>G. Maina</td><td>3.63</td><td>14%</td><td>4</td><td><span class="pill pill-warning">B</span></td></tr>
+          <tr><td>M. Wanjiru</td><td>3.43</td><td>16%</td><td>6</td><td><span class="pill pill-warning">B</span></td></tr>
+          <tr><td>S. Kamau</td><td class="text-red-600">3.09</td><td>22%</td><td>11</td><td><span class="pill pill-danger">D</span></td></tr>
+          <tr><td>A. Hassan</td><td class="text-red-600">2.94</td><td>26%</td><td>14</td><td><span class="pill pill-danger">D</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</main>
+<script src="store-sidebar.js"></script><script>renderStoreSidebar('repFuel');</script>
+</body></html>
